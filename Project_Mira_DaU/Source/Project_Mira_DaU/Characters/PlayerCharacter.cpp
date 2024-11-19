@@ -69,6 +69,6 @@ void APlayerCharacter::Move(const FInputActionValue& InputValue)
 //PLAYER JUMPING
 void APlayerCharacter::Jump(const FInputActionValue& InputValue)
 {
-    GetCharacterMovement()->JumpZVelocity = 300.0f;
+    GetCharacterMovement()->JumpZVelocity = JumpHeight;
     ACharacter::Jump();
 }

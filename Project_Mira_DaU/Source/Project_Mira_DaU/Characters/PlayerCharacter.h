@@ -17,20 +17,19 @@ class PROJECT_MIRA_DAU_API APlayerCharacter : public APaperCharacter
 	GENERATED_BODY()
 	
 private:
-	float Speed = 0.3;
-
 
 public:
-
-	/*UPROPERTY(EditAnywhere)
-	FString name = "Mira";*/
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	/*UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera")
-	class UCameraComponent* MyCamera;*/
+
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float Speed = 0.3f;
+
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float JumpHeight = 300.0f;
 
 
 	UPROPERTY(EditAnywhere, Category = "Enhance Input")
