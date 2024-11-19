@@ -16,6 +16,8 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+
+    //UE_LOG(LogTemp, Display, TEXT("CurrentState : %s"), *CurrentStateMovement);
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) 
@@ -38,12 +40,17 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
     {
         Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
         Input->BindAction(JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Jump);
+
+        Input->BindAction(MoveAction, ETriggerEvent::Completed, this, &APlayerCharacter::ResetCurrentState);
+        Input->BindAction(JumpAction, ETriggerEvent::Completed, this, &APlayerCharacter::ResetCurrentState);
     }
 }
 
 //PLAYER MOVEMENT
 void APlayerCharacter::Move(const FInputActionValue& InputValue)
 {
+    SetCurrentState("move");
+
     FVector2D InputVector = InputValue.Get<FVector2D>();
 
     if (IsValid(Controller))
@@ -58,17 +65,24 @@ void APlayerCharacter::Move(const FInputActionValue& InputValue)
         //Add movement
         AddMovementInput(ForwardDirection, InputVector.Y);
         AddMovementInput(RightDirection, InputVector.X);
-
-        //If X or Y are > 0, change animation direction
-
-        UE_LOG(LogTemp, Display, TEXT("ForwardDirection.X : %f, ForwardDirection.Y : %f"), ForwardDirection.X, ForwardDirection.Y);
-        UE_LOG(LogTemp, Display, TEXT("RightDirection.X : %f, RightDirection.Y : %f"), RightDirection.X, RightDirection.Y);
     }
 }
 
 //PLAYER JUMPING
 void APlayerCharacter::Jump(const FInputActionValue& InputValue)
 {
+    SetCurrentState("jump"); //TODO : Upgrade jump animation system (anim up -> anim down -> ResetCurrentState ?)
     GetCharacterMovement()->JumpZVelocity = JumpHeight;
     ACharacter::Jump();
+}
+
+//UPDATE ANIMATION
+void APlayerCharacter::SetCurrentState(FString currentState)
+{
+    CurrentStateMovement = currentState;
+}
+
+void APlayerCharacter::ResetCurrentState(const FInputActionValue& InputValue) 
+{
+    CurrentStateMovement = "idle";
 }

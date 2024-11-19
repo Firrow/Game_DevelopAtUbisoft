@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "PaperCharacter.h"
+#include "PaperFlipbook.h"
 #include "InputActionValue.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "PlayerCharacter.generated.h"
@@ -43,4 +44,13 @@ public:
 
 	void Move(const FInputActionValue& InputValue);
 	void Jump(const FInputActionValue& InputValue);
+	void SetCurrentState(FString currentState);
+	void ResetCurrentState(const FInputActionValue& InputValue);
+
+
+
+	//I want to tell to blueprint in which state of animation the player is
+	UPROPERTY(BlueprintReadOnly, Category = "Animation")
+	FString CurrentStateMovement = "Idle";
 };
+
