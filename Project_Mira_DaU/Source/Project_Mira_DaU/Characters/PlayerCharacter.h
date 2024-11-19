@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "PaperCharacter.h"
 #include "InputActionValue.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "PlayerCharacter.generated.h"
 
 /**
@@ -17,6 +18,7 @@ class PROJECT_MIRA_DAU_API APlayerCharacter : public APaperCharacter
 	
 private:
 	float Speed = 0.3;
+
 
 public:
 
@@ -33,7 +35,6 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Enhance Input")
 	class UInputMappingContext* InputMappingContext;
-
 
 	UPROPERTY(EditAnywhere, Category = "Enhance Input")
 	class UInputAction* MoveAction;

@@ -5,7 +5,6 @@
 #include "InputMappingContext.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
-#include "Camera/CameraComponent.h"
 
 
 
@@ -17,37 +16,13 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-
-    /*FString* myName;
-    myName = &name;
-    FString nameValue = *myName;
-
-    UE_LOG(LogTemp, Display, TEXT("L'adresse de name est : %u"), myName);
-    UE_LOG(LogTemp, Display, TEXT("La valeur de name est : %s"), *nameValue);*/
-
-
-    //POINTEUR
-    /*float myFloat = 5;
-    float* yourFloat = &myFloat;
-    float floatValue = *yourFloat;
-
-    UE_LOG(LogTemp, Display, TEXT("La valeur de myFloat est : %f"), floatValue);*/
-
-
-
-    //REFERENCE
-    /*float damage = 0;
-    float& damageRef = damage;
-    damageRef = 5;
-
-    UE_LOG(LogTemp, Display, TEXT("damageRef : %f, damage : %f"), damageRef, damage)*/
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) 
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-    //Add input mapping context
+    //Add input mapping context (PAS TOUT COMPRIS)
     if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
     {
         //Get local player subsystem
@@ -62,10 +37,11 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
     if (UEnhancedInputComponent* Input = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
     {
         Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
-        Input->BindAction(JumpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Jump);
+        Input->BindAction(JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Jump);
     }
 }
 
+//PLAYER MOVEMENT
 void APlayerCharacter::Move(const FInputActionValue& InputValue)
 {
     FVector2D InputVector = InputValue.Get<FVector2D>();
@@ -83,12 +59,16 @@ void APlayerCharacter::Move(const FInputActionValue& InputValue)
         AddMovementInput(ForwardDirection, InputVector.Y);
         AddMovementInput(RightDirection, InputVector.X);
 
+        //If X or Y are > 0, change animation direction
+
         UE_LOG(LogTemp, Display, TEXT("ForwardDirection.X : %f, ForwardDirection.Y : %f"), ForwardDirection.X, ForwardDirection.Y);
         UE_LOG(LogTemp, Display, TEXT("RightDirection.X : %f, RightDirection.Y : %f"), RightDirection.X, RightDirection.Y);
     }
 }
 
+//PLAYER JUMPING
 void APlayerCharacter::Jump(const FInputActionValue& InputValue)
 {
-    
+    GetCharacterMovement()->JumpZVelocity = 300.0f;
+    ACharacter::Jump();
 }
