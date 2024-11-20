@@ -21,6 +21,11 @@ private:
 	USceneComponent* Component;
 	FVector PlayerVelocity;
 
+	void Move(const FInputActionValue& InputValue);
+	void Jump(const FInputActionValue& InputValue);
+	void UpdateCurrentState();
+	void UpdateIsFacingLeft();
+
 public:
 
 	virtual void BeginPlay() override;
@@ -44,14 +49,13 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Enhance Input")
 	class UInputAction* JumpAction;
 
-	void Move(const FInputActionValue& InputValue);
-	void Jump(const FInputActionValue& InputValue);
-	void UpdateCurrentState();
-
 
 
 	//I want to tell to blueprint in which state of animation the player is
 	UPROPERTY(BlueprintReadOnly, Category = "Animation")
 	FString CurrentStateMovement = "Idle";
+
+	UPROPERTY(BlueprintReadOnly, Category = "Animation")
+	bool isFacingLeft = false;
 };
 

@@ -24,8 +24,8 @@ void APlayerCharacter::Tick(float DeltaTime)
     }
 
     UpdateCurrentState();
-    //UE_LOG(LogTemp, Display, TEXT("VELOCITY : %s"), *PlayerVelocity.ToString());
-    UE_LOG(LogTemp, Display, TEXT("STATE : %s"), *CurrentStateMovement);
+    UE_LOG(LogTemp, Display, TEXT("VELOCITY : %s"), *PlayerVelocity.ToString());
+    //UE_LOG(LogTemp, Display, TEXT("STATE : %s"), *CurrentStateMovement);
 }
 
 
@@ -81,6 +81,8 @@ void APlayerCharacter::Jump(const FInputActionValue& InputValue)
     ACharacter::Jump();
 }
 
+
+
 //UPDATE ANIMATION
 void APlayerCharacter::UpdateCurrentState() 
 {
@@ -98,4 +100,14 @@ void APlayerCharacter::UpdateCurrentState()
         else
             CurrentStateMovement = "fall";
     }
+
+    UpdateIsFacingLeft();
+}
+
+void APlayerCharacter::UpdateIsFacingLeft()
+{
+    if (PlayerVelocity.X > 0)
+        isFacingLeft = false;
+    else if (PlayerVelocity.X < 0)
+        isFacingLeft = true;
 }
