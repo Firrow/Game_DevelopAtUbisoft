@@ -24,7 +24,7 @@ void APlayerCharacter::Tick(float DeltaTime)
     }
 
     UpdateCurrentState();
-    UE_LOG(LogTemp, Display, TEXT("VELOCITY : %s"), *PlayerVelocity.ToString());
+    //UE_LOG(LogTemp, Display, TEXT("VELOCITY : %s"), *PlayerVelocity.ToString());
     //UE_LOG(LogTemp, Display, TEXT("STATE : %s"), *CurrentStateMovement);
 }
 
