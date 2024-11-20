@@ -18,6 +18,8 @@ class PROJECT_MIRA_DAU_API APlayerCharacter : public APaperCharacter
 	GENERATED_BODY()
 	
 private:
+	USceneComponent* Component;
+	FVector PlayerVelocity;
 
 public:
 
@@ -44,8 +46,7 @@ public:
 
 	void Move(const FInputActionValue& InputValue);
 	void Jump(const FInputActionValue& InputValue);
-	void SetCurrentState(FString currentState);
-	void ResetCurrentState(const FInputActionValue& InputValue);
+	void UpdateCurrentState();
 
 
 

@@ -11,14 +11,25 @@
 void APlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
+    Component = this->GetRootComponent();
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    //UE_LOG(LogTemp, Display, TEXT("CurrentState : %s"), *CurrentStateMovement);
+    if (Component != nullptr)
+    {
+        PlayerVelocity = Component->GetComponentVelocity();
+    }
+
+    UpdateCurrentState();
+    //UE_LOG(LogTemp, Display, TEXT("VELOCITY : %s"), *PlayerVelocity.ToString());
+    UE_LOG(LogTemp, Display, TEXT("STATE : %s"), *CurrentStateMovement);
 }
+
+
+
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) 
 {
@@ -40,17 +51,12 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
     {
         Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
         Input->BindAction(JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Jump);
-
-        Input->BindAction(MoveAction, ETriggerEvent::Completed, this, &APlayerCharacter::ResetCurrentState);
-        Input->BindAction(JumpAction, ETriggerEvent::Completed, this, &APlayerCharacter::ResetCurrentState);
     }
 }
 
 //PLAYER MOVEMENT
 void APlayerCharacter::Move(const FInputActionValue& InputValue)
 {
-    SetCurrentState("move");
-
     FVector2D InputVector = InputValue.Get<FVector2D>();
 
     if (IsValid(Controller))
@@ -71,18 +77,25 @@ void APlayerCharacter::Move(const FInputActionValue& InputValue)
 //PLAYER JUMPING
 void APlayerCharacter::Jump(const FInputActionValue& InputValue)
 {
-    SetCurrentState("jump"); //TODO : Upgrade jump animation system (anim up -> anim down -> ResetCurrentState ?)
     GetCharacterMovement()->JumpZVelocity = JumpHeight;
     ACharacter::Jump();
 }
 
 //UPDATE ANIMATION
-void APlayerCharacter::SetCurrentState(FString currentState)
+void APlayerCharacter::UpdateCurrentState() 
 {
-    CurrentStateMovement = currentState;
-}
-
-void APlayerCharacter::ResetCurrentState(const FInputActionValue& InputValue) 
-{
-    CurrentStateMovement = "idle";
+    if (GetCharacterMovement()->IsMovingOnGround()) 
+    {
+        if (PlayerVelocity.X != 0)
+            CurrentStateMovement = "move";
+        else
+            CurrentStateMovement = "idle";
+    }
+    else 
+    {
+        if (PlayerVelocity.Z > 0)
+            CurrentStateMovement = "jumpRise";
+        else
+            CurrentStateMovement = "fall";
+    }
 }
