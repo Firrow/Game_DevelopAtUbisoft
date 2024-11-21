@@ -12,6 +12,12 @@ void APlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
     Component = this->GetRootComponent();
+
+    // Parcourir les tags de l'acteur
+    for (const FName& Tag : Tags)
+    {
+        UE_LOG(LogTemp, Log, TEXT("Tag trouvé : %s"), *Tag.ToString());
+    }
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
