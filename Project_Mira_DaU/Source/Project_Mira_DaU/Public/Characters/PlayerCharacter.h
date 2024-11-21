@@ -7,6 +7,8 @@
 #include "PaperFlipbook.h"
 #include "InputActionValue.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "ObjectInGame/Interactible.h"
 #include "PlayerCharacter.generated.h"
 
 /**
@@ -18,6 +20,8 @@ class PROJECT_MIRA_DAU_API APlayerCharacter : public APaperCharacter
 	GENERATED_BODY()
 	
 private:
+	APlayerCharacter();
+
 	USceneComponent* Component;
 	FVector PlayerVelocity;
 
@@ -57,5 +61,21 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Animation")
 	bool isFacingLeft = false;
+
+
+
+
+
+	/*UPROPERTY(VisibleAnywhere, Category = "Capsule")
+	class UCapsuleComponent* ObjectCapsule;*/
+
+
+	UFUNCTION()
+	void BeginOverlap(UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult);
 };
 

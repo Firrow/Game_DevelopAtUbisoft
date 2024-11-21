@@ -7,6 +7,12 @@
 #include "EnhancedInputComponent.h"
 
 
+APlayerCharacter::APlayerCharacter() 
+{
+    UCapsuleComponent* ObjectCapsule = GetCapsuleComponent();
+
+    ObjectCapsule->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::BeginOverlap);
+}
 
 void APlayerCharacter::BeginPlay()
 {
@@ -116,4 +122,24 @@ void APlayerCharacter::UpdateIsFacingLeft()
         isFacingLeft = false;
     else if (PlayerVelocity.X < 0)
         isFacingLeft = true;
+}
+
+
+
+
+
+void APlayerCharacter::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
+    AActor* OtherActor,
+    UPrimitiveComponent* OtherComp,
+    int32 OtherBodyIndex,
+    bool bFromSweep,
+    const FHitResult& SweepResult)
+{
+    // Overlap
+    if (Cast<AInteractible>(OtherActor))
+    {
+        // do stuff with OtherCharacter
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Overlap Begin : c'est un Interactible"));
+    }
+
 }

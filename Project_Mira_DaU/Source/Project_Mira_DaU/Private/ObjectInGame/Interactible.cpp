@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 
 #include "ObjectInGame/Interactible.h"
 
@@ -8,6 +6,9 @@ AInteractible::AInteractible()
 	//PrimaryActorTick.bCanEverTick = true;
 
 	ObjectTags.Add(TEXT("Interactible"));
+
+	ObjectCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Object's Capsule"));
+	ObjectCapsule->InitCapsuleSize(10.f, 10.0f);
 }
 
 void AInteractible::BeginPlay()
@@ -15,10 +16,4 @@ void AInteractible::BeginPlay()
 	Super::BeginPlay();
 	
 }
-
-/*void AInteractible::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}*/
 

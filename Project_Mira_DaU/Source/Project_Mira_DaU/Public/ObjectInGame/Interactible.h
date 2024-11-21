@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/CapsuleComponent.h"
 #include "Interactible.generated.h"
 
 
@@ -25,6 +26,10 @@ public:
 	virtual void BeginPlay() override;
 	//virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere, Category = "Global Informations")
+	UPROPERTY(EditAnywhere, Category = "Globales Informations")
 	TArray<FString> ObjectTags;
+
+	UPROPERTY(VisibleAnywhere, Category = "Capsule")
+	class UCapsuleComponent* ObjectCapsule;
+
 };
