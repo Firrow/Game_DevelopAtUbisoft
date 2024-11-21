@@ -9,6 +9,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "ObjectInGame/Interactible.h"
+
+#include "ObjectInGame/Container.h"
+
+
 #include "PlayerCharacter.generated.h"
 
 /**
@@ -64,10 +68,6 @@ public:
 
 
 
-
-
-	/*UPROPERTY(VisibleAnywhere, Category = "Capsule")
-	class UCapsuleComponent* ObjectCapsule;*/
 
 
 	UFUNCTION()

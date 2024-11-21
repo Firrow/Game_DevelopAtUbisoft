@@ -138,6 +138,8 @@ void APlayerCharacter::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     // Overlap
     if (Cast<AInteractible>(OtherActor))
     {
+        // How to know which daughter player overlap ???
+        // //-> Try Interface
         // do stuff with OtherCharacter
         GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Overlap Begin : c'est un Interactible"));
     }
