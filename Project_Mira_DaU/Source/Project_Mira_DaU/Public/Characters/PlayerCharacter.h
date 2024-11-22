@@ -33,7 +33,7 @@ private:
 	void Move(const FInputActionValue& InputValue);
 	void Jump(const FInputActionValue& InputValue);
 	void Interact(const FInputActionValue& InputValue);
-	void StopInteract(const FInputActionValue& InputValue);
+	void LadderMove(const FInputActionValue& InputValue);
 	void UpdateCurrentState();
 	void UpdateIsFacingLeft();
 
@@ -63,6 +63,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Enhance Input")
 	class UInputAction* InteractAction;
 
+	UPROPERTY(EditAnywhere, Category = "Enhance Input")
+	class UInputAction* LadderAction;
 
 
 	//I want to tell to blueprint in which state of animation the player is

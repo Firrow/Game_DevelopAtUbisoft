@@ -56,6 +56,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
         Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
         Input->BindAction(JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Jump);
         Input->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::Interact);
+        Input->BindAction(LadderAction, ETriggerEvent::Triggered, this, &APlayerCharacter::LadderMove);
 
     }
 }
@@ -90,7 +91,7 @@ void APlayerCharacter::Jump(const FInputActionValue& InputValue)
 //PLAYER INTERACT
 void APlayerCharacter::Interact(const FInputActionValue& InputValue)
 {
-    if (ActorIsOverlaped->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass())) //PlayerWantToInteract && 
+    if (ActorIsOverlaped->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass()))
     {
         // Appeler la méthode via l'interface
         IInteractibleInterface* InteractibleActor = Cast<IInteractibleInterface>(ActorIsOverlaped);
@@ -99,6 +100,22 @@ void APlayerCharacter::Interact(const FInputActionValue& InputValue)
             InteractibleActor->Effect(); // Appelle la méthode de l'interface
         }
     }
+}
+
+//PLAYER INTERACT
+void APlayerCharacter::LadderMove(const FInputActionValue& InputValue)
+{
+    /*if (ActorIsOverlaped->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass()))
+    {
+        // Appeler la méthode via l'interface
+        IInteractibleInterface* InteractibleActor = Cast<IInteractibleInterface>(ActorIsOverlaped);
+        if (InteractibleActor)
+        {
+            InteractibleActor->Effect(); // Appelle la méthode de l'interface
+        }
+    }*/
+
+    //TODO : Coder le mouvement du joueur sur l'échelle (elle n'a pas d'effet)
 }
 
 

@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -31,6 +30,4 @@ public :
 
 	UPROPERTY(EditAnywhere, Category = "Global Informations") //temporaire ? vérifier après si le container a toujours son objet ?
 	bool isEmpty = false;
-
-	//PROPERTY AVEC OBJET QUE CONTIENT LE COFFRE OU LE TAS
 };
