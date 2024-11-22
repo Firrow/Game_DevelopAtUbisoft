@@ -28,9 +28,12 @@ private:
 
 	USceneComponent* Component;
 	FVector PlayerVelocity;
+	AActor* ActorIsOverlaped;
 
 	void Move(const FInputActionValue& InputValue);
 	void Jump(const FInputActionValue& InputValue);
+	void Interact(const FInputActionValue& InputValue);
+	void StopInteract(const FInputActionValue& InputValue);
 	void UpdateCurrentState();
 	void UpdateIsFacingLeft();
 
@@ -57,6 +60,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Enhance Input")
 	class UInputAction* JumpAction;
 
+	UPROPERTY(EditAnywhere, Category = "Enhance Input")
+	class UInputAction* InteractAction;
+
 
 
 	//I want to tell to blueprint in which state of animation the player is
@@ -72,6 +78,14 @@ public:
 
 	UFUNCTION()
 	void BeginOverlap(UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void EndOverlap(UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex,

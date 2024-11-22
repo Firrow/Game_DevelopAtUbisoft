@@ -18,12 +18,6 @@ void APlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
     Component = this->GetRootComponent();
-
-    // Parcourir les tags de l'acteur
-    /*for (const FName& Tag : Tags)
-    {
-        UE_LOG(LogTemp, Log, TEXT("Tag trouvé : %s"), *Tag.ToString());
-    }*/
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -36,8 +30,6 @@ void APlayerCharacter::Tick(float DeltaTime)
     }
 
     UpdateCurrentState();
-    //UE_LOG(LogTemp, Display, TEXT("VELOCITY : %s"), *PlayerVelocity.ToString());
-    //UE_LOG(LogTemp, Display, TEXT("STATE : %s"), *CurrentStateMovement);
 }
 
 
@@ -63,6 +55,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
     {
         Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
         Input->BindAction(JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Jump);
+        Input->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::Interact);
+
     }
 }
 
@@ -92,6 +86,21 @@ void APlayerCharacter::Jump(const FInputActionValue& InputValue)
     GetCharacterMovement()->JumpZVelocity = JumpHeight;
     ACharacter::Jump();
 }
+
+//PLAYER INTERACT
+void APlayerCharacter::Interact(const FInputActionValue& InputValue)
+{
+    if (ActorIsOverlaped->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass())) //PlayerWantToInteract && 
+    {
+        // Appeler la méthode via l'interface
+        IInteractibleInterface* InteractibleActor = Cast<IInteractibleInterface>(ActorIsOverlaped);
+        if (InteractibleActor)
+        {
+            InteractibleActor->Effect(); // Appelle la méthode de l'interface
+        }
+    }
+}
+
 
 
 
@@ -138,14 +147,22 @@ void APlayerCharacter::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     // Overlap
     if (Cast<AInteractible>(OtherActor))
     {
-        if (OtherActor->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass()))
-        {
-            // Appeler la méthode via l'interface
-            IInteractibleInterface* InteractibleActor = Cast<IInteractibleInterface>(OtherActor);
-            if (InteractibleActor)
-            {
-                InteractibleActor->Effect(); // Appelle la méthode de l'interface
-            }
-        }
+        //APPELER LA FONCTION de l'UI
+        ActorIsOverlaped = OtherActor;
+    }
+}
+
+void APlayerCharacter::EndOverlap(UPrimitiveComponent* OverlappedComponent,
+    AActor* OtherActor,
+    UPrimitiveComponent* OtherComp,
+    int32 OtherBodyIndex,
+    bool bFromSweep,
+    const FHitResult& SweepResult)
+{
+    // Overlap
+    if (Cast<AInteractible>(OtherActor))
+    {
+        //Stopper LA FONCTION de l'UI
+        ActorIsOverlaped = nullptr;
     }
 }
