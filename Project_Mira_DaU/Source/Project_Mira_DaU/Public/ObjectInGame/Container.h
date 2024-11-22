@@ -28,4 +28,9 @@ public :
 	
 	UPROPERTY(EditAnywhere, Category = "Global Informations")
 	TSubclassOf<ARessource> RessourceInside;
+
+	UPROPERTY(EditAnywhere, Category = "Global Informations") //temporaire ? vérifier après si le container a toujours son objet ?
+	bool isEmpty = false;
+
+	//PROPERTY AVEC OBJET QUE CONTIENT LE COFFRE OU LE TAS
 };

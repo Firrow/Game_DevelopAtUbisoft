@@ -27,5 +27,9 @@ void AContainer::Tick(float DeltaTime)
 
 void AContainer::Effect() 
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Applique l'effet : CONTAINER !"));
+	if (!isEmpty)
+	{
+		isEmpty = true;
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Applique l'effet : CONTAINER !"));
+	}
 }
