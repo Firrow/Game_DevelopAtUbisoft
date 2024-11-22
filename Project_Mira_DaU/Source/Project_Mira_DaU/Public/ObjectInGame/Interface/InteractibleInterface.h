@@ -22,4 +22,5 @@ class PROJECT_MIRA_DAU_API IInteractibleInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+	virtual void Effect() = 0;
 };

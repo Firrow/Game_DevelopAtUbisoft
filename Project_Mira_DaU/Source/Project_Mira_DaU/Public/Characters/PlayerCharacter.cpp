@@ -20,10 +20,10 @@ void APlayerCharacter::BeginPlay()
     Component = this->GetRootComponent();
 
     // Parcourir les tags de l'acteur
-    for (const FName& Tag : Tags)
+    /*for (const FName& Tag : Tags)
     {
         UE_LOG(LogTemp, Log, TEXT("Tag trouvé : %s"), *Tag.ToString());
-    }
+    }*/
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -138,10 +138,14 @@ void APlayerCharacter::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     // Overlap
     if (Cast<AInteractible>(OtherActor))
     {
-        // How to know which daughter player overlap ???
-        // //-> Try Interface
-        // do stuff with OtherCharacter
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Overlap Begin : c'est un Interactible"));
+        if (OtherActor->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass()))
+        {
+            // Appeler la méthode via l'interface
+            IInteractibleInterface* InteractibleActor = Cast<IInteractibleInterface>(OtherActor);
+            if (InteractibleActor)
+            {
+                InteractibleActor->Effect(); // Appelle la méthode de l'interface
+            }
+        }
     }
-
 }

@@ -24,3 +24,8 @@ void AContainer::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
+
+void AContainer::Effect() 
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("APPLIQUE L'EFFET !!!!"));
+}
