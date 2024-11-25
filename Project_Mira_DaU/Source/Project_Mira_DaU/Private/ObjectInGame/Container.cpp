@@ -27,23 +27,19 @@ void AContainer::Effect()
 {
     if (!isEmpty)
     {
-        //TODO : Lancer l'animation du coffre en BP
-        if (sizeof(RessourceInside) == 0)
+        
+        if (RessourceInside.IsEmpty())
         {
             isEmpty = true;
         }
         else
         {
-            //TODO : Fait apparaitre l'objet
+            //TODO : Lancer l'animation du coffre en BP
             FRotator Rotation(0.0f, 0.0f, 0.0f);
-            //FActorSpawnParameters SpawnParams;
-
-
-            //ATTENTION UE CRASH QUAND SPAWNACTOR
-            //AActor* SpawnedActor = GetWorld()->SpawnActor<ARessource>(RessourceInside[0], RessourcePointSpawn->GetComponentLocation(), Rotation);
-            //GetWorld()->SpawnActor<ARessource>(RessourceInside[0], RessourcePointSpawn->GetComponentLocation(), Rotation); //RessourceInside[0]
+            GetWorld()->SpawnActor<ARessource>(RessourceInside.Last(), RessourcePointSpawn->GetComponentLocation(), Rotation);
+            RessourceInside.Pop();
+            //UE_LOG(LogTemp, Display, TEXT("Taille tableau : %i"), RessourceInside.Num());
         }
-
     }
 }
 
