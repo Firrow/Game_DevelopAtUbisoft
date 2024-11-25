@@ -19,7 +19,7 @@ void AWatch_ressource::RessourceEffect()
 {
     //Coder l'effet de la ressource
 
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Je joue l'effet"));
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Je joue l'effet : WATCH"));
 }
 
 
@@ -34,7 +34,6 @@ void AWatch_ressource::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
     if (PlayerCharacter)
     {
-        //Jouer effet + Détruire l'objet
         Super::BeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
     }
 }

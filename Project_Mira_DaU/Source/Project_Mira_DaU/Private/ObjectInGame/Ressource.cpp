@@ -38,4 +38,6 @@ void ARessource::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     const FHitResult& SweepResult)
 {
 	RessourceEffect();
+
+	this->Destroy();
 }
