@@ -26,7 +26,7 @@ public:
 	virtual void BeginPlay() override;
 	//virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere, Category = "Globales Informations")
+	UPROPERTY(EditAnywhere, Category = "Globales Informations") //utile ?
 	TArray<FString> ObjectTags;
 
 	UPROPERTY(VisibleAnywhere, Category = "Capsule")

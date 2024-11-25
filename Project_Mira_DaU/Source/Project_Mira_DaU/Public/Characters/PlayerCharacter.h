@@ -8,8 +8,8 @@
 #include "InputActionValue.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "ObjectInGame/Interactible.h"
 
+#include "ObjectInGame/Interactible.h"
 #include "ObjectInGame/Container.h"
 
 
@@ -67,13 +67,20 @@ public:
 	class UInputAction* LadderAction;
 
 
-	//I want to tell to blueprint in which state of animation the player is
+	
 	UPROPERTY(BlueprintReadOnly, Category = "Animation")
 	FString CurrentStateMovement = "Idle";
 
 	UPROPERTY(BlueprintReadOnly, Category = "Animation")
 	bool isFacingLeft = false;
 
+
+
+	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
+	int32 gears;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
+	bool isArmed;
 
 
 

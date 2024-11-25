@@ -5,6 +5,7 @@
 #include "ObjectInGame/Interactible.h"
 #include "ObjectInGame/Ressource.h"
 #include "ObjectInGame/Interface/InteractibleInterface.h"
+#include "Components/CapsuleComponent.h"
 #include "Container.generated.h"
 
 /**
@@ -30,4 +31,13 @@ public :
 
 	UPROPERTY(EditAnywhere, Category = "Global Informations") //temporaire ? vérifier après si le container a toujours son objet ?
 	bool isEmpty = false;
+
+
+	UFUNCTION()
+	void BeginOverlap(UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult);
 };

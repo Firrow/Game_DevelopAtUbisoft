@@ -10,8 +10,9 @@
 APlayerCharacter::APlayerCharacter() 
 {
     UCapsuleComponent* ObjectCapsule = GetCapsuleComponent();
-
     ObjectCapsule->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::BeginOverlap);
+
+    Tags.Add(TEXT("Player"));
 }
 
 void APlayerCharacter::BeginPlay()
