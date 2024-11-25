@@ -36,14 +36,5 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "CapsuleRessource")
 	class USphereComponent* RessourcePointSpawn;
 
-
-
-	UFUNCTION()
-	void BeginOverlap(UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult);
 };
 
