@@ -23,3 +23,7 @@ void ARessource::Tick(float DeltaTime)
 
 }
 
+void ARessource::RessourceEffect()
+{
+
+}

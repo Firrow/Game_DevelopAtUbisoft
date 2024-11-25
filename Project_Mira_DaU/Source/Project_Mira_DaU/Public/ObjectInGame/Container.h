@@ -6,6 +6,7 @@
 #include "ObjectInGame/Ressource.h"
 #include "ObjectInGame/Interface/InteractibleInterface.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
 #include "Container.generated.h"
 
 /**
@@ -16,21 +17,25 @@ class PROJECT_MIRA_DAU_API AContainer : public AInteractible, public IInteractib
 {
 	GENERATED_BODY()
 
-private :
+private:
 
 	virtual void Effect() override;
 
-public :
+public:
 
 	AContainer();
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-	
+
 	UPROPERTY(EditAnywhere, Category = "Global Informations")
-	TSubclassOf<ARessource> RessourceInside;
+	TArray<TSubclassOf<ARessource>> RessourceInside;
 
 	UPROPERTY(EditAnywhere, Category = "Global Informations") //temporaire ? vérifier après si le container a toujours son objet ?
-	bool isEmpty = false;
+		bool isEmpty = false;
+
+	UPROPERTY(VisibleAnywhere, Category = "CapsuleRessource")
+	class USphereComponent* RessourcePointSpawn;
+
 
 
 	UFUNCTION()
@@ -41,3 +46,4 @@ public :
 		bool bFromSweep,
 		const FHitResult& SweepResult);
 };
+
