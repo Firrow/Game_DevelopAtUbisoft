@@ -30,8 +30,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Global Informations")
 	TArray<TSubclassOf<ARessource>> RessourceInside;
 
-	UPROPERTY(EditAnywhere, Category = "Global Informations") //temporaire ? vérifier après si le container a toujours son objet ?
-		bool isEmpty = false;
+	UPROPERTY(VisibleAnywhere, Category = "Global Informations") //temporaire ? vérifier après si le container a toujours son objet ?
+	bool isEmpty = false;
 
 	UPROPERTY(VisibleAnywhere, Category = "CapsuleRessource")
 	class USphereComponent* RessourcePointSpawn;
