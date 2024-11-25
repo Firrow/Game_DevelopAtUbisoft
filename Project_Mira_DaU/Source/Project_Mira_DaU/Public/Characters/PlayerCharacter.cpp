@@ -7,6 +7,13 @@
 #include "EnhancedInputComponent.h"
 
 
+APlayerCharacter::APlayerCharacter() 
+{
+    UCapsuleComponent* ObjectCapsule = GetCapsuleComponent();
+    ObjectCapsule->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::BeginOverlap);
+
+    Tags.Add(TEXT("Player"));
+}
 
 void APlayerCharacter::BeginPlay()
 {
@@ -24,8 +31,6 @@ void APlayerCharacter::Tick(float DeltaTime)
     }
 
     UpdateCurrentState();
-    //UE_LOG(LogTemp, Display, TEXT("VELOCITY : %s"), *PlayerVelocity.ToString());
-    //UE_LOG(LogTemp, Display, TEXT("STATE : %s"), *CurrentStateMovement);
 }
 
 
@@ -51,6 +56,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
     {
         Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
         Input->BindAction(JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Jump);
+        Input->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::Interact);
+        Input->BindAction(LadderAction, ETriggerEvent::Triggered, this, &APlayerCharacter::LadderMove);
+
     }
 }
 
@@ -81,6 +89,37 @@ void APlayerCharacter::Jump(const FInputActionValue& InputValue)
     ACharacter::Jump();
 }
 
+//PLAYER INTERACT
+void APlayerCharacter::Interact(const FInputActionValue& InputValue)
+{
+    if (ActorIsOverlaped->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass()))
+    {
+        // Appeler la méthode via l'interface
+        IInteractibleInterface* InteractibleActor = Cast<IInteractibleInterface>(ActorIsOverlaped);
+        if (InteractibleActor)
+        {
+            InteractibleActor->Effect(); // Appelle la méthode de l'interface
+        }
+    }
+}
+
+//PLAYER INTERACT
+void APlayerCharacter::LadderMove(const FInputActionValue& InputValue)
+{
+    /*if (ActorIsOverlaped->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass()))
+    {
+        // Appeler la méthode via l'interface
+        IInteractibleInterface* InteractibleActor = Cast<IInteractibleInterface>(ActorIsOverlaped);
+        if (InteractibleActor)
+        {
+            InteractibleActor->Effect(); // Appelle la méthode de l'interface
+        }
+    }*/
+
+    //TODO : Coder le mouvement du joueur sur l'échelle (elle n'a pas d'effet)
+}
+
+
 
 
 //UPDATE ANIMATION
@@ -110,4 +149,38 @@ void APlayerCharacter::UpdateIsFacingLeft()
         isFacingLeft = false;
     else if (PlayerVelocity.X < 0)
         isFacingLeft = true;
+}
+
+
+
+
+
+void APlayerCharacter::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
+    AActor* OtherActor,
+    UPrimitiveComponent* OtherComp,
+    int32 OtherBodyIndex,
+    bool bFromSweep,
+    const FHitResult& SweepResult)
+{
+    // Overlap
+    if (Cast<AInteractible>(OtherActor))
+    {
+        //APPELER LA FONCTION de l'UI
+        ActorIsOverlaped = OtherActor;
+    }
+}
+
+void APlayerCharacter::EndOverlap(UPrimitiveComponent* OverlappedComponent,
+    AActor* OtherActor,
+    UPrimitiveComponent* OtherComp,
+    int32 OtherBodyIndex,
+    bool bFromSweep,
+    const FHitResult& SweepResult)
+{
+    // Overlap
+    if (Cast<AInteractible>(OtherActor))
+    {
+        //Stopper LA FONCTION de l'UI
+        ActorIsOverlaped = nullptr;
+    }
 }
