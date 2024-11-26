@@ -12,12 +12,14 @@
 #include "ObjectInGame/Interactible.h"
 #include "ObjectInGame/Container.h"
 
-
 #include "PlayerCharacter.generated.h"
 
 /**
  * 
  */
+class UInputAction;
+class UInputMappingContext;
+
 UCLASS()
 class PROJECT_MIRA_DAU_API APlayerCharacter : public APaperCharacter
 {
@@ -30,10 +32,10 @@ private:
 	FVector PlayerVelocity;
 	AActor* ActorIsOverlaped;
 
-	void Move(const FInputActionValue& InputValue);
+	void MoveRL(const FInputActionValue& InputValue);
+	void MoveFB(const FInputActionValue& InputValue);
 	void Jump(const FInputActionValue& InputValue);
 	void Interact(const FInputActionValue& InputValue);
-	void LadderMove(const FInputActionValue& InputValue);
 	void UpdateCurrentState();
 	void UpdateIsFacingLeft();
 
@@ -52,19 +54,21 @@ public:
 
 
 	UPROPERTY(EditAnywhere, Category = "Enhance Input")
-	class UInputMappingContext* InputMappingContext;
+	UInputMappingContext* InputMappingContext;
 
 	UPROPERTY(EditAnywhere, Category = "Enhance Input")
-	class UInputAction* MoveAction;
+	UInputAction* MoveRLAction;
 
 	UPROPERTY(EditAnywhere, Category = "Enhance Input")
-	class UInputAction* JumpAction;
+	UInputAction* MoveFBAction;
 
 	UPROPERTY(EditAnywhere, Category = "Enhance Input")
-	class UInputAction* InteractAction;
+	UInputAction* JumpAction;
 
 	UPROPERTY(EditAnywhere, Category = "Enhance Input")
-	class UInputAction* LadderAction;
+	UInputAction* InteractAction;
+
+
 
 
 	

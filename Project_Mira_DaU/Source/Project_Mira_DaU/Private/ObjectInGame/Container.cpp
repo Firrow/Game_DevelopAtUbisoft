@@ -5,9 +5,13 @@
 
 AContainer::AContainer()
 {
+    CapsuleColliderRessource = CreateDefaultSubobject<USphereComponent>(TEXT("CapsuleRessource"));
+    CapsuleColliderRessource->InitSphereRadius(5.f);
+    CapsuleColliderRessource->SetupAttachment(RootComponent);
+
     RessourcePointSpawn = CreateDefaultSubobject<USphereComponent>(TEXT("RessourcePointSpawn"));
     RessourcePointSpawn->InitSphereRadius(1.f);
-    RessourcePointSpawn->SetupAttachment(ObjectCapsule);
+    RessourcePointSpawn->SetupAttachment(CapsuleColliderRessource);
 }
 
 void AContainer::BeginPlay()

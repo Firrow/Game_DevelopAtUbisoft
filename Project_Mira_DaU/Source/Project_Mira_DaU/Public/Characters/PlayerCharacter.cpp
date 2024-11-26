@@ -44,7 +44,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
     if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
     {
         //Get local player subsystem
-        if (class UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+        if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
         {
             //Add input context
             Subsystem->AddMappingContext(InputMappingContext, 0);
@@ -54,16 +54,16 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
     //Bind inputs to corresponding actions
     if (UEnhancedInputComponent* Input = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
     {
-        Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
+        Input->BindAction(MoveRLAction, ETriggerEvent::Triggered, this, &APlayerCharacter::MoveRL);
+        Input->BindAction(MoveFBAction, ETriggerEvent::Triggered, this, &APlayerCharacter::MoveFB);
         Input->BindAction(JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Jump);
         Input->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::Interact);
-        Input->BindAction(LadderAction, ETriggerEvent::Triggered, this, &APlayerCharacter::LadderMove);
 
     }
 }
 
 //PLAYER MOVEMENT
-void APlayerCharacter::Move(const FInputActionValue& InputValue)
+void APlayerCharacter::MoveRL(const FInputActionValue& InputValue)
 {
     FVector2D InputVector = InputValue.Get<FVector2D>();
 
@@ -104,7 +104,7 @@ void APlayerCharacter::Interact(const FInputActionValue& InputValue)
 }
 
 //PLAYER INTERACT
-void APlayerCharacter::LadderMove(const FInputActionValue& InputValue)
+void APlayerCharacter::MoveFB(const FInputActionValue& InputValue)
 {
     /*if (ActorIsOverlaped->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass()))
     {

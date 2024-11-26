@@ -24,12 +24,8 @@ public:
 
 	AInteractible();
 	virtual void BeginPlay() override;
-	//virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere, Category = "Globales Informations") //utile ?
 	TArray<FString> ObjectTags;
-
-	UPROPERTY(VisibleAnywhere, Category = "Capsule")
-	class UCapsuleComponent* ObjectCapsule;
 
 };

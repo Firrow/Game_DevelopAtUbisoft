@@ -7,6 +7,9 @@
 #include "Components/CapsuleComponent.h"
 #include "Ressource.generated.h"
 
+
+class UCapsuleComponent;
+
 UCLASS()
 class PROJECT_MIRA_DAU_API ARessource : public AActor
 {
@@ -22,7 +25,7 @@ protected:
 	virtual void RessourceEffect();
 
 	UPROPERTY(VisibleAnywhere, Category = "Capsule")
-	class UCapsuleComponent* ObjectCapsule;
+	UCapsuleComponent* ObjectCapsule;
 
 public:	
 	// Called every frame

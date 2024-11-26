@@ -5,7 +5,6 @@
 #include "ObjectInGame/Interactible.h"
 #include "ObjectInGame/Ressource.h"
 #include "ObjectInGame/Interface/InteractibleInterface.h"
-#include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
 #include "Container.generated.h"
 
@@ -35,6 +34,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = "CapsuleRessource")
 	class USphereComponent* RessourcePointSpawn;
+
+	UPROPERTY(VisibleAnywhere, Category = "CapsuleRessource")
+	class USphereComponent* CapsuleColliderRessource;
 
 };
 
