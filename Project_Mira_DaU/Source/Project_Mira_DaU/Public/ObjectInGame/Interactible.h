@@ -25,7 +25,4 @@ public:
 	AInteractible();
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, Category = "Globales Informations") //utile ?
-	TArray<FString> ObjectTags;
-
 };

@@ -9,16 +9,21 @@
 
 APlayerCharacter::APlayerCharacter() 
 {
-    UCapsuleComponent* ObjectCapsule = GetCapsuleComponent();
-    ObjectCapsule->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::BeginOverlap);
-
     Tags.Add(TEXT("Player"));
+
+    /*UCapsuleComponent* ObjectCapsule = GetCapsuleComponent();
+    ObjectCapsule->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::BeginOverlap);
+    ObjectCapsule->OnComponentEndOverlap.AddDynamic(this, &APlayerCharacter::EndOverlap);*/
 }
 
 void APlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
     Component = this->GetRootComponent();
+
+    UCapsuleComponent* ObjectCapsule = GetCapsuleComponent();
+    ObjectCapsule->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::BeginOverlap);
+    ObjectCapsule->OnComponentEndOverlap.AddDynamic(this, &APlayerCharacter::EndOverlap);
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -31,6 +36,42 @@ void APlayerCharacter::Tick(float DeltaTime)
     }
 
     UpdateCurrentState();
+
+
+
+    EMovementMode CurrentMode = GetCharacterMovement()->MovementMode;
+
+    FString MovementModeString;
+
+    switch (CurrentMode)
+    {
+    case MOVE_Walking:
+        MovementModeString = "Walking";
+        break;
+    case MOVE_NavWalking:
+        MovementModeString = "NavWalking";
+        break;
+    case MOVE_Falling:
+        MovementModeString = "Falling";
+        break;
+    case MOVE_Swimming:
+        MovementModeString = "Swimming";
+        break;
+    case MOVE_Flying:
+        MovementModeString = "Flying";
+        break;
+    case MOVE_Custom:
+        MovementModeString = "Custom";
+        break;
+    case MOVE_None:
+        MovementModeString = "None";
+        break;
+    default:
+        MovementModeString = "Unknown";
+        break;
+    }
+
+    UE_LOG(LogTemp, Warning, TEXT("Current Movement Mode: %s"), *MovementModeString);
 }
 
 
@@ -65,20 +106,20 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 //PLAYER MOVEMENT
 void APlayerCharacter::MoveRL(const FInputActionValue& InputValue)
 {
-    FVector2D InputVector = InputValue.Get<FVector2D>();
-
-    if (IsValid(Controller))
+    const float ValueInput = InputValue.Get<float>();
+    if (Controller != nullptr && ValueInput != 0.0f)
     {
-        //Get Forward direction
-        const FRotator Rotation = Controller->GetControlRotation();
-        const FRotator YawRotation(0, Rotation.Yaw, 0);
+        AddMovementInput(FVector(1.0f, 0.0f, 0.0f) * Speed, ValueInput);
+    }
+}
 
-        const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X) * Speed;
-        const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y) * Speed;
-
-        //Add movement
-        AddMovementInput(ForwardDirection, InputVector.Y);
-        AddMovementInput(RightDirection, InputVector.X);
+//PLAYER INTERACT
+void APlayerCharacter::MoveFB(const FInputActionValue& InputValue)
+{
+    const float ValueInput = InputValue.Get<float>();
+    if (bIsOnLadder && Controller != nullptr && ValueInput != 0.0f)
+    {
+        AddMovementInput(FVector(0.0f, 0.0f, 1.0f) * Speed, ValueInput);
     }
 }
 
@@ -101,22 +142,6 @@ void APlayerCharacter::Interact(const FInputActionValue& InputValue)
             InteractibleActor->Effect(); // Appelle la méthode de l'interface
         }
     }
-}
-
-//PLAYER INTERACT
-void APlayerCharacter::MoveFB(const FInputActionValue& InputValue)
-{
-    /*if (ActorIsOverlaped->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass()))
-    {
-        // Appeler la méthode via l'interface
-        IInteractibleInterface* InteractibleActor = Cast<IInteractibleInterface>(ActorIsOverlaped);
-        if (InteractibleActor)
-        {
-            InteractibleActor->Effect(); // Appelle la méthode de l'interface
-        }
-    }*/
-
-    //TODO : Coder le mouvement du joueur sur l'échelle (elle n'a pas d'effet)
 }
 
 
@@ -167,20 +192,38 @@ void APlayerCharacter::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     {
         //APPELER LA FONCTION de l'UI
         ActorIsOverlaped = OtherActor;
+
+
+        if (OtherActor->ActorHasTag("Ladder"))
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("DEBUT"));
+
+            bIsOnLadder = true;
+            //GetCharacterMovement()->GravityScale = 0.0f; // Désactive la gravité
+            GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
+        }
     }
 }
 
 void APlayerCharacter::EndOverlap(UPrimitiveComponent* OverlappedComponent,
-    AActor* OtherActor,
-    UPrimitiveComponent* OtherComp,
-    int32 OtherBodyIndex,
-    bool bFromSweep,
-    const FHitResult& SweepResult)
+    AActor* OtherActor, 
+    UPrimitiveComponent* OtherComp, 
+    int32 OtherBodyIndex)
 {
     // Overlap
     if (Cast<AInteractible>(OtherActor))
     {
         //Stopper LA FONCTION de l'UI
         ActorIsOverlaped = nullptr;
+
+        if (OtherActor->ActorHasTag("Ladder"))
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("FIN"));
+
+            bIsOnLadder = false;
+            //GetCharacterMovement()->GravityScale = 1.0f; // Rétablit la gravité
+            GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+        }
+
     }
 }

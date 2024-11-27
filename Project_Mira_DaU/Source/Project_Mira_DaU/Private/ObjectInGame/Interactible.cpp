@@ -3,7 +3,7 @@
 
 AInteractible::AInteractible()
 {
-	ObjectTags.Add(TEXT("Interactible"));
+	Tags.Add(TEXT("Interactible"));
 }
 
 void AInteractible::BeginPlay()

@@ -39,6 +39,10 @@ private:
 	void UpdateCurrentState();
 	void UpdateIsFacingLeft();
 
+
+
+	bool bIsOnLadder = false; // Indique si le joueur est sur une échelle
+
 public:
 
 	virtual void BeginPlay() override;
@@ -97,12 +101,19 @@ public:
 		bool bFromSweep,
 		const FHitResult& SweepResult);
 
-	UFUNCTION()
+	/*UFUNCTION()
 	void EndOverlap(UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex,
 		bool bFromSweep,
-		const FHitResult& SweepResult);
+		const FHitResult& SweepResult);*/
+
+
+	UFUNCTION()
+	void EndOverlap(UPrimitiveComponent* OverlappedComp, 
+		AActor* OtherActor, 
+		UPrimitiveComponent* OtherComp, 
+		int32 OtherBodyIndex);
 };
 
