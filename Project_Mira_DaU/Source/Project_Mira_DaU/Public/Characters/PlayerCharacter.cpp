@@ -196,11 +196,17 @@ void APlayerCharacter::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
 
         if (OtherActor->ActorHasTag("Ladder"))
         {
-            GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("DEBUT"));
+            if (!OverlappingLadders.Contains(OtherActor))
+            {
+                OverlappingLadders.Add(OtherActor);
+            }
 
-            bIsOnLadder = true;
-            //GetCharacterMovement()->GravityScale = 0.0f; // Désactive la gravité
-            GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
+            if (!bIsOnLadder)
+            {
+                bIsOnLadder = true;
+                GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
+            }
+
         }
     }
 }
@@ -216,14 +222,12 @@ void APlayerCharacter::EndOverlap(UPrimitiveComponent* OverlappedComponent,
         //Stopper LA FONCTION de l'UI
         ActorIsOverlaped = nullptr;
 
-        if (OtherActor->ActorHasTag("Ladder"))
-        {
-            GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("FIN"));
+        OverlappingLadders.Remove(OtherActor);
 
+        if (OverlappingLadders.Num() == 0)
+        {
             bIsOnLadder = false;
-            //GetCharacterMovement()->GravityScale = 1.0f; // Rétablit la gravité
             GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
         }
-
     }
 }

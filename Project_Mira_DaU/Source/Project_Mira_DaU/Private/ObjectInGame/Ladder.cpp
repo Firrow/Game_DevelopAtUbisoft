@@ -3,9 +3,9 @@
 
 ALadder::ALadder()
 {
-	BoxCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxLadder"));
-	BoxCollider->InitBoxExtent(FVector(10.f, 10.f, 30.f));
-	BoxCollider->SetupAttachment(RootComponent);
+	//BoxCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxLadder"));
+	//BoxCollider->InitBoxExtent(FVector(10.f, 10.f, 30.f));
+	//BoxCollider->SetupAttachment(RootComponent);
 
 	Tags.Add(TEXT("Ladder"));
 }

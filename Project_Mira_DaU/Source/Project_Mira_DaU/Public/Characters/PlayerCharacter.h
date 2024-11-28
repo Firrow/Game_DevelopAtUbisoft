@@ -42,6 +42,7 @@ private:
 
 
 	bool bIsOnLadder = false; // Indique si le joueur est sur une échelle
+	TArray<AActor*> OverlappingLadders;
 
 public:
 
