@@ -10,10 +10,6 @@
 APlayerCharacter::APlayerCharacter() 
 {
     Tags.Add(TEXT("Player"));
-
-    /*UCapsuleComponent* ObjectCapsule = GetCapsuleComponent();
-    ObjectCapsule->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::BeginOverlap);
-    ObjectCapsule->OnComponentEndOverlap.AddDynamic(this, &APlayerCharacter::EndOverlap);*/
 }
 
 void APlayerCharacter::BeginPlay()
@@ -24,6 +20,8 @@ void APlayerCharacter::BeginPlay()
     UCapsuleComponent* ObjectCapsule = GetCapsuleComponent();
     ObjectCapsule->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::BeginOverlap);
     ObjectCapsule->OnComponentEndOverlap.AddDynamic(this, &APlayerCharacter::EndOverlap);
+
+    GetCharacterMovement()->MaxStepHeight = 5.0f;
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -37,9 +35,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 
     UpdateCurrentState();
 
-
-
-    EMovementMode CurrentMode = GetCharacterMovement()->MovementMode;
+    /*EMovementMode CurrentMode = GetCharacterMovement()->MovementMode;
 
     FString MovementModeString;
 
@@ -71,7 +67,7 @@ void APlayerCharacter::Tick(float DeltaTime)
         break;
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("Current Movement Mode: %s"), *MovementModeString);
+    //UE_LOG(LogTemp, Warning, TEXT("Current Movement Mode: %s"), *MovementModeString);*/
 }
 
 
@@ -157,12 +153,16 @@ void APlayerCharacter::UpdateCurrentState()
         else
             CurrentStateMovement = "idle";
     }
-    else 
+    else
     {
-        if (PlayerVelocity.Z > 0)
-            CurrentStateMovement = "jumpRise";
-        else
+        if (PlayerVelocity.Z < 0)
+        {
             CurrentStateMovement = "fall";
+        }
+        else
+        {
+            CurrentStateMovement = "jumpRise";
+        }
     }
 
     UpdateIsFacingLeft();
