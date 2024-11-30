@@ -5,6 +5,7 @@
 #include "InputMappingContext.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "InputActionValue.h"
 
 
 APlayerCharacter::APlayerCharacter() 
@@ -35,39 +36,15 @@ void APlayerCharacter::Tick(float DeltaTime)
 
     UpdateCurrentState();
 
-    /*EMovementMode CurrentMode = GetCharacterMovement()->MovementMode;
-
-    FString MovementModeString;
-
-    switch (CurrentMode)
+    //AUTRE MÉTHODE AVEC AUTRE EFFET DE BORD
+    /*if (bIsOnLadder)
     {
-    case MOVE_Walking:
-        MovementModeString = "Walking";
-        break;
-    case MOVE_NavWalking:
-        MovementModeString = "NavWalking";
-        break;
-    case MOVE_Falling:
-        MovementModeString = "Falling";
-        break;
-    case MOVE_Swimming:
-        MovementModeString = "Swimming";
-        break;
-    case MOVE_Flying:
-        MovementModeString = "Flying";
-        break;
-    case MOVE_Custom:
-        MovementModeString = "Custom";
-        break;
-    case MOVE_None:
-        MovementModeString = "None";
-        break;
-    default:
-        MovementModeString = "Unknown";
-        break;
-    }
+        PlayerVelocity.X = 0.0f;
+        PlayerVelocity.Y = 0.0f;
+        GetCharacterMovement()->Velocity = PlayerVelocity;
 
-    //UE_LOG(LogTemp, Warning, TEXT("Current Movement Mode: %s"), *MovementModeString);*/
+        GetCharacterMovement()->GravityScale = 0.0f;
+    }*/
 }
 
 
@@ -115,6 +92,14 @@ void APlayerCharacter::MoveFB(const FInputActionValue& InputValue)
     const float ValueInput = InputValue.Get<float>();
     if (bIsOnLadder && Controller != nullptr && ValueInput != 0.0f)
     {
+        GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
+
+        //TODO : 1ERE MÉTHODE AVEC EFFET DE BORD : éviter que le joueur monte ou descende à cause de l'inertie
+        PlayerVelocity.X = 0.0f;
+        PlayerVelocity.Y = 0.0f;
+        GetCharacterMovement()->Velocity = PlayerVelocity;
+        GetCharacterMovement()->GravityScale = 0.0f;
+
         AddMovementInput(FVector(0.0f, 0.0f, 1.0f) * Speed, ValueInput);
     }
 }
@@ -192,7 +177,7 @@ void APlayerCharacter::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     {
         //APPELER LA FONCTION de l'UI
         ActorIsOverlaped = OtherActor;
-
+        UE_LOG(LogTemp, Display, TEXT("OVERLAP : %f"), *ActorIsOverlaped->GetName());
 
         if (OtherActor->ActorHasTag("Ladder"))
         {
@@ -204,9 +189,7 @@ void APlayerCharacter::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
             if (!bIsOnLadder)
             {
                 bIsOnLadder = true;
-                GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
             }
-
         }
     }
 }
@@ -228,6 +211,7 @@ void APlayerCharacter::EndOverlap(UPrimitiveComponent* OverlappedComponent,
         {
             bIsOnLadder = false;
             GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+            GetCharacterMovement()->GravityScale = 1.0f;
         }
     }
 }

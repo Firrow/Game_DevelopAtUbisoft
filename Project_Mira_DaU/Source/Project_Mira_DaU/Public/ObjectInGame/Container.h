@@ -23,8 +23,6 @@ private:
 public:
 
 	AContainer();
-	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere, Category = "Global Informations")
 	TArray<TSubclassOf<ARessource>> RessourceInside;
@@ -32,10 +30,10 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Global Informations") //temporaire ? vérifier après si le container a toujours son objet ?
 	bool isEmpty = false;
 
-	UPROPERTY(VisibleAnywhere, Category = "CapsuleRessource")
+	UPROPERTY(EditAnywhere, Category = "CapsuleRessource")
 	class USphereComponent* RessourcePointSpawn;
 
-	UPROPERTY(VisibleAnywhere, Category = "CapsuleRessource")
+	UPROPERTY(EditAnywhere, Category = "CapsuleRessource")
 	class USphereComponent* CapsuleColliderRessource;
 
 };

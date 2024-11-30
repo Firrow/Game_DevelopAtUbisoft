@@ -23,6 +23,5 @@ protected:
 public:	
 
 	AInteractible();
-	virtual void BeginPlay() override;
 
 };

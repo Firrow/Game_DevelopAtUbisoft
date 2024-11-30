@@ -22,8 +22,6 @@ private:
 
 public:
 	ALadder();
-	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(VisibleAnywhere, Category = "Box Collider")
 	UBoxComponent* BoxCollider;

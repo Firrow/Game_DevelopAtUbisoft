@@ -14,17 +14,6 @@ AContainer::AContainer()
     RessourcePointSpawn->SetupAttachment(CapsuleColliderRessource);
 }
 
-void AContainer::BeginPlay()
-{
-    Super::BeginPlay();
-}
-
-void AContainer::Tick(float DeltaTime)
-{
-    Super::Tick(DeltaTime);
-
-}
-
 void AContainer::Effect()
 {
     if (!isEmpty)
