@@ -1,6 +1,5 @@
 
 #include "ObjectInGame/Container.h"
-#include <Characters/PlayerCharacter.h>
 
 
 AContainer::AContainer()
