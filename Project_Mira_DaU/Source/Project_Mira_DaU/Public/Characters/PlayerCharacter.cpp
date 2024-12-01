@@ -114,16 +114,13 @@ void APlayerCharacter::Jump(const FInputActionValue& InputValue)
 //PLAYER INTERACT
 void APlayerCharacter::Interact(const FInputActionValue& InputValue)
 {
-    if (ActorIsOverlaped != nullptr)
+
+    if (ActorIsOverlaped != nullptr && ActorIsOverlaped->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass()))
     {
-        if (ActorIsOverlaped->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass()))
+        IInteractibleInterface* InteractibleActor = Cast<IInteractibleInterface>(ActorIsOverlaped);
+        if (InteractibleActor)
         {
-            // Appeler la méthode via l'interface
-            IInteractibleInterface* InteractibleActor = Cast<IInteractibleInterface>(ActorIsOverlaped);
-            if (InteractibleActor)
-            {
-                InteractibleActor->Effect(); // Appelle la méthode de l'interface
-            }
+            InteractibleActor->Effect();
         }
     }
 }
