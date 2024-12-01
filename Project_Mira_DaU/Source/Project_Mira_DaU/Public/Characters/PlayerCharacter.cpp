@@ -114,7 +114,7 @@ void APlayerCharacter::Jump(const FInputActionValue& InputValue)
 //PLAYER INTERACT
 void APlayerCharacter::Interact(const FInputActionValue& InputValue)
 {
-    if (ActorIsOverlaped->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass()))
+    /*if (ActorIsOverlaped->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass()))
     {
         // Appeler la méthode via l'interface
         IInteractibleInterface* InteractibleActor = Cast<IInteractibleInterface>(ActorIsOverlaped);
@@ -122,7 +122,7 @@ void APlayerCharacter::Interact(const FInputActionValue& InputValue)
         {
             InteractibleActor->Effect(); // Appelle la méthode de l'interface
         }
-    }
+    }*/
 }
 
 
@@ -140,13 +140,20 @@ void APlayerCharacter::UpdateCurrentState()
     }
     else
     {
-        if (PlayerVelocity.Z < 0)
+        if (bIsOnLadder)
         {
-            CurrentStateMovement = "fall";
+            CurrentStateMovement = "ladder";
         }
-        else
+        else 
         {
-            CurrentStateMovement = "jumpRise";
+            if (PlayerVelocity.Z < 0)
+            {
+                CurrentStateMovement = "fall";
+            }
+            else
+            {
+                CurrentStateMovement = "jumpRise";
+            }
         }
     }
 
@@ -177,7 +184,7 @@ void APlayerCharacter::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     {
         //APPELER LA FONCTION de l'UI
         ActorIsOverlaped = OtherActor;
-        UE_LOG(LogTemp, Display, TEXT("OVERLAP : %f"), *ActorIsOverlaped->GetName());
+        UE_LOG(LogTemp, Display, TEXT("OVERLAP : %s"), *ActorIsOverlaped->GetName());
 
         if (OtherActor->ActorHasTag("Ladder"))
         {
