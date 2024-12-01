@@ -30,7 +30,7 @@ private:
 
 	USceneComponent* Component;
 	FVector PlayerVelocity;
-	AActor* ActorIsOverlaped;
+	AActor* ActorIsOverlaped = nullptr;
 
 	void MoveRL(const FInputActionValue& InputValue);
 	void MoveFB(const FInputActionValue& InputValue);
