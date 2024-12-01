@@ -26,10 +26,10 @@ void AContainer::Effect()
         else
         {
             //TODO : Lancer l'animation du coffre en BP
+
             FRotator Rotation(0.0f, 0.0f, 0.0f);
             GetWorld()->SpawnActor<ARessource>(RessourceInside.Last(), RessourcePointSpawn->GetComponentLocation(), Rotation);
             RessourceInside.Pop();
-            //UE_LOG(LogTemp, Display, TEXT("Taille tableau : %i"), RessourceInside.Num());
         }
     }
 }

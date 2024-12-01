@@ -98,7 +98,7 @@ void APlayerCharacter::MoveFB(const FInputActionValue& InputValue)
         PlayerVelocity.X = 0.0f;
         PlayerVelocity.Y = 0.0f;
         GetCharacterMovement()->Velocity = PlayerVelocity;
-        GetCharacterMovement()->GravityScale = 0.0f;
+        //GetCharacterMovement()->GravityScale = 0.0f;
 
         AddMovementInput(FVector(0.0f, 0.0f, 1.0f) * Speed, ValueInput);
     }
@@ -114,7 +114,7 @@ void APlayerCharacter::Jump(const FInputActionValue& InputValue)
 //PLAYER INTERACT
 void APlayerCharacter::Interact(const FInputActionValue& InputValue)
 {
-    /*if (ActorIsOverlaped->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass()))
+    if (ActorIsOverlaped->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass()))
     {
         // Appeler la méthode via l'interface
         IInteractibleInterface* InteractibleActor = Cast<IInteractibleInterface>(ActorIsOverlaped);
@@ -122,7 +122,7 @@ void APlayerCharacter::Interact(const FInputActionValue& InputValue)
         {
             InteractibleActor->Effect(); // Appelle la méthode de l'interface
         }
-    }*/
+    }
 }
 
 
@@ -183,8 +183,8 @@ void APlayerCharacter::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     if (Cast<AInteractible>(OtherActor))
     {
         //APPELER LA FONCTION de l'UI
+
         ActorIsOverlaped = OtherActor;
-        UE_LOG(LogTemp, Display, TEXT("OVERLAP : %s"), *ActorIsOverlaped->GetName());
 
         if (OtherActor->ActorHasTag("Ladder"))
         {
@@ -212,13 +212,16 @@ void APlayerCharacter::EndOverlap(UPrimitiveComponent* OverlappedComponent,
         //Stopper LA FONCTION de l'UI
         ActorIsOverlaped = nullptr;
 
-        OverlappingLadders.Remove(OtherActor);
-
-        if (OverlappingLadders.Num() == 0)
+        if (OtherActor->ActorHasTag("Ladder"))
         {
-            bIsOnLadder = false;
-            GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
-            GetCharacterMovement()->GravityScale = 1.0f;
+            OverlappingLadders.Remove(OtherActor);
+
+            if (OverlappingLadders.Num() == 0)
+            {
+                bIsOnLadder = false;
+                GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+                //GetCharacterMovement()->GravityScale = 1.0f;
+            }
         }
     }
 }
