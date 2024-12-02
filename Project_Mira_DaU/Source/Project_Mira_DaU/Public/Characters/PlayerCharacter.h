@@ -7,22 +7,39 @@
 #include "PaperFlipbook.h"
 #include "InputActionValue.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/CapsuleComponent.h"
+
+#include "ObjectInGame/Interactible.h"
+#include "ObjectInGame/Container.h"
+
 #include "PlayerCharacter.generated.h"
 
 /**
  * 
  */
+class UInputAction;
+class UInputMappingContext;
+
 UCLASS()
 class PROJECT_MIRA_DAU_API APlayerCharacter : public APaperCharacter
 {
 	GENERATED_BODY()
 	
 private:
+	APlayerCharacter();
+
 	USceneComponent* Component;
 	FVector PlayerVelocity;
+	AActor* ActorIsOverlaped = nullptr;
+	bool bIsOnLadder = false;
+	float MaxStepHeightPlayer = 5.0f;
+	TArray<AActor*> OverlappingLadders;
 
-	void Move(const FInputActionValue& InputValue);
+	void MoveRL(const FInputActionValue& InputValue);
+	void MoveFB(const FInputActionValue& InputValue);
+	void EndMoveFB(const FInputActionValue& InputValue);
 	void Jump(const FInputActionValue& InputValue);
+	void Interact(const FInputActionValue& InputValue);
 	void UpdateCurrentState();
 	void UpdateIsFacingLeft();
 
@@ -41,21 +58,50 @@ public:
 
 
 	UPROPERTY(EditAnywhere, Category = "Enhance Input")
-	class UInputMappingContext* InputMappingContext;
+	UInputMappingContext* InputMappingContext;
 
 	UPROPERTY(EditAnywhere, Category = "Enhance Input")
-	class UInputAction* MoveAction;
+	UInputAction* MoveRLAction;
 
 	UPROPERTY(EditAnywhere, Category = "Enhance Input")
-	class UInputAction* JumpAction;
+	UInputAction* MoveFBAction;
+
+	UPROPERTY(EditAnywhere, Category = "Enhance Input")
+	UInputAction* JumpAction;
+
+	UPROPERTY(EditAnywhere, Category = "Enhance Input")
+	UInputAction* InteractAction;
 
 
-
-	//I want to tell to blueprint in which state of animation the player is
+	
 	UPROPERTY(BlueprintReadOnly, Category = "Animation")
 	FString CurrentStateMovement = "Idle";
 
 	UPROPERTY(BlueprintReadOnly, Category = "Animation")
 	bool isFacingLeft = false;
+
+
+
+	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
+	int32 gears;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
+	bool isArmed;
+
+
+
+	UFUNCTION()
+	void BeginOverlap(UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void EndOverlap(UPrimitiveComponent* OverlappedComp, 
+		AActor* OtherActor, 
+		UPrimitiveComponent* OtherComp, 
+		int32 OtherBodyIndex);
 };
 
