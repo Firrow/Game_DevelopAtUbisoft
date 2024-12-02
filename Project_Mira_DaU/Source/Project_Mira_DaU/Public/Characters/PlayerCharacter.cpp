@@ -22,7 +22,7 @@ void APlayerCharacter::BeginPlay()
     ObjectCapsule->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::BeginOverlap);
     ObjectCapsule->OnComponentEndOverlap.AddDynamic(this, &APlayerCharacter::EndOverlap);
 
-    GetCharacterMovement()->MaxStepHeight = 5.0f;
+    GetCharacterMovement()->MaxStepHeight = MaxStepHeightPlayer;
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -30,21 +30,9 @@ void APlayerCharacter::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 
     if (Component != nullptr)
-    {
         PlayerVelocity = Component->GetComponentVelocity();
-    }
 
     UpdateCurrentState();
-
-    //AUTRE MÉTHODE AVEC AUTRE EFFET DE BORD
-    /*if (bIsOnLadder)
-    {
-        PlayerVelocity.X = 0.0f;
-        PlayerVelocity.Y = 0.0f;
-        GetCharacterMovement()->Velocity = PlayerVelocity;
-
-        GetCharacterMovement()->GravityScale = 0.0f;
-    }*/
 }
 
 
@@ -54,7 +42,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-    //Add input mapping context (PAS TOUT COMPRIS)
+    //Add input mapping context
     if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
     {
         //Get local player subsystem
@@ -73,6 +61,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
         Input->BindAction(JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Jump);
         Input->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::Interact);
 
+        Input->BindAction(MoveFBAction, ETriggerEvent::Completed, this, &APlayerCharacter::EndMoveFB);
     }
 }
 
@@ -85,22 +74,25 @@ void APlayerCharacter::MoveRL(const FInputActionValue& InputValue)
         AddMovementInput(FVector(1.0f, 0.0f, 0.0f) * Speed, ValueInput);
     }
 }
-
-//PLAYER INTERACT
 void APlayerCharacter::MoveFB(const FInputActionValue& InputValue)
 {
     const float ValueInput = InputValue.Get<float>();
+
     if (bIsOnLadder && Controller != nullptr && ValueInput != 0.0f)
     {
         GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
-
-        //TODO : 1ERE MÉTHODE AVEC EFFET DE BORD : éviter que le joueur monte ou descende à cause de l'inertie
+        AddMovementInput(FVector(0.0f, 0.0f, 1.0f) * Speed, ValueInput);
+    }
+}
+void APlayerCharacter::EndMoveFB(const FInputActionValue& InputValue)
+{
+    if (bIsOnLadder && Controller != nullptr)
+    {
         PlayerVelocity.X = 0.0f;
         PlayerVelocity.Y = 0.0f;
-        GetCharacterMovement()->Velocity = PlayerVelocity;
-        //GetCharacterMovement()->GravityScale = 0.0f;
+        PlayerVelocity.Z = 0.0f;
 
-        AddMovementInput(FVector(0.0f, 0.0f, 1.0f) * Speed, ValueInput);
+        GetCharacterMovement()->Velocity = PlayerVelocity;
     }
 }
 
@@ -142,18 +134,17 @@ void APlayerCharacter::UpdateCurrentState()
     {
         if (bIsOnLadder)
         {
-            CurrentStateMovement = "ladder";
+            if (PlayerVelocity.Z != 0)
+                CurrentStateMovement = "ladder";
+            else 
+                CurrentStateMovement = "onPause";
         }
         else 
         {
             if (PlayerVelocity.Z < 0)
-            {
                 CurrentStateMovement = "fall";
-            }
             else
-            {
                 CurrentStateMovement = "jumpRise";
-            }
         }
     }
 
@@ -179,7 +170,6 @@ void APlayerCharacter::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     bool bFromSweep,
     const FHitResult& SweepResult)
 {
-    // Overlap
     if (Cast<AInteractible>(OtherActor))
     {
         //APPELER LA FONCTION de l'UI
@@ -189,14 +179,10 @@ void APlayerCharacter::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
         if (OtherActor->ActorHasTag("Ladder"))
         {
             if (!OverlappingLadders.Contains(OtherActor))
-            {
                 OverlappingLadders.Add(OtherActor);
-            }
 
             if (!bIsOnLadder)
-            {
                 bIsOnLadder = true;
-            }
         }
     }
 }
@@ -206,7 +192,6 @@ void APlayerCharacter::EndOverlap(UPrimitiveComponent* OverlappedComponent,
     UPrimitiveComponent* OtherComp, 
     int32 OtherBodyIndex)
 {
-    // Overlap
     if (Cast<AInteractible>(OtherActor))
     {
         //Stopper LA FONCTION de l'UI
@@ -220,7 +205,6 @@ void APlayerCharacter::EndOverlap(UPrimitiveComponent* OverlappedComponent,
             {
                 bIsOnLadder = false;
                 GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
-                //GetCharacterMovement()->GravityScale = 1.0f;
             }
         }
     }

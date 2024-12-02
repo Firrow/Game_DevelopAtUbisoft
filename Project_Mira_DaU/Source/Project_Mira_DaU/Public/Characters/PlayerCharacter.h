@@ -31,18 +31,17 @@ private:
 	USceneComponent* Component;
 	FVector PlayerVelocity;
 	AActor* ActorIsOverlaped = nullptr;
+	bool bIsOnLadder = false;
+	float MaxStepHeightPlayer = 5.0f;
+	TArray<AActor*> OverlappingLadders;
 
 	void MoveRL(const FInputActionValue& InputValue);
 	void MoveFB(const FInputActionValue& InputValue);
+	void EndMoveFB(const FInputActionValue& InputValue);
 	void Jump(const FInputActionValue& InputValue);
 	void Interact(const FInputActionValue& InputValue);
 	void UpdateCurrentState();
 	void UpdateIsFacingLeft();
-
-
-
-	bool bIsOnLadder = false; // Indique si le joueur est sur une échelle
-	TArray<AActor*> OverlappingLadders;
 
 public:
 
@@ -74,8 +73,6 @@ public:
 	UInputAction* InteractAction;
 
 
-
-
 	
 	UPROPERTY(BlueprintReadOnly, Category = "Animation")
 	FString CurrentStateMovement = "Idle";
@@ -93,7 +90,6 @@ public:
 
 
 
-
 	UFUNCTION()
 	void BeginOverlap(UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
@@ -101,7 +97,6 @@ public:
 		int32 OtherBodyIndex,
 		bool bFromSweep,
 		const FHitResult& SweepResult);
-
 
 	UFUNCTION()
 	void EndOverlap(UPrimitiveComponent* OverlappedComp, 
