@@ -52,9 +52,11 @@ int AGameManager::GetTimeInGame(int &RealTime)
 void AGameManager::GameOverEndGame()
 {
 	//TODO : display screen (avec les causes de la mort)
+	// Si timer est encore en cours -> arrêter le timer
 }
 
 void AGameManager::VictoryEndGame()
 {
 	//TODO : display screen
+	// Stop timer
 }
