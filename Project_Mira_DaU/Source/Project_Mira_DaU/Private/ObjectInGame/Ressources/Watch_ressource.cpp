@@ -1,5 +1,7 @@
 
 #include <Characters/PlayerCharacter.h>
+#include "Game/GameManager.h"
+#include "Kismet/GameplayStatics.h"
 #include "ObjectInGame/Ressources/Watch_ressource.h"
 
 void AWatch_ressource::BeginPlay()
@@ -11,9 +13,13 @@ void AWatch_ressource::BeginPlay()
 
 void AWatch_ressource::RessourceEffect()
 {
-    //Coder l'effet de la ressource
+    AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass());
+    AGameManager* GameManager = Cast<AGameManager>(FoundActor);
 
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Je joue l'effet : WATCH"));
+    if (GameManager != nullptr)
+    {
+        GameManager->RealTimeValue -= TIME_IN_WATCH; //Update RealTime to change TimeInGame
+    }
 }
 
 
