@@ -5,6 +5,8 @@
 #include "InputMappingContext.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Game/TriggerEnding.h"
 #include "InputActionValue.h"
 
 
@@ -23,6 +25,9 @@ void APlayerCharacter::BeginPlay()
     ObjectCapsule->OnComponentEndOverlap.AddDynamic(this, &APlayerCharacter::EndOverlap);
 
     GetCharacterMovement()->MaxStepHeight = MaxStepHeightPlayer;
+
+    AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass());
+    GameManager = Cast<AGameManager>(FoundActor);
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -183,6 +188,21 @@ void APlayerCharacter::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
 
             if (!bIsOnLadder)
                 bIsOnLadder = true;
+        }
+    }
+    else 
+    {
+        if (Cast<ATriggerEnding>(OtherActor))
+        {
+            //UE_LOG(LogTemp, Display, TEXT("This is the end... My only friend, the end."));
+            if (GearsNumber == GameManager->NUMBER_OF_GEARS)
+            {
+                GameManager->VictoryEndGame();
+            }
+            else
+            {
+                GameManager->GameOverEndGame();
+            }
         }
     }
 }

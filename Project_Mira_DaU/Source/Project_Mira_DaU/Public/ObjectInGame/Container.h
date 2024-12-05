@@ -8,9 +8,8 @@
 #include "Components/SphereComponent.h"
 #include "Container.generated.h"
 
-/**
- * 
- */
+class USphereComponent;
+
 UCLASS()
 class PROJECT_MIRA_DAU_API AContainer : public AInteractible, public IInteractibleInterface
 {
@@ -31,10 +30,10 @@ public:
 	bool isEmpty = false;
 
 	UPROPERTY(EditAnywhere, Category = "CapsuleRessource")
-	class USphereComponent* RessourcePointSpawn;
+	USphereComponent* RessourcePointSpawn;
 
 	UPROPERTY(EditAnywhere, Category = "CapsuleRessource")
-	class USphereComponent* CapsuleColliderRessource;
+	USphereComponent* CapsuleColliderRessource;
 
 };
 
