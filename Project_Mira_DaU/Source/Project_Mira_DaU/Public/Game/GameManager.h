@@ -29,6 +29,7 @@ protected:
 public:	
 	int RealTimeValue;
 	int GameTimeValue;
+	int NUMBER_OF_GEARS = 3;
 
 	virtual void Tick(float DeltaTime) override;
 	void GameOverEndGame();

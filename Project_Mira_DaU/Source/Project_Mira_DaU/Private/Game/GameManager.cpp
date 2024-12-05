@@ -53,10 +53,12 @@ void AGameManager::GameOverEndGame()
 {
 	//TODO : display screen (avec les causes de la mort)
 	// Si timer est encore en cours -> arrêter le timer
+	UE_LOG(LogTemp, Display, TEXT("BAD ENDING"));
 }
 
 void AGameManager::VictoryEndGame()
 {
 	//TODO : display screen
 	// Stop timer
+	UE_LOG(LogTemp, Display, TEXT("GOOD ENDING"));
 }
