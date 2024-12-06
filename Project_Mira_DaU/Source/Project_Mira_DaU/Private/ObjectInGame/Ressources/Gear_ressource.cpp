@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include <Characters/PlayerCharacter.h>
+#include "Characters/PlayerCharacter.h"
 #include "ObjectInGame/Ressources/Gear_ressource.h"
 
 AGear_ressource::AGear_ressource()
@@ -17,9 +17,7 @@ void AGear_ressource::BeginPlay()
 
 void AGear_ressource::RessourceEffect()
 {
-    //Coder l'effet de la ressource
-
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Je joue l'effet : GEAR !!!!"));
+    PlayerCharacter->GearsNumber++;
 }
 
 
@@ -31,8 +29,8 @@ void AGear_ressource::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     const FHitResult& SweepResult)
 {
     // Overlap
-    APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
-    if (PlayerCharacter)
+    PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
+    if (PlayerCharacter != nullptr)
     {
         Super::BeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
     }
