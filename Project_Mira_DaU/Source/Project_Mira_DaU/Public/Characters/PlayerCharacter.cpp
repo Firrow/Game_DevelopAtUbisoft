@@ -109,7 +109,6 @@ void APlayerCharacter::Jump(const FInputActionValue& InputValue)
 //PLAYER INTERACT
 void APlayerCharacter::Interact(const FInputActionValue& InputValue)
 {
-
     if (ActorIsOverlaped != nullptr && ActorIsOverlaped->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass()))
     {
         IInteractibleInterface* InteractibleActor = Cast<IInteractibleInterface>(ActorIsOverlaped);
@@ -192,7 +191,7 @@ void APlayerCharacter::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     {
         if (Cast<ATriggerEnding>(OtherActor))
         {
-            //UE_LOG(LogTemp, Display, TEXT("This is the end... My only friend, the end."));
+            //UE_LOG(LogTemp, Display, TEXT("This is the end... My only friend, the end"));
             if (GearsNumber == GameManager->NUMBER_OF_GEARS)
             {
                 GameManager->VictoryEndGame();
