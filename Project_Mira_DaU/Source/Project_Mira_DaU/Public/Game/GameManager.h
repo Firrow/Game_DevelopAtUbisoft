@@ -3,6 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Blueprint/UserWidget.h"
 #include "GameManager.generated.h"
 
 UCLASS()
@@ -17,6 +18,12 @@ private:
 	FTimerHandle timer;
 	int translateSecondsIRLTimeToGameTime = SECONDS_IN_A_DAY / TOTAL_PLAYING_TIME;
 
+	UPROPERTY()
+	UUserWidget* GameOverWidget;
+
+	UPROPERTY()
+	UUserWidget* VictoryWidget;
+
 	AGameManager();
 	void TimerManager();
 	int GetTimeInGame(int& RealTime);
@@ -30,6 +37,12 @@ public:
 	int RealTimeValue;
 	int GameTimeValue;
 	int NUMBER_OF_GEARS = 3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UUserWidget> GameOverWidgetClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UUserWidget> VictoryWidgetClass;
 
 	virtual void Tick(float DeltaTime) override;
 	void GameOverEndGame();
