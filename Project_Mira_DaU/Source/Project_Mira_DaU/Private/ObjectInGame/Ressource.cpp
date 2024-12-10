@@ -11,20 +11,6 @@ ARessource::ARessource()
 	ObjectCapsule->InitCapsuleSize(1.f, 1.f);
 }
 
-// Called when the game starts or when spawned
-void ARessource::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void ARessource::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
 void ARessource::RessourceEffect()
 {
 

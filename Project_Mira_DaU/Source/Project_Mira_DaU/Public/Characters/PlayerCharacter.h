@@ -11,29 +11,39 @@
 
 #include "ObjectInGame/Interactible.h"
 #include "ObjectInGame/Container.h"
-
+#include "Game/GameManager.h"
 
 #include "PlayerCharacter.generated.h"
 
 /**
  * 
  */
+class UInputAction;
+class UInputMappingContext;
+class AGameManager;
+
 UCLASS()
 class PROJECT_MIRA_DAU_API APlayerCharacter : public APaperCharacter
 {
 	GENERATED_BODY()
 	
 private:
-	APlayerCharacter();
-
+	
+	int MAX_HEALTH = 10;
 	USceneComponent* Component;
 	FVector PlayerVelocity;
-	AActor* ActorIsOverlaped;
+	AActor* ActorIsOverlaped = nullptr;
+	bool bIsOnLadder = false;
+	float MaxStepHeightPlayer = 5.0f;
+	TArray<AActor*> OverlappingLadders;
+	AGameManager* GameManager = nullptr;
 
-	void Move(const FInputActionValue& InputValue);
+	APlayerCharacter();
+	void MoveRL(const FInputActionValue& InputValue);
+	void MoveFB(const FInputActionValue& InputValue);
+	void EndMoveFB(const FInputActionValue& InputValue);
 	void Jump(const FInputActionValue& InputValue);
 	void Interact(const FInputActionValue& InputValue);
-	void LadderMove(const FInputActionValue& InputValue);
 	void UpdateCurrentState();
 	void UpdateIsFacingLeft();
 
@@ -43,6 +53,8 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	int GearsNumber = 0;
+	int LifePlayer = MAX_HEALTH;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float Speed = 0.3f;
@@ -52,19 +64,19 @@ public:
 
 
 	UPROPERTY(EditAnywhere, Category = "Enhance Input")
-	class UInputMappingContext* InputMappingContext;
+	UInputMappingContext* InputMappingContext;
 
 	UPROPERTY(EditAnywhere, Category = "Enhance Input")
-	class UInputAction* MoveAction;
+	UInputAction* MoveRLAction;
 
 	UPROPERTY(EditAnywhere, Category = "Enhance Input")
-	class UInputAction* JumpAction;
+	UInputAction* MoveFBAction;
 
 	UPROPERTY(EditAnywhere, Category = "Enhance Input")
-	class UInputAction* InteractAction;
+	UInputAction* JumpAction;
 
 	UPROPERTY(EditAnywhere, Category = "Enhance Input")
-	class UInputAction* LadderAction;
+	UInputAction* InteractAction;
 
 
 	
@@ -84,7 +96,6 @@ public:
 
 
 
-
 	UFUNCTION()
 	void BeginOverlap(UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
@@ -94,11 +105,9 @@ public:
 		const FHitResult& SweepResult);
 
 	UFUNCTION()
-	void EndOverlap(UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult);
+	void EndOverlap(UPrimitiveComponent* OverlappedComp, 
+		AActor* OtherActor, 
+		UPrimitiveComponent* OtherComp, 
+		int32 OtherBodyIndex);
 };
 

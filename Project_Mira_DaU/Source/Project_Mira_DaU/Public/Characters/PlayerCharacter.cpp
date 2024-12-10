@@ -5,13 +5,13 @@
 #include "InputMappingContext.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Game/TriggerEnding.h"
+#include "InputActionValue.h"
 
 
 APlayerCharacter::APlayerCharacter() 
 {
-    UCapsuleComponent* ObjectCapsule = GetCapsuleComponent();
-    ObjectCapsule->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::BeginOverlap);
-
     Tags.Add(TEXT("Player"));
 }
 
@@ -19,6 +19,15 @@ void APlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
     Component = this->GetRootComponent();
+
+    UCapsuleComponent* ObjectCapsule = GetCapsuleComponent();
+    ObjectCapsule->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::BeginOverlap);
+    ObjectCapsule->OnComponentEndOverlap.AddDynamic(this, &APlayerCharacter::EndOverlap);
+
+    GetCharacterMovement()->MaxStepHeight = MaxStepHeightPlayer;
+
+    AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass());
+    GameManager = Cast<AGameManager>(FoundActor);
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -26,9 +35,7 @@ void APlayerCharacter::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 
     if (Component != nullptr)
-    {
         PlayerVelocity = Component->GetComponentVelocity();
-    }
 
     UpdateCurrentState();
 }
@@ -40,11 +47,11 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-    //Add input mapping context (PAS TOUT COMPRIS)
+    //Add input mapping context
     if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
     {
         //Get local player subsystem
-        if (class UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+        if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
         {
             //Add input context
             Subsystem->AddMappingContext(InputMappingContext, 0);
@@ -54,31 +61,43 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
     //Bind inputs to corresponding actions
     if (UEnhancedInputComponent* Input = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
     {
-        Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
+        Input->BindAction(MoveRLAction, ETriggerEvent::Triggered, this, &APlayerCharacter::MoveRL);
+        Input->BindAction(MoveFBAction, ETriggerEvent::Triggered, this, &APlayerCharacter::MoveFB);
         Input->BindAction(JumpAction, ETriggerEvent::Started, this, &APlayerCharacter::Jump);
         Input->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::Interact);
-        Input->BindAction(LadderAction, ETriggerEvent::Triggered, this, &APlayerCharacter::LadderMove);
 
+        Input->BindAction(MoveFBAction, ETriggerEvent::Completed, this, &APlayerCharacter::EndMoveFB);
     }
 }
 
 //PLAYER MOVEMENT
-void APlayerCharacter::Move(const FInputActionValue& InputValue)
+void APlayerCharacter::MoveRL(const FInputActionValue& InputValue)
 {
-    FVector2D InputVector = InputValue.Get<FVector2D>();
-
-    if (IsValid(Controller))
+    const float ValueInput = InputValue.Get<float>();
+    if (Controller != nullptr && ValueInput != 0.0f)
     {
-        //Get Forward direction
-        const FRotator Rotation = Controller->GetControlRotation();
-        const FRotator YawRotation(0, Rotation.Yaw, 0);
+        AddMovementInput(FVector(1.0f, 0.0f, 0.0f) * Speed, ValueInput);
+    }
+}
+void APlayerCharacter::MoveFB(const FInputActionValue& InputValue)
+{
+    const float ValueInput = InputValue.Get<float>();
 
-        const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X) * Speed;
-        const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y) * Speed;
+    if (bIsOnLadder && Controller != nullptr && ValueInput != 0.0f)
+    {
+        GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
+        AddMovementInput(FVector(0.0f, 0.0f, 1.0f) * Speed, ValueInput);
+    }
+}
+void APlayerCharacter::EndMoveFB(const FInputActionValue& InputValue)
+{
+    if (bIsOnLadder && Controller != nullptr)
+    {
+        PlayerVelocity.X = 0.0f;
+        PlayerVelocity.Y = 0.0f;
+        PlayerVelocity.Z = 0.0f;
 
-        //Add movement
-        AddMovementInput(ForwardDirection, InputVector.Y);
-        AddMovementInput(RightDirection, InputVector.X);
+        GetCharacterMovement()->Velocity = PlayerVelocity;
     }
 }
 
@@ -92,31 +111,14 @@ void APlayerCharacter::Jump(const FInputActionValue& InputValue)
 //PLAYER INTERACT
 void APlayerCharacter::Interact(const FInputActionValue& InputValue)
 {
-    if (ActorIsOverlaped->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass()))
+    if (ActorIsOverlaped != nullptr && ActorIsOverlaped->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass()))
     {
-        // Appeler la méthode via l'interface
         IInteractibleInterface* InteractibleActor = Cast<IInteractibleInterface>(ActorIsOverlaped);
         if (InteractibleActor)
         {
-            InteractibleActor->Effect(); // Appelle la méthode de l'interface
+            InteractibleActor->Effect();
         }
     }
-}
-
-//PLAYER INTERACT
-void APlayerCharacter::LadderMove(const FInputActionValue& InputValue)
-{
-    /*if (ActorIsOverlaped->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass()))
-    {
-        // Appeler la méthode via l'interface
-        IInteractibleInterface* InteractibleActor = Cast<IInteractibleInterface>(ActorIsOverlaped);
-        if (InteractibleActor)
-        {
-            InteractibleActor->Effect(); // Appelle la méthode de l'interface
-        }
-    }*/
-
-    //TODO : Coder le mouvement du joueur sur l'échelle (elle n'a pas d'effet)
 }
 
 
@@ -132,12 +134,22 @@ void APlayerCharacter::UpdateCurrentState()
         else
             CurrentStateMovement = "idle";
     }
-    else 
+    else
     {
-        if (PlayerVelocity.Z > 0)
-            CurrentStateMovement = "jumpRise";
-        else
-            CurrentStateMovement = "fall";
+        if (bIsOnLadder)
+        {
+            if (PlayerVelocity.Z != 0)
+                CurrentStateMovement = "ladder";
+            else 
+                CurrentStateMovement = "onPause";
+        }
+        else 
+        {
+            if (PlayerVelocity.Z < 0)
+                CurrentStateMovement = "fall";
+            else
+                CurrentStateMovement = "jumpRise";
+        }
     }
 
     UpdateIsFacingLeft();
@@ -162,25 +174,57 @@ void APlayerCharacter::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     bool bFromSweep,
     const FHitResult& SweepResult)
 {
-    // Overlap
     if (Cast<AInteractible>(OtherActor))
     {
         //APPELER LA FONCTION de l'UI
+
         ActorIsOverlaped = OtherActor;
+
+        if (OtherActor->ActorHasTag("Ladder"))
+        {
+            if (!OverlappingLadders.Contains(OtherActor))
+                OverlappingLadders.Add(OtherActor);
+
+            if (!bIsOnLadder)
+                bIsOnLadder = true;
+        }
+    }
+    else 
+    {
+        if (Cast<ATriggerEnding>(OtherActor))
+        {
+            //UE_LOG(LogTemp, Display, TEXT("This is the end... My only friend, the end"));
+            if (GearsNumber == GameManager->NUMBER_OF_GEARS)
+            {
+                GameManager->VictoryEndGame();
+            }
+            else
+            {
+                GameManager->GameOverEndGame();
+            }
+        }
     }
 }
 
 void APlayerCharacter::EndOverlap(UPrimitiveComponent* OverlappedComponent,
-    AActor* OtherActor,
-    UPrimitiveComponent* OtherComp,
-    int32 OtherBodyIndex,
-    bool bFromSweep,
-    const FHitResult& SweepResult)
+    AActor* OtherActor, 
+    UPrimitiveComponent* OtherComp, 
+    int32 OtherBodyIndex)
 {
-    // Overlap
     if (Cast<AInteractible>(OtherActor))
     {
         //Stopper LA FONCTION de l'UI
         ActorIsOverlaped = nullptr;
+
+        if (OtherActor->ActorHasTag("Ladder"))
+        {
+            OverlappingLadders.Remove(OtherActor);
+
+            if (OverlappingLadders.Num() == 0)
+            {
+                bIsOnLadder = false;
+                GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+            }
+        }
     }
 }
