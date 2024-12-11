@@ -31,9 +31,9 @@ void AGameManager::TimerManager()
 
 		RealTimeValue++;
 		GameTimeValue = GetTimeInGame(RealTimeValue);
-		UE_LOG(LogTemp, Display, TEXT("REAL TIME (second) : %i"), RealTimeValue);
+		/*UE_LOG(LogTemp, Display, TEXT("REAL TIME (second) : %i"), RealTimeValue);
 		UE_LOG(LogTemp, Display, TEXT("Time in game (second) : %i"), GameTimeValue);
-		UE_LOG(LogTemp, Display, TEXT("----------------------------------------------------------------------------"));
+		UE_LOG(LogTemp, Display, TEXT("----------------------------------------------------------------------------"));*/
 
 		if (RealTimeValue >= TOTAL_PLAYING_TIME)
 		{
