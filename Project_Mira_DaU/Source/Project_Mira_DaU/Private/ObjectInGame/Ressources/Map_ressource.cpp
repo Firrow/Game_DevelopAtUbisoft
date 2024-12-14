@@ -1,12 +1,6 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #include <Characters/PlayerCharacter.h>
 #include "ObjectInGame/Ressources/Map_ressource.h"
-
-AMap_ressource::AMap_ressource()
-{
-
-}
 
 void AMap_ressource::BeginPlay()
 {

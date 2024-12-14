@@ -1,10 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "ObjectInGame/Ressource.h"
-#include "Components/CapsuleComponent.h"
 #include "LifePotion_ressource.generated.h"
 
 /**
@@ -17,10 +15,9 @@ class PROJECT_MIRA_DAU_API ALifePotion_ressource : public ARessource
 	
 private:
 
-	virtual void RessourceEffect();
+	virtual void RessourceEffect() override;
 
 public:
-	ALifePotion_ressource();
 	virtual void BeginPlay() override;
 
 	virtual void BeginOverlap(UPrimitiveComponent* OverlappedComponent,

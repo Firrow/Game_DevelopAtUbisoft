@@ -1,12 +1,6 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #include <Characters/PlayerCharacter.h>
 #include "ObjectInGame/Ressources/Gear_ressource.h"
-
-AGear_ressource::AGear_ressource()
-{
-
-}
 
 void AGear_ressource::BeginPlay()
 {

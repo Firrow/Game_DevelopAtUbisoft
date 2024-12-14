@@ -2,11 +2,6 @@
 #include <Characters/PlayerCharacter.h>
 #include "ObjectInGame/Ressources/LifePotion_ressource.h"
 
-ALifePotion_ressource::ALifePotion_ressource()
-{
-
-}
-
 void ALifePotion_ressource::BeginPlay()
 {
     Super::BeginPlay();

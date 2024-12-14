@@ -2,12 +2,6 @@
 #include <Characters/PlayerCharacter.h>
 #include "ObjectInGame/Ressources/Watch_ressource.h"
 
-
-AWatch_ressource::AWatch_ressource()
-{
-
-}
-
 void AWatch_ressource::BeginPlay()
 {
     Super::BeginPlay();

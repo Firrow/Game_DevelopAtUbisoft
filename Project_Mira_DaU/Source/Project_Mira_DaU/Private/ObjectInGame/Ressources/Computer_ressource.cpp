@@ -2,11 +2,6 @@
 #include <Characters/PlayerCharacter.h>
 #include "ObjectInGame/Ressources/Computer_ressource.h"
 
-AComputer_ressource::AComputer_ressource()
-{
-
-}
-
 void AComputer_ressource::BeginPlay()
 {
     Super::BeginPlay();
