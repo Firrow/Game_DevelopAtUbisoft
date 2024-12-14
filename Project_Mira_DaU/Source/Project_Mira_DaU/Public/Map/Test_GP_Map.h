@@ -32,9 +32,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "TileMap")
 	UPaperTileSet* TileSet;
 
-	/*UPROPERTY(EditAnywhere, Category = "TileMap")
-	UPaperTileMap* MyTileMap;*/
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Settings")
 	UPaperTileMapComponent* MyTileMapComponent;
 
