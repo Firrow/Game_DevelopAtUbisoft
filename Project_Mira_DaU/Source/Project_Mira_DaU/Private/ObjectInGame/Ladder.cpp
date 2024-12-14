@@ -1,4 +1,5 @@
 
+#include "Components/BoxComponent.h"
 #include "ObjectInGame/Ladder.h"
 
 ALadder::ALadder()

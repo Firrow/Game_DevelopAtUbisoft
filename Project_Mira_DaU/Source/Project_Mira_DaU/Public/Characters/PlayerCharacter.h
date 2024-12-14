@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -7,16 +6,13 @@
 #include "PaperFlipbook.h"
 #include "InputActionValue.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Components/CapsuleComponent.h"
 
 #include "ObjectInGame/Interactible.h"
 #include "ObjectInGame/Container.h"
 
 #include "PlayerCharacter.generated.h"
 
-/**
- * 
- */
+
 class UInputAction;
 class UInputMappingContext;
 
@@ -26,7 +22,6 @@ class PROJECT_MIRA_DAU_API APlayerCharacter : public APaperCharacter
 	GENERATED_BODY()
 	
 private:
-	APlayerCharacter();
 
 	USceneComponent* Component;
 	FVector PlayerVelocity;
@@ -35,6 +30,7 @@ private:
 	float MaxStepHeightPlayer = 5.0f;
 	TArray<AActor*> OverlappingLadders;
 
+	APlayerCharacter();
 	void MoveRL(const FInputActionValue& InputValue);
 	void MoveFB(const FInputActionValue& InputValue);
 	void EndMoveFB(const FInputActionValue& InputValue);
@@ -44,11 +40,6 @@ private:
 	void UpdateIsFacingLeft();
 
 public:
-
-	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaSeconds) override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float Speed = 0.3f;
@@ -73,13 +64,11 @@ public:
 	UInputAction* InteractAction;
 
 
-	
 	UPROPERTY(BlueprintReadOnly, Category = "Animation")
 	FString CurrentStateMovement = "Idle";
 
 	UPROPERTY(BlueprintReadOnly, Category = "Animation")
 	bool isFacingLeft = false;
-
 
 
 	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
@@ -89,6 +78,10 @@ public:
 	bool isArmed;
 
 
+
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION()
 	void BeginOverlap(UPrimitiveComponent* OverlappedComponent,

@@ -15,14 +15,12 @@ class PROJECT_MIRA_DAU_API ARessource : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
-	ARessource();
-
 protected:
-	virtual void RessourceEffect();
 
 	UPROPERTY(VisibleAnywhere, Category = "Capsule")
 	UCapsuleComponent* ObjectCapsule;
+
+	virtual void RessourceEffect();
 
 public:	
 
@@ -33,4 +31,6 @@ public:
 		int32 OtherBodyIndex,
 		bool bFromSweep,
 		const FHitResult& SweepResult);
+
+	ARessource();
 };

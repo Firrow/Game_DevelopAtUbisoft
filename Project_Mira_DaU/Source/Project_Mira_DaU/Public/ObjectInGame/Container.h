@@ -5,12 +5,10 @@
 #include "ObjectInGame/Interactible.h"
 #include "ObjectInGame/Ressource.h"
 #include "ObjectInGame/Interface/InteractibleInterface.h"
-#include "Components/SphereComponent.h"
 #include "Container.generated.h"
 
-/**
- * 
- */
+class USphereComponent;
+
 UCLASS()
 class PROJECT_MIRA_DAU_API AContainer : public AInteractible, public IInteractibleInterface
 {
@@ -22,8 +20,6 @@ private:
 
 public:
 
-	AContainer();
-
 	UPROPERTY(EditAnywhere, Category = "Global Informations")
 	TArray<TSubclassOf<ARessource>> RessourceInside;
 
@@ -31,10 +27,11 @@ public:
 	bool isEmpty = false;
 
 	UPROPERTY(EditAnywhere, Category = "CapsuleRessource")
-	class USphereComponent* RessourcePointSpawn;
+	USphereComponent* RessourcePointSpawn;
 
 	UPROPERTY(EditAnywhere, Category = "CapsuleRessource")
-	class USphereComponent* CapsuleColliderRessource;
+	USphereComponent* CapsuleColliderRessource;
 
+	AContainer();
 };
 
