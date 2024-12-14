@@ -9,12 +9,14 @@
 
 #include "ObjectInGame/Interactible.h"
 #include "ObjectInGame/Container.h"
+#include "Game/GameManager.h"
 
 #include "PlayerCharacter.generated.h"
 
 
 class UInputAction;
 class UInputMappingContext;
+class AGameManager;
 
 UCLASS()
 class PROJECT_MIRA_DAU_API APlayerCharacter : public APaperCharacter
@@ -22,13 +24,15 @@ class PROJECT_MIRA_DAU_API APlayerCharacter : public APaperCharacter
 	GENERATED_BODY()
 	
 private:
-
+	
+	int MAX_HEALTH = 10;
 	USceneComponent* Component;
 	FVector PlayerVelocity;
 	AActor* ActorIsOverlaped = nullptr;
 	bool bIsOnLadder = false;
 	float MaxStepHeightPlayer = 5.0f;
 	TArray<AActor*> OverlappingLadders;
+	AGameManager* GameManager = nullptr;
 
 	APlayerCharacter();
 	void MoveRL(const FInputActionValue& InputValue);
@@ -40,6 +44,9 @@ private:
 	void UpdateIsFacingLeft();
 
 public:
+
+	int GearsNumber = 0;
+	int LifePlayer = MAX_HEALTH;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float Speed = 0.3f;
