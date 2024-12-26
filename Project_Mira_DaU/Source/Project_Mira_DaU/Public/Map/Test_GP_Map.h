@@ -41,6 +41,8 @@ private:
 	bool LeftNeighborIsNull(UPaperTileLayer& layer, int x, int y);
 	bool CurrentTileIsOnGround(UPaperTileLayer& layer, int x, int y);
 	bool BuildBuildingOrNot(int const probability);
+	void CreateBuilding(int const x, int const y, UPaperTileLayer& layer);
+	void PutTileOnGrid(int const x, int const y, int32 tile, UPaperTileLayer& layer);
 
 protected:
 	virtual void BeginPlay() override;
