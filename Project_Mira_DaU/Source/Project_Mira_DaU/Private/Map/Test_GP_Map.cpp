@@ -7,7 +7,7 @@
 #include "Map/Test_GP_Map.h"
 
 
-// ETAPE 1 : Initialisée la TileMapComponent et les valeurs qui seront utilisées
+// ETAPE 1 : Initialiser la TileMapComponent et les valeurs qui seront utilisées
 ATest_GP_Map::ATest_GP_Map()
 {
 	GridWidth = 50;
@@ -46,7 +46,7 @@ void ATest_GP_Map::GenerateWorld()
         SEED.value = FMath::Rand();
         Stream.Initialize(SEED.value);
     }
-    else 
+    else
     {
         Stream.Initialize(SEED.value);
     }
@@ -62,7 +62,6 @@ void ATest_GP_Map::GenerateWorld()
     {
         for (int32 x = 0; x < GridWidth; x++)
         {
-            //Put ground on 
             if (y == GridHeight - 1)
             {
                 PutTileOnGrid(x, y, (int32)ETiles::GROUND, *NewLayer);
@@ -72,7 +71,6 @@ void ATest_GP_Map::GenerateWorld()
                 if (CurrentTileIsOnGround(*NewLayer, x, y))
                 {
                     CreateBuilding(x, y, BuildingWidth, *NewLayer);
-                    
                 }
                 else
                 {
@@ -84,11 +82,6 @@ void ATest_GP_Map::GenerateWorld()
 
     // ETAPE 6 : MAJ des collisions des tuiles
     MyTileMapComponent->RebuildCollision();
-}
-
-bool ATest_GP_Map::LeftNeighborIsNull(UPaperTileLayer& layer, int x, int y)
-{
-    return layer.GetCell(x - 1, y).PackedTileIndex == INDEX_NONE || layer.GetCell(x, y).PackedTileIndex == NULL;
 }
 
 bool ATest_GP_Map::CurrentTileIsOnGround(UPaperTileLayer& layer,  int x, int y)
@@ -107,7 +100,7 @@ void ATest_GP_Map::CreateBuilding(int const x, int const y, int& width, UPaperTi
 {
     if (width == 0)
     {
-        // Commencer nouveau batiment
+        // Commencer nouveau batiment : poser une tuile début de bâtiment
         if (GridWidth - x >= MIN_WIDTH_BUILDING && BuildBuildingOrNot(PROBA_START_BUILDING))
         {
             PutTileOnGrid(x, y, (int32)ETiles::STARTBUILDING, layer);
@@ -119,8 +112,9 @@ void ATest_GP_Map::CreateBuilding(int const x, int const y, int& width, UPaperTi
     {
         width++;
 
-        // Si je suis encore dans la grille et que soit je suis en dessous de la taille minimal requise ou que je suis inférieur à la 
-        // taille max et que la probabilité de continuer le batiment demande de continuer le batiment
+        // Si je suis encore dans la grille et que 
+        // soit je suis en dessous de la taille minimal requise 
+        // soit que je suis inférieur à la taille max et que la probabilité dit de continuer le bâtiment
         if (x < GridWidth - 1
             && (width < MIN_WIDTH_BUILDING ||
                (width < MAX_WIDTH_BUILDING && BuildBuildingOrNot(PROBA_EXTEND_BUILD_WIDTH)))
@@ -144,7 +138,5 @@ void ATest_GP_Map::PutTileOnGrid(int const x, int const y, int32 tile, UPaperTil
     TileInfo.TileSet = TileSet;
     TileInfo.PackedTileIndex = tile;
 
-    // Placement de la tuile
     MyTileMapComponent->SetTile(x, y, layer.GetLayerIndex(), TileInfo);
-
 }

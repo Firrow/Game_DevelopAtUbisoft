@@ -49,7 +49,7 @@ private:
 	ATest_GP_Map();
 	void GenerateWorld();
 
-	bool LeftNeighborIsNull(UPaperTileLayer& layer, int x, int y);
+	bool IsLeftNeighborNull(UPaperTileLayer& layer, int x, int y);
 	bool CurrentTileIsOnGround(UPaperTileLayer& layer, int x, int y);
 	bool BuildBuildingOrNot(int const probability);
 	void CreateBuilding(int const x, int const y, int& width, UPaperTileLayer& layer);
