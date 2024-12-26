@@ -22,6 +22,17 @@ enum class ETiles : uint8 {
 	TEMP = 48 UMETA(DisplayName = "TEMP")
 };
 
+USTRUCT(BlueprintType) 
+struct FSeed
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings", meta = (EditCondition = "!randomSeed"))
+	int32 value;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
+	bool randomSeed;
+};
+
 
 UCLASS()
 class PROJECT_MIRA_DAU_API ATest_GP_Map : public AActor
@@ -33,7 +44,7 @@ private:
 	int GridWidth;
 	int GridHeight;
 	float TileSize;
-	int BuildingWidth = 0;
+	FRandomStream Stream; //Ma map étant une classe de generation, je prefere le mettre en attribut (Stream <=> RNG)
 
 	ATest_GP_Map();
 	void GenerateWorld();
@@ -41,7 +52,7 @@ private:
 	bool LeftNeighborIsNull(UPaperTileLayer& layer, int x, int y);
 	bool CurrentTileIsOnGround(UPaperTileLayer& layer, int x, int y);
 	bool BuildBuildingOrNot(int const probability);
-	void CreateBuilding(int const x, int const y, UPaperTileLayer& layer);
+	void CreateBuilding(int const x, int const y, int& width, UPaperTileLayer& layer);
 	void PutTileOnGrid(int const x, int const y, int32 tile, UPaperTileLayer& layer);
 
 protected:
@@ -54,6 +65,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Settings")
 	UPaperTileMapComponent* MyTileMapComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
+	FSeed SEED = { 0, false };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
 	int PROBA_START_BUILDING = 65;

@@ -41,9 +41,21 @@ void ATest_GP_Map::GenerateWorld()
     TileMap->SeparationPerLayer = 0.0f;
     MyTileMapComponent->SetTileMap(TileMap);
 
+    if (SEED.randomSeed)
+    {
+        SEED.value = FMath::Rand();
+        Stream.Initialize(SEED.value);
+    }
+    else 
+    {
+        Stream.Initialize(SEED.value);
+    }
+    GEngine->AddOnScreenDebugMessage(-1, 50000.f, FColor::Yellow, FString::Printf(TEXT("SEED : %d"), SEED.value));
 
     // ETAPE 4 : Création d'un nouveau calque pour poser les tuiles
     UPaperTileLayer* NewLayer = TileMap->AddNewLayer();
+
+    int BuildingWidth = 0;
 
     // ETAPE 5 : Placement des tuiles dans la grille pour le test
     for (int32 y = GridHeight - 1; y >= 0; y--)
@@ -59,7 +71,8 @@ void ATest_GP_Map::GenerateWorld()
             {
                 if (CurrentTileIsOnGround(*NewLayer, x, y))
                 {
-                    CreateBuilding(x, y, *NewLayer);
+                    CreateBuilding(x, y, BuildingWidth, *NewLayer);
+                    
                 }
                 else
                 {
@@ -87,30 +100,30 @@ bool ATest_GP_Map::CurrentTileIsOnGround(UPaperTileLayer& layer,  int x, int y)
 
 bool ATest_GP_Map::BuildBuildingOrNot(int const probability)
 {
-    return FMath::RandRange(0, 99) < probability;
+    return Stream.RandRange(0, 99) < probability;
 }
 
-void ATest_GP_Map::CreateBuilding(int const x, int const y, UPaperTileLayer& layer)
+void ATest_GP_Map::CreateBuilding(int const x, int const y, int& width, UPaperTileLayer& layer)
 {
-    if (BuildingWidth == 0)
+    if (width == 0)
     {
         // Commencer nouveau batiment
         if (GridWidth - x >= MIN_WIDTH_BUILDING && BuildBuildingOrNot(PROBA_START_BUILDING))
         {
             PutTileOnGrid(x, y, (int32)ETiles::STARTBUILDING, layer);
 
-            BuildingWidth = 1;
+            width = 1;
         }
     }
     else
     {
-        BuildingWidth++;
+        width++;
 
         // Si je suis encore dans la grille et que soit je suis en dessous de la taille minimal requise ou que je suis inférieur à la 
         // taille max et que la probabilité de continuer le batiment demande de continuer le batiment
-        if (x < GridWidth
-            && (BuildingWidth < MIN_WIDTH_BUILDING ||
-                (BuildingWidth < MAX_WIDTH_BUILDING && BuildBuildingOrNot(PROBA_EXTEND_BUILD_WIDTH)))
+        if (x < GridWidth - 1
+            && (width < MIN_WIDTH_BUILDING ||
+               (width < MAX_WIDTH_BUILDING && BuildBuildingOrNot(PROBA_EXTEND_BUILD_WIDTH)))
             )
         {
             PutTileOnGrid(x, y, (int32)ETiles::BUILDINGWALL, layer);
@@ -119,12 +132,12 @@ void ATest_GP_Map::CreateBuilding(int const x, int const y, UPaperTileLayer& lay
         {
             PutTileOnGrid(x, y, (int32)ETiles::ENDBUILDING, layer);
 
-            BuildingWidth = 0;
+            width = 0;
         }
     }
 }
 
-// Eh you là-bas ! Near the bétoneuse ! Put the ciment on the poteau please !
+// Eh you là-bas ! Near the betonneuse ! Put the ciment on the poteau please !
 void ATest_GP_Map::PutTileOnGrid(int const x, int const y, int32 tile, UPaperTileLayer& layer)
 {
     FPaperTileInfo TileInfo;
