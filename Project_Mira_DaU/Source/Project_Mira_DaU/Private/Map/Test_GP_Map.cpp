@@ -50,131 +50,22 @@ void ATest_GP_Map::GenerateWorld()
     {
         for (int32 x = 0; x < GridWidth; x++)
         {
-            UE_LOG(LogTemp, Warning, TEXT("Longueur batiment actuel : %i"), BuildingWidth);
-
             //Put ground on 
             if (y == GridHeight - 1)
             {
-                FPaperTileInfo TileInfo;
-                TileInfo.TileSet = TileSet;
-                TileInfo.PackedTileIndex = (int32)ETiles::GROUND;
-
-                // Placement de la tuile
-                MyTileMapComponent->SetTile(x, y, NewLayer->GetLayerIndex(), TileInfo);
+                PutTileOnGrid(x, y, (int32)ETiles::GROUND, *NewLayer);
             }
             else 
             {
                 if (CurrentTileIsOnGround(*NewLayer, x, y))
                 {
-                    if (LeftNeighborIsNull(*NewLayer, x, y))
-                    {
-                        // (Commencer nouveau batiment)
-                        // Tirer au hasard un nombre et comparer avec la constante
-                        if (GridWidth - x >= MIN_WIDTH_BUILDING && BuildBuildingOrNot(PROBA_START_BUILDING))
-                        {
-                            UE_LOG(LogTemp, Warning, TEXT(" Je creer un batiment"));
-
-                            FPaperTileInfo TileInfo;
-                            TileInfo.TileSet = TileSet;
-                            TileInfo.PackedTileIndex = (int32)ETiles::STARTBUILDING;
-
-                            // Placement de la tuile
-                            MyTileMapComponent->SetTile(x, y, NewLayer->GetLayerIndex(), TileInfo);
-
-                            BuildingWidth = 1;
-                        }
-                    }
-                    else
-                    {
-                        // Si varLongueurBat <= tailleMin : pauser tuile intérieur
-                        if (BuildingWidth <= MIN_WIDTH_BUILDING)
-                        {
-                            UE_LOG(LogTemp, Warning, TEXT(" Je continue le batiment car taille min pas atteinte"));
-
-                            FPaperTileInfo TileInfo;
-                            TileInfo.TileSet = TileSet;
-                            if (x == GridWidth - 1)
-                            {
-                                TileInfo.PackedTileIndex = (int32)ETiles::ENDBUILDING;
-                            }
-                            else 
-                            {
-                                TileInfo.PackedTileIndex = (int32)ETiles::BUILDINGWALL;
-                            }
-
-                            // Placement de la tuile
-                            MyTileMapComponent->SetTile(x, y, NewLayer->GetLayerIndex(), TileInfo);
-
-                            BuildingWidth++;
-                        }
-                        else
-                        {
-                            if (BuildingWidth <= MAX_WIDTH_BUILDING && BuildBuildingOrNot(PROBA_EXTEND_BUILD_WIDTH))
-                            {
-                                UE_LOG(LogTemp, Warning, TEXT(" Je continue le batiment car hasard"));
-
-                                // pauser tuile intérieur
-                                FPaperTileInfo TileInfo;
-                                TileInfo.TileSet = TileSet;
-                                if (x == GridWidth - 1)
-                                {
-                                    TileInfo.PackedTileIndex = (int32)ETiles::ENDBUILDING;
-                                }
-                                else
-                                {
-                                    TileInfo.PackedTileIndex = (int32)ETiles::BUILDINGWALL;
-                                }
-
-                                // Placement de la tuile
-                                MyTileMapComponent->SetTile(x, y, NewLayer->GetLayerIndex(), TileInfo);
-
-                                BuildingWidth++;
-                            }
-                            else
-                            {
-                                UE_LOG(LogTemp, Warning, TEXT(" Je stoppe le batiment car hasard"));
-                                // Si non : 1) changer tuile précédente par tuile qui ferme batiment
-                                //          2) tirer chiffre démarrer nouveau batiment
-                                FPaperTileInfo TileInfo;
-                                TileInfo.TileSet = TileSet;
-                                TileInfo.PackedTileIndex = (int32)ETiles::ENDBUILDING;
-
-                                // Changement de la tuile précédente
-                                MyTileMapComponent->SetTile(x - 1, y, NewLayer->GetLayerIndex(), TileInfo);
-
-                                BuildingWidth = 0;
-
-                                if (GridWidth - x >= MIN_WIDTH_BUILDING && BuildBuildingOrNot(PROBA_START_BUILDING))
-                                {
-                                    UE_LOG(LogTemp, Warning, TEXT(" Je creer un batiment"));
-
-                                    FPaperTileInfo TileInfoNewBuild;
-                                    TileInfoNewBuild.TileSet = TileSet;
-                                    TileInfoNewBuild.PackedTileIndex = (int32)ETiles::STARTBUILDING;
-
-                                    // Placement de la tuile
-                                    MyTileMapComponent->SetTile(x, y, NewLayer->GetLayerIndex(), TileInfoNewBuild);
-
-                                    BuildingWidth = 1;
-                                }
-                            }
-                        }
-                    }
+                    CreateBuilding(x, y, *NewLayer);
                 }
                 else
                 {
-                    //QUAND POSER SOL ? (VOIR EN Y)
-
-                    FPaperTileInfo TileInfo;
-                    TileInfo.TileSet = TileSet;
-                    TileInfo.PackedTileIndex = (int32)ETiles::TEMP;
-
-                    // Placement de la tuile
-                    MyTileMapComponent->SetTile(x, y, NewLayer->GetLayerIndex(), TileInfo);
+                    PutTileOnGrid(x, y, (int32)ETiles::TEMP, *NewLayer);
                 }
             }
-
-            //UE_LOG(LogTemp, Warning, TEXT("X : %i - Y : %i"), x, y);
         }
     }
 
@@ -184,30 +75,63 @@ void ATest_GP_Map::GenerateWorld()
 
 bool ATest_GP_Map::LeftNeighborIsNull(UPaperTileLayer& layer, int x, int y)
 {
-    bool res = layer.GetCell(x - 1, y).PackedTileIndex == INDEX_NONE || layer.GetCell(x, y).PackedTileIndex == NULL ? true : false;
-    UE_LOG(LogTemp, Warning, TEXT("res : %s"), res == true ? TEXT("true") : TEXT("false"));
-    return res;
+    return layer.GetCell(x - 1, y).PackedTileIndex == INDEX_NONE || layer.GetCell(x, y).PackedTileIndex == NULL;
 }
 
 bool ATest_GP_Map::CurrentTileIsOnGround(UPaperTileLayer& layer,  int x, int y)
 {
     FPaperTileInfo TileInfoCell = layer.GetCell(x, y + 1);
 
-    if (!TileInfoCell.TileSet)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("TileSet is null for tile at (%d, %d)"), x, y);
-        return false;
-    }
-
-    //UE_LOG(LogTemp, Warning, TEXT("UserDataName : %s"), *TileInfoCell.TileSet->GetTileUserData(TileInfoCell.PackedTileIndex).ToString());
-
-    FString UserData = TileInfoCell.TileSet->GetTileUserData(TileInfoCell.PackedTileIndex).ToString();
-    return UserData == TEXT("Ground");
+    return TileInfoCell.TileSet && TileInfoCell.TileSet->GetTileUserData(TileInfoCell.PackedTileIndex).ToString() == TEXT("Ground");
 }
 
 bool ATest_GP_Map::BuildBuildingOrNot(int const probability)
 {
-    int res = FMath::RandRange(0, 99);
-    //UE_LOG(LogTemp, Warning, TEXT("res : %i"), res);
-    return  res <= probability ? true : false;
+    return FMath::RandRange(0, 99) < probability;
+}
+
+void ATest_GP_Map::CreateBuilding(int const x, int const y, UPaperTileLayer& layer)
+{
+    if (BuildingWidth == 0)
+    {
+        // Commencer nouveau batiment
+        if (GridWidth - x >= MIN_WIDTH_BUILDING && BuildBuildingOrNot(PROBA_START_BUILDING))
+        {
+            PutTileOnGrid(x, y, (int32)ETiles::STARTBUILDING, layer);
+
+            BuildingWidth = 1;
+        }
+    }
+    else
+    {
+        BuildingWidth++;
+
+        // Si je suis encore dans la grille et que soit je suis en dessous de la taille minimal requise ou que je suis inférieur à la 
+        // taille max et que la probabilité de continuer le batiment demande de continuer le batiment
+        if (x < GridWidth
+            && (BuildingWidth < MIN_WIDTH_BUILDING ||
+                (BuildingWidth < MAX_WIDTH_BUILDING && BuildBuildingOrNot(PROBA_EXTEND_BUILD_WIDTH)))
+            )
+        {
+            PutTileOnGrid(x, y, (int32)ETiles::BUILDINGWALL, layer);
+        }
+        else
+        {
+            PutTileOnGrid(x, y, (int32)ETiles::ENDBUILDING, layer);
+
+            BuildingWidth = 0;
+        }
+    }
+}
+
+// Eh you là-bas ! Near the bétoneuse ! Put the ciment on the poteau please !
+void ATest_GP_Map::PutTileOnGrid(int const x, int const y, int32 tile, UPaperTileLayer& layer)
+{
+    FPaperTileInfo TileInfo;
+    TileInfo.TileSet = TileSet;
+    TileInfo.PackedTileIndex = tile;
+
+    // Placement de la tuile
+    MyTileMapComponent->SetTile(x, y, layer.GetLayerIndex(), TileInfo);
+
 }
