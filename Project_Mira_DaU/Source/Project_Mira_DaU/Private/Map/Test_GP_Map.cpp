@@ -55,11 +55,12 @@ void ATest_GP_Map::GenerateWorld()
     // ETAPE 4 : Création d'un nouveau calque pour poser les tuiles
     UPaperTileLayer* NewLayer = TileMap->AddNewLayer();
 
-    int BuildingWidth = 0;
-
     // ETAPE 5 : Placement des tuiles dans la grille pour le test
     for (int32 y = GridHeight - 1; y >= 0; y--)
     {
+        int BuildingWidth = 0;
+        int availableFloorSpace = 0;
+
         for (int32 x = 0; x < GridWidth; x++)
         {
             if (y == GridHeight - 1)
@@ -68,13 +69,53 @@ void ATest_GP_Map::GenerateWorld()
             }
             else 
             {
-                if (CurrentTileIsOnGround(*NewLayer, x, y))
+                if (IsTileUserDataEqual(*NewLayer, x, y + 1, TEXT("GROUND")))
                 {
-                    CreateBuilding(x, y, BuildingWidth, *NewLayer);
+                    CreateBuilding(x, y, BuildingWidth, availableFloorSpace, *NewLayer);
                 }
                 else
-                {
-                    PutTileOnGrid(x, y, (int32)ETiles::TEMP, *NewLayer);
+                {   
+                    // Construction en Hauteur (on est pas sur le sol)
+                    //START (ou GROUND)
+                    if (IsTileUserDataEqual(*NewLayer, x, y + 1, TEXT("STARTBUILDING")))
+                    {
+                        // On est au début d'un autre batiment
+                        if (CalculHeightValue(*NewLayer, x, y, 0) <= MIN_HEIGHT_BUILDING)
+                        {
+                            PutTileOnGrid(x, y, (int32)ETiles::STARTBUILDING, *NewLayer);
+                        }
+                        else if (CalculHeightValue(*NewLayer, x, y, 0) == MAX_HEIGHT_BUILDING)
+                        {
+                            PutTileOnGrid(x, y, (int32)ETiles::GROUND, *NewLayer);
+                        }
+                        else
+                        {
+                            // probabilité de continuer le bâtiment en hauteur
+                            if (BuildBuildingOrNot(PROBA_EXTEND_BUILD_HEIGHT))
+                            {
+                                PutTileOnGrid(x, y, (int32)ETiles::STARTBUILDING, *NewLayer);
+                            }
+                            else
+                            {
+                                PutTileOnGrid(x, y, (int32)ETiles::GROUND, *NewLayer);
+                            }
+                        }
+                    }
+                    //GROUND
+                    else if (IsTileUserDataEqual(*NewLayer, x - 1, y, TEXT("GROUND")) && (IsTileUserDataEqual(*NewLayer, x, y + 1, TEXT("BUILDINGWALL")) || IsTileUserDataEqual(*NewLayer, x, y + 1, TEXT("ENDBUILDING"))))
+                    {
+                        PutTileOnGrid(x, y, (int32)ETiles::GROUND, *NewLayer);
+                    }
+                    //END
+                    else if (IsTileUserDataEqual(*NewLayer, x, y + 1, TEXT("ENDBUILDING")))
+                    {
+                        PutTileOnGrid(x, y, (int32)ETiles::ENDBUILDING, *NewLayer);
+                    }
+                    //WALL
+                    else if (IsTileUserDataEqual(*NewLayer, x, y + 1, TEXT("BUILDINGWALL")))
+                    {
+                        PutTileOnGrid(x, y, (int32)ETiles::BUILDINGWALL, *NewLayer);
+                    }
                 }
             }
         }
@@ -84,38 +125,72 @@ void ATest_GP_Map::GenerateWorld()
     MyTileMapComponent->RebuildCollision();
 }
 
-bool ATest_GP_Map::CurrentTileIsOnGround(UPaperTileLayer& layer,  int x, int y)
+bool ATest_GP_Map::IsTileUserDataEqual(UPaperTileLayer& layer,  int x, int y, FString tileType)
 {
-    FPaperTileInfo TileInfoCell = layer.GetCell(x, y + 1);
+    FPaperTileInfo TileInfoCell = layer.GetCell(x, y);
 
-    return TileInfoCell.TileSet && TileInfoCell.TileSet->GetTileUserData(TileInfoCell.PackedTileIndex).ToString() == TEXT("Ground");
+    return TileInfoCell.TileSet && TileInfoCell.TileSet->GetTileUserData(TileInfoCell.PackedTileIndex).ToString() == tileType;
 }
+ 
+/*bool ATest_GP_Map::IsTileNull(UPaperTileLayer& layer, int x, int y) // DOESN'T WORKS
+{
+    FPaperTileInfo TileInfoCell = layer.GetCell(x, y);
+
+    return TileInfoCell.PackedTileIndex == INDEX_NONE || TileInfoCell.PackedTileIndex == NULL;
+}*/
+
+/*bool ATest_GP_Map::PreviousTileIsAWall(UPaperTileLayer& layer, int x, int y)
+{
+    FPaperTileInfo TileInfoCell = layer.GetCell(x - 1, y);
+
+    if (TileInfoCell.PackedTileIndex != INDEX_NONE && TileInfoCell.PackedTileIndex != NULL)
+    {
+        // Sur ce layer, les tuiles sont soit des sols, soit des murs, soit vide (et null en dehors de la grille)
+        return TileInfoCell.TileSet->GetTileUserData(TileInfoCell.PackedTileIndex).ToString() != TEXT("Ground");
+    }
+}*/
+
+/*bool ATest_GP_Map::CompareTwoTilesUserData(UPaperTileLayer& layer, int x1, int y1, int x2, int y2)
+{
+    FPaperTileInfo TileInfoCell1 = layer.GetCell(x1, y1);
+    FPaperTileInfo TileInfoCell2 = layer.GetCell(x2, y2);
+
+    if (TileInfoCell1.PackedTileIndex && TileInfoCell2.PackedTileIndex)
+    {
+        return TileInfoCell1.TileSet->GetTileUserData(TileInfoCell1.PackedTileIndex).ToString() == TileInfoCell2.TileSet->GetTileUserData(TileInfoCell2.PackedTileIndex).ToString();
+    }
+    return false;
+}*/
 
 bool ATest_GP_Map::BuildBuildingOrNot(int const probability)
 {
     return Stream.RandRange(0, 99) < probability;
 }
 
-void ATest_GP_Map::CreateBuilding(int const x, int const y, int& width, UPaperTileLayer& layer)
+void ATest_GP_Map::CreateBuilding(int const x, int const y, int& width, int& availableFloorSpace, UPaperTileLayer& layer)
 {
     if (width == 0)
     {
+        availableFloorSpace = CalculWidthValue(layer, x, y, 0);
+
         // Commencer nouveau batiment : poser une tuile début de bâtiment
-        if (GridWidth - x >= MIN_WIDTH_BUILDING && BuildBuildingOrNot(PROBA_START_BUILDING))
+        if (availableFloorSpace >= MIN_WIDTH_BUILDING && BuildBuildingOrNot(PROBA_START_BUILDING))
         {
             PutTileOnGrid(x, y, (int32)ETiles::STARTBUILDING, layer);
 
             width = 1;
+            availableFloorSpace--;
         }
     }
     else
     {
         width++;
+        availableFloorSpace--;
 
         // Si je suis encore dans la grille et que 
         // soit je suis en dessous de la taille minimal requise 
         // soit que je suis inférieur à la taille max et que la probabilité dit de continuer le bâtiment
-        if (x < GridWidth - 1
+        if (availableFloorSpace > 0
             && (width < MIN_WIDTH_BUILDING ||
                (width < MAX_WIDTH_BUILDING && BuildBuildingOrNot(PROBA_EXTEND_BUILD_WIDTH)))
             )
@@ -139,4 +214,32 @@ void ATest_GP_Map::PutTileOnGrid(int const x, int const y, int32 tile, UPaperTil
     TileInfo.PackedTileIndex = tile;
 
     MyTileMapComponent->SetTile(x, y, layer.GetLayerIndex(), TileInfo);
+}
+
+int ATest_GP_Map::CalculHeightValue(UPaperTileLayer& layer, int x, int y, int heightValue = 0)
+{
+    if (IsTileUserDataEqual(layer, x, y + 1, TEXT("GROUND")))
+    {
+        return heightValue;
+    }
+    else
+    {
+        heightValue++;
+    }
+
+    return CalculHeightValue(layer, x, y + 1, heightValue);
+}
+
+int ATest_GP_Map::CalculWidthValue(UPaperTileLayer& layer, int x, int y, int widthValue = 0)
+{
+    if(!IsTileUserDataEqual(layer, x, y + 1, TEXT("GROUND")))
+    {
+        return widthValue;
+    }
+    else
+    {
+        widthValue++;
+    }
+
+    return CalculWidthValue(layer, x + 1, y, widthValue);
 }
