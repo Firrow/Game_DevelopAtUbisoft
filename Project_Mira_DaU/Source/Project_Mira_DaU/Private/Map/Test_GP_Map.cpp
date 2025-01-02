@@ -4,6 +4,7 @@
 #include "PaperTileSet.h"
 #include "PaperTileLayer.h"
 #include "Math/UnrealMathUtility.h"
+#include "Templates/Function.h"
 #include "Map/Test_GP_Map.h"
 
 
@@ -82,11 +83,16 @@ void ATest_GP_Map::GenerateWorld()
                     if (IsTileUserDataEqual(*NewLayer, x, y + 1, TEXT("STARTBUILDING")))
                     {
                         // On est au début d'un autre batiment
-                        if (CalculHeightValue(*NewLayer, x, y, 0) <= MIN_HEIGHT_BUILDING)
+                        int numberOfTiles = CountTiles(
+                            *NewLayer, x, y,
+                            [this](UPaperTileLayer& layer, int x, int y) -> bool { return !IsTileUserDataEqual(layer, x, y, TEXT("GROUND")); },
+                            [](int& x, int& y) { y++; });
+
+                        if (numberOfTiles <= MIN_HEIGHT_BUILDING)
                         {
                             PutTileOnGrid(x, y, (int32)ETiles::STARTBUILDING, *NewLayer);
                         }
-                        else if (CalculHeightValue(*NewLayer, x, y, 0) == MAX_HEIGHT_BUILDING)
+                        else if (numberOfTiles == MAX_HEIGHT_BUILDING)
                         {
                             PutTileOnGrid(x, y, (int32)ETiles::GROUND, *NewLayer);
                         }
@@ -110,11 +116,15 @@ void ATest_GP_Map::GenerateWorld()
 
                         if (!TileInfoCell.TileSet)
                         {
-                            int temp = CalculGroundWidthValue(*NewLayer, x - 1, y);
-                            UE_LOG(LogTemp, Display, TEXT("num tile ground before : %i"), temp);
+                            int numberOfTile = CountTiles(
+                                *NewLayer,x - 1,y,
+                                [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileUserDataEqual(layer, x, y, TEXT("GROUND")); },
+                                [](int& x, int& y) { x--; });
+
+                            UE_LOG(LogTemp, Display, TEXT("num tile ground before : %i"), numberOfTile);
 
                             // FRONT LEDGES
-                            if (BuildOrNot(temp * 6))
+                            if (BuildOrNot(numberOfTile * 6))
                             {
                                 PutTileOnGrid(x, y, (int32)ETiles::GROUND, *NewLayer);
                             }
@@ -191,7 +201,10 @@ void ATest_GP_Map::CreateBuilding(int const x, int const y, int& width, int& ava
 {
     if (width == 0)
     {
-        availableFloorSpace = CalculWidthValue(layer, x, y, 0);
+        availableFloorSpace = CountTiles(
+            layer, x, y,
+            [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileUserDataEqual(layer, x, y + 1, TEXT("GROUND")); },
+            [](int& x, int& y) { x++; });
 
         // Commencer nouveau batiment : poser une tuile début de bâtiment
         if (availableFloorSpace >= MIN_WIDTH_BUILDING && BuildOrNot(PROBA_START_BUILDING))
@@ -236,7 +249,20 @@ void ATest_GP_Map::PutTileOnGrid(int const x, int const y, int32 tile, UPaperTil
     MyTileMapComponent->SetTile(x, y, layer.GetLayerIndex(), TileInfo);
 }
 
-int ATest_GP_Map::CalculHeightValue(UPaperTileLayer& layer, int x, int y, int heightValue = 0)
+int ATest_GP_Map::CountTiles(UPaperTileLayer& layer, int x, int y, TFunction<bool(UPaperTileLayer&, int, int)> condition, TFunction<void(int&, int&)> iteration)
+{
+    if (condition(layer, x, y))
+    {
+        iteration(x, y);
+        return CountTiles(layer, x, y, condition, iteration) + 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+/*int ATest_GP_Map::CalculHeightValue(UPaperTileLayer& layer, int x, int y, int heightValue = 0)
 {
     if (IsTileUserDataEqual(layer, x, y + 1, TEXT("GROUND")))
     {
@@ -248,9 +274,9 @@ int ATest_GP_Map::CalculHeightValue(UPaperTileLayer& layer, int x, int y, int he
     }
 
     return CalculHeightValue(layer, x, y + 1, heightValue);
-}
+}*/
 
-int ATest_GP_Map::CalculWidthValue(UPaperTileLayer& layer, int x, int y, int widthValue = 0)
+/*int ATest_GP_Map::CalculWidthValue(UPaperTileLayer& layer, int x, int y, int widthValue = 0)
 {
     if(!IsTileUserDataEqual(layer, x, y + 1, TEXT("GROUND")))
     {
@@ -262,9 +288,9 @@ int ATest_GP_Map::CalculWidthValue(UPaperTileLayer& layer, int x, int y, int wid
     }
 
     return CalculWidthValue(layer, x + 1, y, widthValue);
-}
+}*/
 
-int ATest_GP_Map::CalculGroundWidthValue(UPaperTileLayer& layer, int x, int y)
+/*int ATest_GP_Map::CalculGroundWidthValue(UPaperTileLayer& layer, int x, int y)
 {
     if (!IsTileUserDataEqual(layer, x, y, TEXT("GROUND")))
     {
@@ -274,9 +300,9 @@ int ATest_GP_Map::CalculGroundWidthValue(UPaperTileLayer& layer, int x, int y)
     {
         return CalculGroundWidthValue(layer, x - 1, y) + 1;
     }
-}
+}*/
 
-int ATest_GP_Map::CalculNullTileWidthValue(UPaperTileLayer& layer, int x, int y, int nullTileWidthValue = 0)
+/*int ATest_GP_Map::CalculNullTileWidthValue(UPaperTileLayer& layer, int x, int y, int nullTileWidthValue = 0)
 {
     if (layer.GetCell(x, y).TileSet)
     {
@@ -287,8 +313,8 @@ int ATest_GP_Map::CalculNullTileWidthValue(UPaperTileLayer& layer, int x, int y,
         nullTileWidthValue++;
     }
 
-    return CalculWidthValue(layer, x - 1, y, nullTileWidthValue);
-}
+    return CalculNullTileWidthValue(layer, x - 1, y, nullTileWidthValue);
+}*/
 
 
 /*
