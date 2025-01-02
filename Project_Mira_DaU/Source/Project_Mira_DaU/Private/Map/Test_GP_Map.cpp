@@ -63,6 +63,8 @@ void ATest_GP_Map::GenerateWorld()
 
         for (int32 x = 0; x < GridWidth; x++)
         {
+            // NE MARCHE PAS : UE_LOG(LogTemp, Warning, TEXT("UserDataName : %s"), *TileSet->GetTileUserData(TileInfo.PackedTileIndex).ToString());
+
             if (y == GridHeight - 1)
             {
                 PutTileOnGrid(x, y, (int32)ETiles::GROUND, *NewLayer);
@@ -91,7 +93,7 @@ void ATest_GP_Map::GenerateWorld()
                         else
                         {
                             // probabilité de continuer le bâtiment en hauteur
-                            if (BuildBuildingOrNot(PROBA_EXTEND_BUILD_HEIGHT))
+                            if (BuildOrNot(PROBA_EXTEND_BUILD_HEIGHT))
                             {
                                 PutTileOnGrid(x, y, (int32)ETiles::STARTBUILDING, *NewLayer);
                             }
@@ -102,9 +104,25 @@ void ATest_GP_Map::GenerateWorld()
                         }
                     }
                     //GROUND
-                    else if (IsTileUserDataEqual(*NewLayer, x - 1, y, TEXT("GROUND")) && (IsTileUserDataEqual(*NewLayer, x, y + 1, TEXT("BUILDINGWALL")) || IsTileUserDataEqual(*NewLayer, x, y + 1, TEXT("ENDBUILDING"))))
+                    else if (IsTileUserDataEqual(*NewLayer, x - 1, y, TEXT("GROUND")))
                     {
-                        PutTileOnGrid(x, y, (int32)ETiles::GROUND, *NewLayer);
+                        FPaperTileInfo TileInfoCell = NewLayer->GetCell(x, y + 1);
+
+                        if (!TileInfoCell.TileSet)
+                        {
+                            int temp = CalculGroundWidthValue(*NewLayer, x - 1, y);
+                            UE_LOG(LogTemp, Display, TEXT("num tile ground before : %i"), temp);
+
+                            // FRONT LEDGES
+                            if (BuildOrNot(temp * 6))
+                            {
+                                PutTileOnGrid(x, y, (int32)ETiles::GROUND, *NewLayer);
+                            }
+                        }
+                        else
+                        {
+                            PutTileOnGrid(x, y, (int32)ETiles::GROUND, *NewLayer);
+                        }
                     }
                     //END
                     else if (IsTileUserDataEqual(*NewLayer, x, y + 1, TEXT("ENDBUILDING")))
@@ -132,12 +150,14 @@ bool ATest_GP_Map::IsTileUserDataEqual(UPaperTileLayer& layer,  int x, int y, FS
     return TileInfoCell.TileSet && TileInfoCell.TileSet->GetTileUserData(TileInfoCell.PackedTileIndex).ToString() == tileType;
 }
  
-/*bool ATest_GP_Map::IsTileNull(UPaperTileLayer& layer, int x, int y) // DOESN'T WORKS
+bool ATest_GP_Map::IsTileNull(UPaperTileLayer& layer, int x, int y)
 {
     FPaperTileInfo TileInfoCell = layer.GetCell(x, y);
 
-    return TileInfoCell.PackedTileIndex == INDEX_NONE || TileInfoCell.PackedTileIndex == NULL;
-}*/
+    //UE_LOG(LogTemp, Warning, TEXT("EMPTY IN IsTileNull ? : %s"), (TileInfoCell.TileSet == true) ? TEXT("TRUE") : TEXT("FALSE"));
+
+    return TileInfoCell.TileSet == NULL ? true : false;
+}
 
 /*bool ATest_GP_Map::PreviousTileIsAWall(UPaperTileLayer& layer, int x, int y)
 {
@@ -162,7 +182,7 @@ bool ATest_GP_Map::IsTileUserDataEqual(UPaperTileLayer& layer,  int x, int y, FS
     return false;
 }*/
 
-bool ATest_GP_Map::BuildBuildingOrNot(int const probability)
+bool ATest_GP_Map::BuildOrNot(int const probability)
 {
     return Stream.RandRange(0, 99) < probability;
 }
@@ -174,7 +194,7 @@ void ATest_GP_Map::CreateBuilding(int const x, int const y, int& width, int& ava
         availableFloorSpace = CalculWidthValue(layer, x, y, 0);
 
         // Commencer nouveau batiment : poser une tuile début de bâtiment
-        if (availableFloorSpace >= MIN_WIDTH_BUILDING && BuildBuildingOrNot(PROBA_START_BUILDING))
+        if (availableFloorSpace >= MIN_WIDTH_BUILDING && BuildOrNot(PROBA_START_BUILDING))
         {
             PutTileOnGrid(x, y, (int32)ETiles::STARTBUILDING, layer);
 
@@ -192,7 +212,7 @@ void ATest_GP_Map::CreateBuilding(int const x, int const y, int& width, int& ava
         // soit que je suis inférieur à la taille max et que la probabilité dit de continuer le bâtiment
         if (availableFloorSpace > 0
             && (width < MIN_WIDTH_BUILDING ||
-               (width < MAX_WIDTH_BUILDING && BuildBuildingOrNot(PROBA_EXTEND_BUILD_WIDTH)))
+               (width < MAX_WIDTH_BUILDING && BuildOrNot(PROBA_EXTEND_BUILD_WIDTH)))
             )
         {
             PutTileOnGrid(x, y, (int32)ETiles::BUILDINGWALL, layer);
@@ -243,3 +263,48 @@ int ATest_GP_Map::CalculWidthValue(UPaperTileLayer& layer, int x, int y, int wid
 
     return CalculWidthValue(layer, x + 1, y, widthValue);
 }
+
+int ATest_GP_Map::CalculGroundWidthValue(UPaperTileLayer& layer, int x, int y)
+{
+    if (!IsTileUserDataEqual(layer, x, y, TEXT("GROUND")))
+    {
+        return 0;
+    }
+    else
+    {
+        return CalculGroundWidthValue(layer, x - 1, y) + 1;
+    }
+}
+
+int ATest_GP_Map::CalculNullTileWidthValue(UPaperTileLayer& layer, int x, int y, int nullTileWidthValue = 0)
+{
+    if (layer.GetCell(x, y).TileSet)
+    {
+        return nullTileWidthValue;
+    }
+    else
+    {
+        nullTileWidthValue++;
+    }
+
+    return CalculWidthValue(layer, x - 1, y, nullTileWidthValue);
+}
+
+
+/*
+
+                            int groundTileCount = 0;
+
+                            UE_LOG(LogTemp, Warning, TEXT("EMPTY ? : %s"), (IsTileNull(*NewLayer, x - 1, y) && IsTileNull(*NewLayer, x, y + 1) == true) ? TEXT("TRUE") : TEXT("FALSE"));
+
+                            // BACK LEDGES
+                            while (/*groundTileCount <= 3 && IsTileNull(*NewLayer, x - 1, y) && IsTileNull(*NewLayer, x, y + 1))
+                            {
+                                if (BuildOrNot(70))
+                                {
+                                    groundTileCount++;
+                                    PutTileOnGrid(x - groundTileCount, y, (int32)ETiles::GROUND, *NewLayer);
+                                }
+                            }
+
+                            groundTileCount = 0;*/
