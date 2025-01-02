@@ -64,8 +64,6 @@ void ATest_GP_Map::GenerateWorld()
 
         for (int32 x = 0; x < GridWidth; x++)
         {
-            // NE MARCHE PAS : UE_LOG(LogTemp, Warning, TEXT("UserDataName : %s"), *TileSet->GetTileUserData(TileInfo.PackedTileIndex).ToString());
-
             if (y == GridHeight - 1)
             {
                 PutTileOnGrid(x, y, (int32)ETiles::GROUND, *NewLayer);
@@ -121,8 +119,6 @@ void ATest_GP_Map::GenerateWorld()
                                 [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileUserDataEqual(layer, x, y, TEXT("GROUND")); },
                                 [](int& x, int& y) { x--; });
 
-                            UE_LOG(LogTemp, Display, TEXT("num tile ground before : %i"), numberOfTile);
-
                             // FRONT LEDGES
                             if (BuildOrNot(numberOfTile * 6))
                             {
@@ -156,41 +152,14 @@ void ATest_GP_Map::GenerateWorld()
 bool ATest_GP_Map::IsTileUserDataEqual(UPaperTileLayer& layer,  int x, int y, FString tileType)
 {
     FPaperTileInfo TileInfoCell = layer.GetCell(x, y);
-
     return TileInfoCell.TileSet && TileInfoCell.TileSet->GetTileUserData(TileInfoCell.PackedTileIndex).ToString() == tileType;
 }
  
 bool ATest_GP_Map::IsTileNull(UPaperTileLayer& layer, int x, int y)
 {
     FPaperTileInfo TileInfoCell = layer.GetCell(x, y);
-
-    //UE_LOG(LogTemp, Warning, TEXT("EMPTY IN IsTileNull ? : %s"), (TileInfoCell.TileSet == true) ? TEXT("TRUE") : TEXT("FALSE"));
-
     return TileInfoCell.TileSet == NULL ? true : false;
 }
-
-/*bool ATest_GP_Map::PreviousTileIsAWall(UPaperTileLayer& layer, int x, int y)
-{
-    FPaperTileInfo TileInfoCell = layer.GetCell(x - 1, y);
-
-    if (TileInfoCell.PackedTileIndex != INDEX_NONE && TileInfoCell.PackedTileIndex != NULL)
-    {
-        // Sur ce layer, les tuiles sont soit des sols, soit des murs, soit vide (et null en dehors de la grille)
-        return TileInfoCell.TileSet->GetTileUserData(TileInfoCell.PackedTileIndex).ToString() != TEXT("Ground");
-    }
-}*/
-
-/*bool ATest_GP_Map::CompareTwoTilesUserData(UPaperTileLayer& layer, int x1, int y1, int x2, int y2)
-{
-    FPaperTileInfo TileInfoCell1 = layer.GetCell(x1, y1);
-    FPaperTileInfo TileInfoCell2 = layer.GetCell(x2, y2);
-
-    if (TileInfoCell1.PackedTileIndex && TileInfoCell2.PackedTileIndex)
-    {
-        return TileInfoCell1.TileSet->GetTileUserData(TileInfoCell1.PackedTileIndex).ToString() == TileInfoCell2.TileSet->GetTileUserData(TileInfoCell2.PackedTileIndex).ToString();
-    }
-    return false;
-}*/
 
 bool ATest_GP_Map::BuildOrNot(int const probability)
 {
@@ -249,6 +218,15 @@ void ATest_GP_Map::PutTileOnGrid(int const x, int const y, int32 tile, UPaperTil
     MyTileMapComponent->SetTile(x, y, layer.GetLayerIndex(), TileInfo);
 }
 
+/// <summary>
+/// Count all tiles that check condition along the iteration vector
+/// </summary>
+/// <param name="layer"></param>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="condition"></param>
+/// <param name="iteration"></param>
+/// <returns></returns>
 int ATest_GP_Map::CountTiles(UPaperTileLayer& layer, int x, int y, TFunction<bool(UPaperTileLayer&, int, int)> condition, TFunction<void(int&, int&)> iteration)
 {
     if (condition(layer, x, y))
@@ -262,75 +240,19 @@ int ATest_GP_Map::CountTiles(UPaperTileLayer& layer, int x, int y, TFunction<boo
     }
 }
 
-/*int ATest_GP_Map::CalculHeightValue(UPaperTileLayer& layer, int x, int y, int heightValue = 0)
+/* TEST POUR CORNICHE ARRIÈRE
+int groundTileCount = 0;
+
+UE_LOG(LogTemp, Warning, TEXT("EMPTY ? : %s"), (IsTileNull(*NewLayer, x - 1, y) && IsTileNull(*NewLayer, x, y + 1) == true) ? TEXT("TRUE") : TEXT("FALSE"));
+
+// BACK LEDGES
+while (/*groundTileCount <= 3 && IsTileNull(*NewLayer, x - 1, y) && IsTileNull(*NewLayer, x, y + 1))
 {
-    if (IsTileUserDataEqual(layer, x, y + 1, TEXT("GROUND")))
+    if (BuildOrNot(70))
     {
-        return heightValue;
+        groundTileCount++;
+        PutTileOnGrid(x - groundTileCount, y, (int32)ETiles::GROUND, *NewLayer);
     }
-    else
-    {
-        heightValue++;
-    }
+}
 
-    return CalculHeightValue(layer, x, y + 1, heightValue);
-}*/
-
-/*int ATest_GP_Map::CalculWidthValue(UPaperTileLayer& layer, int x, int y, int widthValue = 0)
-{
-    if(!IsTileUserDataEqual(layer, x, y + 1, TEXT("GROUND")))
-    {
-        return widthValue;
-    }
-    else
-    {
-        widthValue++;
-    }
-
-    return CalculWidthValue(layer, x + 1, y, widthValue);
-}*/
-
-/*int ATest_GP_Map::CalculGroundWidthValue(UPaperTileLayer& layer, int x, int y)
-{
-    if (!IsTileUserDataEqual(layer, x, y, TEXT("GROUND")))
-    {
-        return 0;
-    }
-    else
-    {
-        return CalculGroundWidthValue(layer, x - 1, y) + 1;
-    }
-}*/
-
-/*int ATest_GP_Map::CalculNullTileWidthValue(UPaperTileLayer& layer, int x, int y, int nullTileWidthValue = 0)
-{
-    if (layer.GetCell(x, y).TileSet)
-    {
-        return nullTileWidthValue;
-    }
-    else
-    {
-        nullTileWidthValue++;
-    }
-
-    return CalculNullTileWidthValue(layer, x - 1, y, nullTileWidthValue);
-}*/
-
-
-/*
-
-                            int groundTileCount = 0;
-
-                            UE_LOG(LogTemp, Warning, TEXT("EMPTY ? : %s"), (IsTileNull(*NewLayer, x - 1, y) && IsTileNull(*NewLayer, x, y + 1) == true) ? TEXT("TRUE") : TEXT("FALSE"));
-
-                            // BACK LEDGES
-                            while (/*groundTileCount <= 3 && IsTileNull(*NewLayer, x - 1, y) && IsTileNull(*NewLayer, x, y + 1))
-                            {
-                                if (BuildOrNot(70))
-                                {
-                                    groundTileCount++;
-                                    PutTileOnGrid(x - groundTileCount, y, (int32)ETiles::GROUND, *NewLayer);
-                                }
-                            }
-
-                            groundTileCount = 0;*/
+groundTileCount = 0;*/
