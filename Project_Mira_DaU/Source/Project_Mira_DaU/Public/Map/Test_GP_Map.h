@@ -53,13 +53,14 @@ private:
 	bool IsTileNull(UPaperTileLayer& layer, int x, int y);
 	//bool PreviousTileIsAWall(UPaperTileLayer& layer, int x, int y);
 	//bool CompareTwoTilesUserData(UPaperTileLayer& layer, int x1, int y1, int x2, int y2);
+	int CountTiles(UPaperTileLayer& layer, int x, int y, TFunction<bool(UPaperTileLayer&, int, int)> condition, TFunction<void(int&, int&)> iteration);
 	bool BuildOrNot(int const probability);
 	void CreateBuilding(int const x, int const y, int& width, int& availableFloorSpace, UPaperTileLayer& layer);
 	void PutTileOnGrid(int const x, int const y, int32 tile, UPaperTileLayer& layer);
-	int CalculHeightValue(UPaperTileLayer& layer, int x, int y, int heightValue);
-	int CalculWidthValue(UPaperTileLayer& layer, int x, int y, int widthValue);
-	int CalculGroundWidthValue(UPaperTileLayer& layer, int x, int y);
-	int CalculNullTileWidthValue(UPaperTileLayer& layer, int x, int y, int nullTileWidthValue);
+	//int CalculHeightValue(UPaperTileLayer& layer, int x, int y, int heightValue);
+	//int CalculWidthValue(UPaperTileLayer& layer, int x, int y, int widthValue);
+	//int CalculGroundWidthValue(UPaperTileLayer& layer, int x, int y);
+	//int CalculNullTileWidthValue(UPaperTileLayer& layer, int x, int y, int nullTileWidthValue);
 
 protected:
 	virtual void BeginPlay() override;
@@ -91,7 +92,7 @@ public:
 	int MAX_WIDTH_BUILDING = 20;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
-	int MIN_HEIGHT_BUILDING = 4; // 6
+	int MIN_HEIGHT_BUILDING = 6;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
 	int MAX_HEIGHT_BUILDING = 14;
