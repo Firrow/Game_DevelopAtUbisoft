@@ -53,9 +53,9 @@ private:
 	bool IsTileNull(UPaperTileLayer& layer, int x, int y);
 	int CountTiles(UPaperTileLayer& layer, int x, int y, TFunction<bool(UPaperTileLayer&, int, int)> condition, TFunction<void(int&, int&)> iteration);
 	bool BuildOrNot(int const probability);
-	void CreateBuilding(int const x, int const y, int& width, int& availableFloorSpace, UPaperTileLayer& layer);
 	void PutTileOnGrid(int const x, int const y, int32 tile, UPaperTileLayer& layer);
-	//int CalculNullTileWidthValue(UPaperTileLayer& layer, int x, int y, int nullTileWidthValue);
+	void CreateBuilding(int const x, int const y, int& width, int& availableFloorSpace, UPaperTileLayer& layer);
+	void ContinueBuilding(int const x, int const y, UPaperTileLayer& layer);
 
 protected:
 	virtual void BeginPlay() override;
