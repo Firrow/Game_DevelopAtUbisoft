@@ -11,8 +11,8 @@
 // ETAPE 1 : Initialiser la TileMapComponent et les valeurs qui seront utilisées
 ATest_GP_Map::ATest_GP_Map()
 {
-	GridWidth = 50;
-	GridHeight = 50; 
+	GridWidth = 100;
+	GridHeight = 100; 
 	TileSize = 16.f;
 
 	MyTileMapComponent = CreateDefaultSubobject<UPaperTileMapComponent>(TEXT("TileMapComponent"));
@@ -93,6 +93,23 @@ void ATest_GP_Map::GenerateWorld()
                         else if (numberOfTiles == MAX_HEIGHT_BUILDING)
                         {
                             PutTileOnGrid(x, y, (int32)ETiles::GROUND, *NewLayer);
+
+                            // BACK LEDGES
+                            int numberOfTile = CountTiles(
+                                *NewLayer, x - 1, y,
+                                [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileNull(layer, x, y); },
+                                [](int& x, int& y) { x--; });
+
+                            if (numberOfTile > 0)
+                            {
+                                int xBackLedge = x - 1;
+
+                                while (IsTileNull(*NewLayer, xBackLedge, y) && BuildOrNot(100 - numberOfTile * 8))
+                                {
+                                    PutTileOnGrid(xBackLedge, y, (int32)ETiles::GROUND, *NewLayer);
+                                    xBackLedge--;
+                                }
+                            }
                         }
                         else
                         {
@@ -104,6 +121,23 @@ void ATest_GP_Map::GenerateWorld()
                             else
                             {
                                 PutTileOnGrid(x, y, (int32)ETiles::GROUND, *NewLayer);
+
+                                // BACK LEDGES
+                                int numberOfTile = CountTiles(
+                                    *NewLayer, x - 1, y,
+                                    [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileNull(layer, x, y); },
+                                    [](int& x, int& y) { x--; });
+
+                                if (numberOfTile > 0)
+                                {
+                                    int xBackLedge = x - 1;
+
+                                    while (IsTileNull(*NewLayer, xBackLedge, y) && BuildOrNot(100 - numberOfTile * 8))
+                                    {
+                                        PutTileOnGrid(xBackLedge, y, (int32)ETiles::GROUND, *NewLayer);
+                                        xBackLedge--;
+                                    }
+                                }
                             }
                         }
                     }
@@ -114,13 +148,13 @@ void ATest_GP_Map::GenerateWorld()
 
                         if (!TileInfoCell.TileSet)
                         {
+                            // FRONT LEDGES
                             int numberOfTile = CountTiles(
                                 *NewLayer,x - 1,y,
                                 [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileUserDataEqual(layer, x, y, TEXT("GROUND")); },
                                 [](int& x, int& y) { x--; });
 
-                            // FRONT LEDGES
-                            if (BuildOrNot(numberOfTile * 6))
+                            if (BuildOrNot(numberOfTile * 5))
                             {
                                 PutTileOnGrid(x, y, (int32)ETiles::GROUND, *NewLayer);
                             }
@@ -158,7 +192,7 @@ bool ATest_GP_Map::IsTileUserDataEqual(UPaperTileLayer& layer,  int x, int y, FS
 bool ATest_GP_Map::IsTileNull(UPaperTileLayer& layer, int x, int y)
 {
     FPaperTileInfo TileInfoCell = layer.GetCell(x, y);
-    return TileInfoCell.TileSet == NULL ? true : false;
+    return !TileInfoCell.TileSet;
 }
 
 bool ATest_GP_Map::BuildOrNot(int const probability)
@@ -229,7 +263,7 @@ void ATest_GP_Map::PutTileOnGrid(int const x, int const y, int32 tile, UPaperTil
 /// <returns></returns>
 int ATest_GP_Map::CountTiles(UPaperTileLayer& layer, int x, int y, TFunction<bool(UPaperTileLayer&, int, int)> condition, TFunction<void(int&, int&)> iteration)
 {
-    if (condition(layer, x, y))
+    if (x >= 0 && x < GridWidth && y >= 0 && y < GridHeight && condition(layer, x, y))
     {
         iteration(x, y);
         return CountTiles(layer, x, y, condition, iteration) + 1;
