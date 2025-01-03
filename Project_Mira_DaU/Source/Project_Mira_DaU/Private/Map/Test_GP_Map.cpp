@@ -70,110 +70,13 @@ void ATest_GP_Map::GenerateWorld()
             }
             else 
             {
-                if (IsTileUserDataEqual(*NewLayer, x, y + 1, TEXT("GROUND")))
+                if (y >= MIN_HEIGHT_BUILDING && IsTileUserDataEqual(*NewLayer, x, y + 1, TEXT("GROUND")))
                 {
                     CreateBuilding(x, y, BuildingWidth, availableFloorSpace, *NewLayer);
                 }
                 else
                 {   
-                    // Construction en Hauteur (on est pas sur le sol)
-                    //START (ou GROUND)
-                    if (IsTileUserDataEqual(*NewLayer, x, y + 1, TEXT("STARTBUILDING")))
-                    {
-                        // On est au début d'un autre batiment
-                        int numberOfTiles = CountTiles(
-                            *NewLayer, x, y,
-                            [this](UPaperTileLayer& layer, int x, int y) -> bool { return !IsTileUserDataEqual(layer, x, y, TEXT("GROUND")); },
-                            [](int& x, int& y) { y++; });
-
-                        if (numberOfTiles <= MIN_HEIGHT_BUILDING)
-                        {
-                            PutTileOnGrid(x, y, (int32)ETiles::STARTBUILDING, *NewLayer);
-                        }
-                        else if (numberOfTiles == MAX_HEIGHT_BUILDING)
-                        {
-                            PutTileOnGrid(x, y, (int32)ETiles::GROUND, *NewLayer);
-
-                            // BACK LEDGES
-                            int numberOfTile = CountTiles(
-                                *NewLayer, x - 1, y,
-                                [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileNull(layer, x, y); },
-                                [](int& x, int& y) { x--; });
-
-                            if (numberOfTile > 0)
-                            {
-                                int xBackLedge = x - 1;
-
-                                while (IsTileNull(*NewLayer, xBackLedge, y) && BuildOrNot(100 - numberOfTile * 8))
-                                {
-                                    PutTileOnGrid(xBackLedge, y, (int32)ETiles::GROUND, *NewLayer);
-                                    xBackLedge--;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            // probabilité de continuer le bâtiment en hauteur
-                            if (BuildOrNot(PROBA_EXTEND_BUILD_HEIGHT))
-                            {
-                                PutTileOnGrid(x, y, (int32)ETiles::STARTBUILDING, *NewLayer);
-                            }
-                            else
-                            {
-                                PutTileOnGrid(x, y, (int32)ETiles::GROUND, *NewLayer);
-
-                                // BACK LEDGES
-                                int numberOfTile = CountTiles(
-                                    *NewLayer, x - 1, y,
-                                    [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileNull(layer, x, y); },
-                                    [](int& x, int& y) { x--; });
-
-                                if (numberOfTile > 0)
-                                {
-                                    int xBackLedge = x - 1;
-
-                                    while (IsTileNull(*NewLayer, xBackLedge, y) && BuildOrNot(100 - numberOfTile * 8))
-                                    {
-                                        PutTileOnGrid(xBackLedge, y, (int32)ETiles::GROUND, *NewLayer);
-                                        xBackLedge--;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    //GROUND
-                    else if (IsTileUserDataEqual(*NewLayer, x - 1, y, TEXT("GROUND")))
-                    {
-                        FPaperTileInfo TileInfoCell = NewLayer->GetCell(x, y + 1);
-
-                        if (!TileInfoCell.TileSet)
-                        {
-                            // FRONT LEDGES
-                            int numberOfTile = CountTiles(
-                                *NewLayer,x - 1,y,
-                                [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileUserDataEqual(layer, x, y, TEXT("GROUND")); },
-                                [](int& x, int& y) { x--; });
-
-                            if (BuildOrNot(numberOfTile * 5))
-                            {
-                                PutTileOnGrid(x, y, (int32)ETiles::GROUND, *NewLayer);
-                            }
-                        }
-                        else
-                        {
-                            PutTileOnGrid(x, y, (int32)ETiles::GROUND, *NewLayer);
-                        }
-                    }
-                    //END
-                    else if (IsTileUserDataEqual(*NewLayer, x, y + 1, TEXT("ENDBUILDING")))
-                    {
-                        PutTileOnGrid(x, y, (int32)ETiles::ENDBUILDING, *NewLayer);
-                    }
-                    //WALL
-                    else if (IsTileUserDataEqual(*NewLayer, x, y + 1, TEXT("BUILDINGWALL")))
-                    {
-                        PutTileOnGrid(x, y, (int32)ETiles::BUILDINGWALL, *NewLayer);
-                    }
+                    ContinueBuilding(x, y, *NewLayer);
                 }
             }
         }
@@ -198,6 +101,38 @@ bool ATest_GP_Map::IsTileNull(UPaperTileLayer& layer, int x, int y)
 bool ATest_GP_Map::BuildOrNot(int const probability)
 {
     return Stream.RandRange(0, 99) < probability;
+}
+
+/// <summary>
+/// Count all tiles that check condition along the iteration vector
+/// </summary>
+/// <param name="layer"></param>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="condition"></param>
+/// <param name="iteration"></param>
+/// <returns></returns>
+int ATest_GP_Map::CountTiles(UPaperTileLayer& layer, int x, int y, TFunction<bool(UPaperTileLayer&, int, int)> condition, TFunction<void(int&, int&)> iteration)
+{
+    if (x >= 0 && x < GridWidth && y >= 0 && y < GridHeight && condition(layer, x, y))
+    {
+        iteration(x, y);
+        return CountTiles(layer, x, y, condition, iteration) + 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+// Eh you là-bas ! Near the betonneuse ! Put the ciment on the poteau please !
+void ATest_GP_Map::PutTileOnGrid(int const x, int const y, int32 tile, UPaperTileLayer& layer)
+{
+    FPaperTileInfo TileInfo;
+    TileInfo.TileSet = TileSet;
+    TileInfo.PackedTileIndex = tile;
+
+    MyTileMapComponent->SetTile(x, y, layer.GetLayerIndex(), TileInfo);
 }
 
 void ATest_GP_Map::CreateBuilding(int const x, int const y, int& width, int& availableFloorSpace, UPaperTileLayer& layer)
@@ -242,51 +177,104 @@ void ATest_GP_Map::CreateBuilding(int const x, int const y, int& width, int& ava
     }
 }
 
-// Eh you là-bas ! Near the betonneuse ! Put the ciment on the poteau please !
-void ATest_GP_Map::PutTileOnGrid(int const x, int const y, int32 tile, UPaperTileLayer& layer)
+void ATest_GP_Map::ContinueBuilding(int const x, int const y, UPaperTileLayer& layer)
 {
-    FPaperTileInfo TileInfo;
-    TileInfo.TileSet = TileSet;
-    TileInfo.PackedTileIndex = tile;
-
-    MyTileMapComponent->SetTile(x, y, layer.GetLayerIndex(), TileInfo);
-}
-
-/// <summary>
-/// Count all tiles that check condition along the iteration vector
-/// </summary>
-/// <param name="layer"></param>
-/// <param name="x"></param>
-/// <param name="y"></param>
-/// <param name="condition"></param>
-/// <param name="iteration"></param>
-/// <returns></returns>
-int ATest_GP_Map::CountTiles(UPaperTileLayer& layer, int x, int y, TFunction<bool(UPaperTileLayer&, int, int)> condition, TFunction<void(int&, int&)> iteration)
-{
-    if (x >= 0 && x < GridWidth && y >= 0 && y < GridHeight && condition(layer, x, y))
+    // Construction en Hauteur (on est pas sur le sol)
+    //START (ou GROUND)
+    if (IsTileUserDataEqual(layer, x, y + 1, TEXT("STARTBUILDING")))
     {
-        iteration(x, y);
-        return CountTiles(layer, x, y, condition, iteration) + 1;
+        // On est au début d'un autre batiment
+        int numberOfTiles = CountTiles(
+            layer, x, y,
+            [this](UPaperTileLayer& layer, int x, int y) -> bool { return !IsTileUserDataEqual(layer, x, y, TEXT("GROUND")); },
+            [](int& x, int& y) { y++; });
+
+        if (numberOfTiles <= MIN_HEIGHT_BUILDING)
+        {
+            PutTileOnGrid(x, y, (int32)ETiles::STARTBUILDING, layer);
+        }
+        else if (numberOfTiles == MAX_HEIGHT_BUILDING)
+        {
+            PutTileOnGrid(x, y, (int32)ETiles::GROUND, layer);
+
+            // BACK LEDGES
+            int numberOfTile = CountTiles(
+                layer, x - 1, y,
+                [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileNull(layer, x, y); },
+                [](int& x, int& y) { x--; });
+
+            if (numberOfTile > 0)
+            {
+                int xBackLedge = x - 1;
+
+                while (IsTileNull(layer, xBackLedge, y) && BuildOrNot(100 - numberOfTile * 8))
+                {
+                    PutTileOnGrid(xBackLedge, y, (int32)ETiles::GROUND, layer);
+                    xBackLedge--;
+                }
+            }
+        }
+        else
+        {
+            // probabilité de continuer le bâtiment en hauteur
+            if (BuildOrNot(PROBA_EXTEND_BUILD_HEIGHT))
+            {
+                PutTileOnGrid(x, y, (int32)ETiles::STARTBUILDING, layer);
+            }
+            else
+            {
+                PutTileOnGrid(x, y, (int32)ETiles::GROUND, layer);
+
+                // BACK LEDGES
+                int numberOfTile = CountTiles(
+                    layer, x - 1, y,
+                    [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileNull(layer, x, y); },
+                    [](int& x, int& y) { x--; });
+
+                if (numberOfTile > 0)
+                {
+                    int xBackLedge = x - 1;
+
+                    while (IsTileNull(layer, xBackLedge, y) && BuildOrNot(100 - numberOfTile * 8))
+                    {
+                        PutTileOnGrid(xBackLedge, y, (int32)ETiles::GROUND, layer);
+                        xBackLedge--;
+                    }
+                }
+            }
+        }
     }
-    else
+    //GROUND
+    else if (IsTileUserDataEqual(layer, x - 1, y, TEXT("GROUND")))
     {
-        return 0;
+        FPaperTileInfo TileInfoCell = layer.GetCell(x, y + 1);
+
+        if (!TileInfoCell.TileSet)
+        {
+            // FRONT LEDGES
+            int numberOfTile = CountTiles(
+                layer, x - 1, y,
+                [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileUserDataEqual(layer, x, y, TEXT("GROUND")); },
+                [](int& x, int& y) { x--; });
+
+            if (BuildOrNot(numberOfTile * 5))
+            {
+                PutTileOnGrid(x, y, (int32)ETiles::GROUND, layer);
+            }
+        }
+        else
+        {
+            PutTileOnGrid(x, y, (int32)ETiles::GROUND, layer);
+        }
+    }
+    //END
+    else if (IsTileUserDataEqual(layer, x, y + 1, TEXT("ENDBUILDING")))
+    {
+        PutTileOnGrid(x, y, (int32)ETiles::ENDBUILDING, layer);
+    }
+    //WALL
+    else if (IsTileUserDataEqual(layer, x, y + 1, TEXT("BUILDINGWALL")))
+    {
+        PutTileOnGrid(x, y, (int32)ETiles::BUILDINGWALL, layer);
     }
 }
-
-/* TEST POUR CORNICHE ARRIÈRE
-int groundTileCount = 0;
-
-UE_LOG(LogTemp, Warning, TEXT("EMPTY ? : %s"), (IsTileNull(*NewLayer, x - 1, y) && IsTileNull(*NewLayer, x, y + 1) == true) ? TEXT("TRUE") : TEXT("FALSE"));
-
-// BACK LEDGES
-while (/*groundTileCount <= 3 && IsTileNull(*NewLayer, x - 1, y) && IsTileNull(*NewLayer, x, y + 1))
-{
-    if (BuildOrNot(70))
-    {
-        groundTileCount++;
-        PutTileOnGrid(x - groundTileCount, y, (int32)ETiles::GROUND, *NewLayer);
-    }
-}
-
-groundTileCount = 0;*/
