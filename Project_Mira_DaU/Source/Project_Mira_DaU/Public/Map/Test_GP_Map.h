@@ -54,6 +54,7 @@ private:
 	int CountTiles(UPaperTileLayer& layer, int x, int y, TFunction<bool(UPaperTileLayer&, int, int)> condition, TFunction<void(int&, int&)> iteration);
 	bool BuildOrNot(int const probability);
 	void PutTileOnGrid(int const x, int const y, int32 tile, UPaperTileLayer& layer);
+	void CreateBackLedge(int const x, int const y, UPaperTileLayer& layer);
 	void CreateBuilding(int const x, int const y, int& width, int& availableFloorSpace, UPaperTileLayer& layer);
 	void ContinueBuilding(int const x, int const y, UPaperTileLayer& layer);
 
@@ -72,13 +73,19 @@ public:
 	FSeed SEED = { 0, false };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
-	int PROBA_START_BUILDING = 65;
+	int PROBA_START_BUILDING = 85;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
 	int PROBA_EXTEND_BUILD_WIDTH = PROBA_START_BUILDING;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
 	int PROBA_EXTEND_BUILD_HEIGHT = 50;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
+	int PROBA_BACK_LEDGE = 8;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
+	int PROBA_FRONT_LEDGE = 8;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
 	int MIN_WIDTH_BUILDING = 7;
