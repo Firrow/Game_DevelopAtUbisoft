@@ -234,6 +234,7 @@ void ATest_GP_Map::ContinueBuilding(int const x, int const y, UPaperTileLayer& l
         ((y == 0 && !IsTileNull(layer, x, y + 1) && !IsTileUserDataEqual(layer, x, y + 1, TEXT("GROUND")))
             || !IsTileNull(layer, x, y + 1) && (!IsTileUserDataEqual(layer, x, y + 1, TEXT("GROUND"))))
         || (IsTileNull(layer, x, y + 1)
+            && IsTileNull(layer, x, y + 2)
             && IsTileUserDataEqual(layer, x - 1, y, TEXT("GROUND"))
             && BuildOrNot(CountTiles(
                 layer, x - 1, y,
