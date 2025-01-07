@@ -54,10 +54,10 @@ void ATest_GP_Map::GenerateWorld()
     GEngine->AddOnScreenDebugMessage(-1, 50000.f, FColor::Yellow, FString::Printf(TEXT("SEED : %d"), SEED.value));
 
     // ETAPE 4 : Création d'un nouveau calque pour poser les tuiles
-    UPaperTileLayer* NewLayer = TileMap->AddNewLayer();
+    UPaperTileLayer* BuildingLayer = TileMap->AddNewLayer();
 
     // ETAPE 5 : Placement des tuiles dans la grille pour le test
-    for (int32 y = GridHeight - 1; y >= 0; y--)
+    for (int32 y = GridHeight; y >= 0; y--) // - 1
     {
         int BuildingWidth = 0;
         int availableFloorSpace = 0;
@@ -66,17 +66,17 @@ void ATest_GP_Map::GenerateWorld()
         {
             if (y == GridHeight - 1)
             {
-                PutTileOnGrid(x, y, (int32)ETiles::GROUND, *NewLayer);
+                PutTileOnGrid(x, y, (int32)ETiles::GROUND, *BuildingLayer);
             }
             else 
             {
-                if (y >= MIN_HEIGHT_BUILDING && IsTileUserDataEqual(*NewLayer, x, y + 1, TEXT("GROUND")))
+                if (y >= MIN_HEIGHT_BUILDING && IsTileUserDataEqual(*BuildingLayer, x, y + 1, TEXT("GROUND")))
                 {
-                    CreateBuilding(x, y, BuildingWidth, availableFloorSpace, *NewLayer);
+                    CreateBuilding(x, y, BuildingWidth, availableFloorSpace, *BuildingLayer);
                 }
                 else
                 {   
-                    ContinueBuilding(x, y, *NewLayer);
+                    ContinueBuilding(x, y, *BuildingLayer);
                 }
             }
         }
@@ -207,9 +207,9 @@ void ATest_GP_Map::ContinueBuilding(int const x, int const y, UPaperTileLayer& l
         [](int& x, int& y) { y++; });
 
     //START
-    if (IsTileUserDataEqual(layer, x, y + 1, TEXT("STARTBUILDING")) 
-        && (heightBuilding <= MIN_HEIGHT_BUILDING 
-        || (heightBuilding < MAX_HEIGHT_BUILDING && BuildOrNot(PROBA_EXTEND_BUILD_HEIGHT))))
+    if (y > 0 && IsTileUserDataEqual(layer, x, y + 1, TEXT("STARTBUILDING"))
+        && (heightBuilding <= MIN_HEIGHT_BUILDING
+            || (heightBuilding < MAX_HEIGHT_BUILDING && BuildOrNot(PROBA_EXTEND_BUILD_HEIGHT))))
     {
         // On est au début d'un autre batiment
         PutTileOnGrid(x, y, (int32)ETiles::STARTBUILDING, layer);
@@ -226,13 +226,19 @@ void ATest_GP_Map::ContinueBuilding(int const x, int const y, UPaperTileLayer& l
     }
     //GROUND
     else if (
-        (!IsTileNull(layer, x, y + 1) && !IsTileUserDataEqual(layer, x, y + 1, TEXT("GROUND")))
-        || (IsTileNull(layer, x, y + 1) 
-            && IsTileUserDataEqual(layer, x - 1, y, TEXT("GROUND")) 
+        //On pose un sol si
+        // La tuile en dessous n'est pas vide ET qu'elle n'est pas un sol
+        // OU (corniche avant) que la tuile en dessous est nulle
+        //      ET que la tuile avant est un sol
+        //      ET que la probabilité de poser un sol soit bonne
+        ((y == 0 && !IsTileNull(layer, x, y + 1) && !IsTileUserDataEqual(layer, x, y + 1, TEXT("GROUND")))
+            || !IsTileNull(layer, x, y + 1) && (!IsTileUserDataEqual(layer, x, y + 1, TEXT("GROUND"))))
+        || (IsTileNull(layer, x, y + 1)
+            && IsTileUserDataEqual(layer, x - 1, y, TEXT("GROUND"))
             && BuildOrNot(CountTiles(
                 layer, x - 1, y,
                 [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileUserDataEqual(layer, x, y, TEXT("GROUND")); },
-                [](int& x, int& y) { x--; }) * PROBA_FRONT_LEDGE))) 
+                [](int& x, int& y) { x--; }) * PROBA_FRONT_LEDGE)))
         // FRONT LEDGE : On prend en compte le nombre de tuile sol précédente pour avoir une taille de corniche cohérente avec la taille du batiment
     {
         PutTileOnGrid(x, y, (int32)ETiles::GROUND, layer);
