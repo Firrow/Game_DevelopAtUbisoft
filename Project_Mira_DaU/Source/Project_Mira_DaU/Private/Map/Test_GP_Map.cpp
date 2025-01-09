@@ -242,6 +242,8 @@ void ATest_GP_Map::ContinueBuilding(int const x, int const y, UPaperTileLayer& l
                 [](int& x, int& y) { x--; }) * PROBA_FRONT_LEDGE)))
         // FRONT LEDGE : On prend en compte le nombre de tuile sol précédente pour avoir une taille de corniche cohérente avec la taille du batiment
     {
+
+        // Placer une mur en dessous de la ground
         PutTileOnGrid(x, y, (int32)ETiles::GROUND, layer);
 
         if (IsTileUserDataEqual(layer, x, y + 1, TEXT("STARTBUILDING")))
