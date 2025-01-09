@@ -64,6 +64,12 @@ void ATest_GP_Map::GenerateWorld()
 
         for (int32 x = 0; x < GridWidth; x++)
         {
+            //TEST
+            if (x == 2 && y == 2)
+            {
+                SpawnBPTile(Ladder, x, y);
+            }
+
             if (y == GridHeight - 1)
             {
                 PutTileOnGrid(x, y, (int32)ETiles::GROUND, *BuildingLayer);
@@ -154,6 +160,16 @@ void ATest_GP_Map::CreateBackLedge(int const x, int const y, UPaperTileLayer& la
             xBackLedge--;
         }
     }
+}
+
+FVector ATest_GP_Map::ConvertGridPositionToWorldPosition(const int x, const int y)
+{
+    return FVector(x * TileSize, 0.0f, y * -TileSize);
+}
+
+void ATest_GP_Map::SpawnBPTile(TSubclassOf<AInteractible>& BPTile, const int x, const int y)
+{
+    GetWorld()->SpawnActor<AActor>(BPTile, ConvertGridPositionToWorldPosition(x, y), FRotator::ZeroRotator);
 }
 
 void ATest_GP_Map::CreateBuilding(int const x, int const y, int& width, int& availableFloorSpace, UPaperTileLayer& layer)

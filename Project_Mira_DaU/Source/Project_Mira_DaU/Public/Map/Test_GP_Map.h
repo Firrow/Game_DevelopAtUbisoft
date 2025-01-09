@@ -4,6 +4,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "PaperTileMapActor.h"
+#include "ObjectInGame/Interactible.h"
 #include "Test_GP_Map.generated.h"
 
 class PaperTileMapComponent;
@@ -55,6 +56,9 @@ private:
 	bool BuildOrNot(int const probability);
 	void PutTileOnGrid(int const x, int const y, int32 tile, UPaperTileLayer& layer);
 	void CreateBackLedge(int const x, int const y, UPaperTileLayer& layer);
+	FVector ConvertGridPositionToWorldPosition(const int x, const int y);
+	void SpawnBPTile(TSubclassOf<AInteractible>& BPTile, const int x, const int y);
+
 	void CreateBuilding(int const x, int const y, int& width, int& availableFloorSpace, UPaperTileLayer& layer);
 	void ContinueBuilding(int const x, int const y, UPaperTileLayer& layer);
 
@@ -98,4 +102,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
 	int MAX_HEIGHT_BUILDING = 14;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
+	TSubclassOf<AInteractible> Ladder;
 };
