@@ -23,6 +23,8 @@ ATest_GP_Map::ATest_GP_Map()
 void ATest_GP_Map::BeginPlay()
 {
 	Super::BeginPlay();
+
+    UE_LOG(LogTemp, Warning, TEXT("SEED : % d"), SEED.value);
 	
 	GenerateWorld();
 }
@@ -56,7 +58,7 @@ void ATest_GP_Map::GenerateWorld()
     // ETAPE 4 : Création d'un nouveau calque pour poser les tuiles
     UPaperTileLayer* BuildingLayer = TileMap->AddNewLayer();
 
-    // ETAPE 5 : Placement des tuiles dans la grille pour le test
+    // ETAPE 5 : Placement des murs dans la grille
     for (int32 y = GridHeight; y >= 0; y--) // - 1
     {
         int BuildingWidth = 0;
@@ -64,12 +66,6 @@ void ATest_GP_Map::GenerateWorld()
 
         for (int32 x = 0; x < GridWidth; x++)
         {
-            //TEST
-            if (x == 2 && y == 2)
-            {
-                SpawnBPTile(Ladder, x, y);
-            }
-
             if (y == GridHeight - 1)
             {
                 PutTileOnGrid(x, y, (int32)ETiles::GROUND, *BuildingLayer);
@@ -88,7 +84,66 @@ void ATest_GP_Map::GenerateWorld()
         }
     }
 
-    // ETAPE 6 : MAJ des collisions des tuiles
+    // ETAPE 6 : Placement des éléments interactibles dans la map
+    for (int32 y = GridHeight; y >= 0; y--) // - 1
+    {
+        for (int32 x = 0; x < GridWidth; x++)
+        {
+            //last ground tile
+            if (y != 0 && IsTileUserDataEqual(*BuildingLayer, x, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x + 1, y, TEXT("GROUND")))
+            {
+                bool groundIsAvailable = false;
+
+                for (int i = 1; i < 3; i++)
+                {
+                    // check if a ground is available in player jump range (down only)
+                    if (IsTileUserDataEqual(*BuildingLayer, x + i, y + i, TEXT("GROUND")))
+                    {
+                        groundIsAvailable = true;
+                    }
+                }
+
+                groundIsAvailable = false;
+
+                // Put ladder on map
+                if (!groundIsAvailable)
+                {
+                    bool isLadder = false;
+                    int i = 0;
+
+                    while (!isLadder && IsTileUserDataEqual(*BuildingLayer, x - i - 1, y, TEXT("GROUND")))
+                    {
+                        if (IsTileUserDataEqual(*BuildingLayer, x - i, y + 1, TEXT("BUILDINGWALL")) && IsTileUserDataEqual(*BuildingLayer, x - i, y, TEXT("GROUND")) && BuildOrNot(PROBA_LADDER))
+                        {
+                            SpawnBPTile(Ladder, x - i, y);
+
+                            isLadder = true;
+
+                            int k = 1;
+
+                            while (!IsTileUserDataEqual(*BuildingLayer, x - i, y + k, TEXT("GROUND")))
+                            {
+                                SpawnBPTile(Ladder, x - i, y + k);
+                                PutTileOnGrid(x - i, y, (int32)ETiles::UNDERLADDER, *BuildingLayer);
+                                k++;
+                            }
+
+                            k = 1;
+                        }
+                        else 
+                        {
+                            i++;
+                        }
+                    }
+
+                    i = 0;
+                    isLadder = false;
+                }
+            }
+        }
+    }
+
+    // ETAPE 7 : MAJ des collisions des tuiles
     MyTileMapComponent->RebuildCollision();
 }
 
