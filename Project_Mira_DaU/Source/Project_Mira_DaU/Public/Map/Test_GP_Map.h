@@ -20,6 +20,7 @@ enum class ETiles : uint8 {
 	STARTBUILDING = 25 UMETA(DisplayName = "STARTBUILDING"),
 	BUILDINGWALL = 26 UMETA(DisplayName = "BUILDINGWALL"),
 	ENDBUILDING = 27 UMETA(DisplayName = "ENDBUILDING"),
+	UNDERLADDER = 22 UMETA(DisplayName = "UNDERLADDER"),
 	TEMP = 48 UMETA(DisplayName = "TEMP")
 };
 
@@ -90,6 +91,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
 	int PROBA_FRONT_LEDGE = 8;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
+	int PROBA_LADDER = 5;
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
 	int MIN_WIDTH_BUILDING = 7;
