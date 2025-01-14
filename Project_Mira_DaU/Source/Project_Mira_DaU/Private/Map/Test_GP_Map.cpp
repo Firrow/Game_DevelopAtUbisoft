@@ -97,7 +97,7 @@ void ATest_GP_Map::GenerateWorld()
                 for (int i = 1; i < 3; i++)
                 {
                     // check if a ground is available in player jump range (down only)
-                    if (IsTileUserDataEqual(*BuildingLayer, x + i, y + i, TEXT("GROUND")))
+                    if (IsTileUserDataEqual(*BuildingLayer, x + i, y + i, TEXT("GROUND")) || IsTileUserDataEqual(*BuildingLayer, x - i, y + i, TEXT("GROUND")))
                     {
                         groundIsAvailable = true;
                     }
@@ -113,7 +113,9 @@ void ATest_GP_Map::GenerateWorld()
 
                     while (!isLadder && IsTileUserDataEqual(*BuildingLayer, x - i - 1, y, TEXT("GROUND")))
                     {
-                        if (IsTileUserDataEqual(*BuildingLayer, x - i, y + 1, TEXT("BUILDINGWALL")) && IsTileUserDataEqual(*BuildingLayer, x - i, y, TEXT("GROUND")) && BuildOrNot(PROBA_LADDER))
+                        if (IsTileUserDataEqual(*BuildingLayer, x - i, y + 1, TEXT("BUILDINGWALL")) 
+                            && (IsTileUserDataEqual(*BuildingLayer, x - i, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - i, y - 1, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - i, y - 2, TEXT("GROUND")))
+                            && BuildOrNot(PROBA_LADDER))
                         {
                             SpawnBPTile(Ladder, x - i, y);
 
