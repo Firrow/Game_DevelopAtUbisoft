@@ -85,62 +85,85 @@ void ATest_GP_Map::GenerateWorld()
     }
 
     // ETAPE 6 : Placement des éléments interactibles dans la map
-    for (int32 y = GridHeight; y >= 0; y--) // - 1
+    for (int32 y = GridHeight - 2; y >= 0; y--) // - 1
     {
         for (int32 x = 0; x < GridWidth; x++)
         {
-            //last ground tile
-            if (y != 0 && IsTileUserDataEqual(*BuildingLayer, x, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x + 1, y, TEXT("GROUND")))
+            if (IsTileUserDataEqual(*BuildingLayer, x, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - 1, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - 2, y, TEXT("GROUND"))) //si bord gauche plateforme et qu'une échelle ne vient pas d'être placée
             {
-                bool groundIsAvailable = false;
-
-                for (int i = 1; i < 3; i++)
+                int isNotAvailable = 0;
+                //calcul disponibilité à gauche
+                for (int i = 1; i <= 3; i++)
                 {
                     // check if a ground is available in player jump range (down only)
-                    if (IsTileUserDataEqual(*BuildingLayer, x + i, y + i, TEXT("GROUND")) || IsTileUserDataEqual(*BuildingLayer, x - i, y + i, TEXT("GROUND")))
+                    if (!IsTileUserDataEqual(*BuildingLayer, x - i, y + i, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - i, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - i, y - i, TEXT("GROUND")))
                     {
-                        groundIsAvailable = true;
+                        isNotAvailable++;
                     }
                 }
 
-                groundIsAvailable = false;
+                int plateformLength = CountTiles(
+                    *BuildingLayer, x, y,
+                    [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileUserDataEqual(layer, x, y, TEXT("GROUND")) && IsTileUserDataEqual(layer, x + 1, y, TEXT("GROUND")); },
+                    [](int& x, int& y) { x++; });
 
-                // Put ladder on map
-                if (!groundIsAvailable)
+
+                for (int j = 1; j <= 3; j++)
+                {
+                    // check if a ground is available in player jump range (down only)
+                    if (!IsTileUserDataEqual(*BuildingLayer, x + plateformLength + j, y + j, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x + plateformLength + j, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x + plateformLength + j, y - j, TEXT("GROUND")))
+                    {
+                        isNotAvailable++;
+                    }
+                }
+
+
+                int proba_calculate;
+                if (isNotAvailable == 6)
+                {
+                    proba_calculate = PROBA_LADDER * isNotAvailable;
+                }
+                else
+                {
+                    proba_calculate = PROBA_LADDER;
+                }
+                
+
+                if (isNotAvailable >= 4)
                 {
                     bool isLadder = false;
-                    int i = 0;
+                    int k = 0;
 
-                    while (!isLadder && IsTileUserDataEqual(*BuildingLayer, x - i - 1, y, TEXT("GROUND")))
+                    while (!isLadder && IsTileUserDataEqual(*BuildingLayer, x + k, y, TEXT("GROUND")))
                     {
-                        if (IsTileUserDataEqual(*BuildingLayer, x - i, y + 1, TEXT("BUILDINGWALL")) 
-                            && (IsTileUserDataEqual(*BuildingLayer, x - i, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - i, y - 1, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - i, y - 2, TEXT("GROUND")))
-                            && BuildOrNot(PROBA_LADDER))
+                        if (IsTileUserDataEqual(*BuildingLayer, x + k, y + 1, TEXT("BUILDINGWALL"))
+                            && (IsTileUserDataEqual(*BuildingLayer, x + k, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x + k, y - 1, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x + k, y - 2, TEXT("GROUND")))
+                            && BuildOrNot(proba_calculate))
                         {
-                            SpawnBPTile(Ladder, x - i, y);
+                            SpawnBPTile(Ladder, x + k, y);
+                            PutTileOnGrid(x + k, y, (int32)ETiles::UNDERLADDER, *BuildingLayer);
 
                             isLadder = true;
 
-                            int k = 1;
+                            int l = 1;
 
-                            while (!IsTileUserDataEqual(*BuildingLayer, x - i, y + k, TEXT("GROUND")))
+                            while (!IsTileUserDataEqual(*BuildingLayer, x + k, y + l, TEXT("GROUND")))
                             {
-                                SpawnBPTile(Ladder, x - i, y + k);
-                                PutTileOnGrid(x - i, y, (int32)ETiles::UNDERLADDER, *BuildingLayer);
-                                k++;
+                                SpawnBPTile(Ladder, x + k, y + l);
+                                l++;
                             }
-
-                            k = 1;
                         }
-                        else 
+                        else
                         {
-                            i++;
+                            k++;
                         }
                     }
 
-                    i = 0;
+                    k = 0;
                     isLadder = false;
                 }
+
+                isNotAvailable = 0;
             }
         }
     }
