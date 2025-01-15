@@ -3,15 +3,9 @@
 
 #include "CoreMinimal.h"
 #include "ObjectInGame/Ressource.h"
-
-#include "Game/GameManager.h"
-
 #include "Watch_ressource.generated.h"
 
-/**
- * 
- */
-class AGameManager;
+
 UCLASS()
 class PROJECT_MIRA_DAU_API AWatch_ressource : public ARessource
 {

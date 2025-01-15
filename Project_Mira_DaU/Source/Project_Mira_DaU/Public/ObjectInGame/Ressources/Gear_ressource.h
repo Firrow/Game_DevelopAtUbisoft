@@ -3,7 +3,6 @@
 
 #include "CoreMinimal.h"
 #include "ObjectInGame/Ressource.h"
-#include "Characters/PlayerCharacter.h"
 #include "Gear_ressource.generated.h"
 
 

@@ -6,7 +6,6 @@
 #include "Components/BoxComponent.h"
 #include "TriggerEnding.generated.h"
 
-class UBoxComponent;
 
 UCLASS()
 class PROJECT_MIRA_DAU_API ATriggerEnding : public AActor
@@ -23,5 +22,5 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere, Category = "BoxComponent")
-	UBoxComponent* TriggerWithEnding;
+	class UBoxComponent* TriggerWithEnding;
 };
