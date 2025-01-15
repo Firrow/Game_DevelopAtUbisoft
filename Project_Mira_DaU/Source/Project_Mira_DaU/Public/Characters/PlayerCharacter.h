@@ -16,7 +16,6 @@
 
 class UInputAction;
 class UInputMappingContext;
-class AGameManager;
 
 UCLASS()
 class PROJECT_MIRA_DAU_API APlayerCharacter : public APaperCharacter
@@ -32,7 +31,7 @@ private:
 	bool bIsOnLadder = false;
 	float MaxStepHeightPlayer = 5.0f;
 	TArray<AActor*> OverlappingLadders;
-	AGameManager* GameManager = nullptr;
+	class AGameManager* GameManager = nullptr;
 
 	APlayerCharacter();
 	void MoveRL(const FInputActionValue& InputValue);
