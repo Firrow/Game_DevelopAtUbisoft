@@ -12,6 +12,10 @@ class PROJECT_MIRA_DAU_API AGameManager : public AActor
 	GENERATED_BODY()
 	
 private:	
+
+	int RealTimeValue; //créer getter et setter
+	int GameTimeValue; //créer getter et setter
+
 	int SECONDS_IN_A_DAY = 86400;
 	int TOTAL_PLAYING_TIME = 10; //TODO : Set to 3600 or 1800 when tests are finished
 
@@ -26,7 +30,7 @@ private:
 
 	AGameManager();
 	void TimerManager();
-	int GetTimeInGame(int& RealTime);
+	int GetTimeInGame(const int& RealTime);
 	
 
 protected:
@@ -34,8 +38,6 @@ protected:
 
 
 public:	
-	int RealTimeValue;
-	int GameTimeValue;
 	int NUMBER_OF_GEARS = 3;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
@@ -47,4 +49,12 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	void GameOverEndGame();
 	void VictoryEndGame();
+
+
+
+	int GetRealTimeValue() const;
+	void SetRealTimeValue(int NewValue);
+
+	int GetGameTimeValue() const;
+	void SetGameTimeValue(int NewValue);
 };

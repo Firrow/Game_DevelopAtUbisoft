@@ -29,23 +29,23 @@ void AGameManager::TimerManager()
 {
 	GetWorldTimerManager().SetTimer(timer, FTimerDelegate::CreateLambda([this]() {
 
-		RealTimeValue++;
-		GameTimeValue = GetTimeInGame(RealTimeValue);
-		/*UE_LOG(LogTemp, Display, TEXT("REAL TIME (second) : %i"), RealTimeValue);
-		UE_LOG(LogTemp, Display, TEXT("Time in game (second) : %i"), GameTimeValue);
-		UE_LOG(LogTemp, Display, TEXT("----------------------------------------------------------------------------"));*/
+		SetRealTimeValue(GetRealTimeValue() + 1);
+		SetGameTimeValue(GetTimeInGame(GetRealTimeValue()));
+		UE_LOG(LogTemp, Warning, TEXT("REAL TIME (second) : %i"), RealTimeValue);
+		UE_LOG(LogTemp, Warning, TEXT("Time in game (second) : %i"), GameTimeValue);
+		UE_LOG(LogTemp, Warning, TEXT("----------------------------------------------------------------------------"));
 
-		if (RealTimeValue >= TOTAL_PLAYING_TIME)
+		if (GetRealTimeValue() >= TOTAL_PLAYING_TIME)
 		{
 			GetWorldTimerManager().ClearTimer(timer);
 			GameOverEndGame();
-			UE_LOG(LogTemp, Display, TEXT("STOP GAME !!!!! : %i"), GameTimeValue);
+			UE_LOG(LogTemp, Warning, TEXT("STOP GAME !!!!! : %i"), GameTimeValue);
 		}
 
 	}), 1, true);
 }
 
-int AGameManager::GetTimeInGame(int &RealTime)
+int AGameManager::GetTimeInGame(const int &RealTime)
 {
 	return RealTime * translateSecondsIRLTimeToGameTime;
 }
@@ -64,4 +64,24 @@ void AGameManager::VictoryEndGame()
 {
 	GetWorldTimerManager().ClearTimer(timer);
 	VictoryWidget->AddToViewport();
+}
+
+
+
+int AGameManager::GetRealTimeValue() const
+{
+	return RealTimeValue;
+}
+void AGameManager::SetRealTimeValue(int NewValue)
+{
+	RealTimeValue = NewValue;
+}
+
+int AGameManager::GetGameTimeValue() const
+{
+	return GameTimeValue;
+}
+void AGameManager::SetGameTimeValue(int NewValue)
+{
+	GameTimeValue = NewValue;
 }

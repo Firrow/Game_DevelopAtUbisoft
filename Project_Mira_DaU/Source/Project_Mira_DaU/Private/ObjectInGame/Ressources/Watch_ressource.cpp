@@ -2,6 +2,7 @@
 #include <Characters/PlayerCharacter.h>
 #include "Game/GameManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "Game/GameManager.h"
 #include "ObjectInGame/Ressources/Watch_ressource.h"
 
 void AWatch_ressource::BeginPlay()
@@ -18,7 +19,7 @@ void AWatch_ressource::RessourceEffect()
 
     if (GameManager != nullptr)
     {
-        GameManager->RealTimeValue -= TIME_IN_WATCH; //Update RealTime to change TimeInGame
+        GameManager->SetRealTimeValue(GameManager->GetRealTimeValue() - TIME_IN_WATCH);
     }
 }
 
