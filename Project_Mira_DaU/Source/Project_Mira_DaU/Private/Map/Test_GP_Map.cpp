@@ -89,13 +89,15 @@ void ATest_GP_Map::GenerateWorld()
     {
         for (int32 x = 0; x < GridWidth; x++)
         {
+            // 1) Vérification si on est en début de plateforme
             if (IsTileUserDataEqual(*BuildingLayer, x, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - 1, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - 2, y, TEXT("GROUND"))) //si bord gauche plateforme et qu'une échelle ne vient pas d'être placée
             {
                 int isNotAvailable = 0;
-                //calcul disponibilité à gauche
+
+                // 2) calcul de l'accessibilité de la plateforme
+                // calcul disponibilité à gauche
                 for (int i = 1; i <= 3; i++)
                 {
-                    // check if a ground is available in player jump range (down only)
                     if (!IsTileUserDataEqual(*BuildingLayer, x - i, y + i, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - i, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - i, y - i, TEXT("GROUND")))
                     {
                         isNotAvailable++;
@@ -107,10 +109,9 @@ void ATest_GP_Map::GenerateWorld()
                     [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileUserDataEqual(layer, x, y, TEXT("GROUND")) && IsTileUserDataEqual(layer, x + 1, y, TEXT("GROUND")); },
                     [](int& x, int& y) { x++; });
 
-
+                // calcul disponibilité à droite
                 for (int j = 1; j <= 3; j++)
                 {
-                    // check if a ground is available in player jump range (down only)
                     if (!IsTileUserDataEqual(*BuildingLayer, x + plateformLength + j, y + j, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x + plateformLength + j, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x + plateformLength + j, y - j, TEXT("GROUND")))
                     {
                         isNotAvailable++;
@@ -118,6 +119,7 @@ void ATest_GP_Map::GenerateWorld()
                 }
 
 
+                // 3) Calcul la probabilité de spawn de l'échelle en fonction de l'accessibilité
                 int proba_calculate;
                 if (isNotAvailable == 6)
                 {
@@ -128,18 +130,23 @@ void ATest_GP_Map::GenerateWorld()
                     proba_calculate = PROBA_LADDER;
                 }
                 
-
+                // Si l'échelle n'est pas accessible facilement
                 if (isNotAvailable >= 4)
                 {
                     bool isLadder = false;
                     int k = 0;
 
+                    // 4) parcourir la plateforme tant qu'il n'y a pas d'échelle
                     while (!isLadder && IsTileUserDataEqual(*BuildingLayer, x + k, y, TEXT("GROUND")))
                     {
+                        // S'il y a un mur en dessous du sol
+                        // et si les deux tuiles du dessous ne sont pas des sols
+                        // et si la probabilité de placer une échelle est bonne
                         if (IsTileUserDataEqual(*BuildingLayer, x + k, y + 1, TEXT("BUILDINGWALL"))
-                            && (IsTileUserDataEqual(*BuildingLayer, x + k, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x + k, y - 1, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x + k, y - 2, TEXT("GROUND")))
+                            && (!IsTileUserDataEqual(*BuildingLayer, x + k, y - 1, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x + k, y - 2, TEXT("GROUND")))
                             && BuildOrNot(proba_calculate))
                         {
+                            // 5) Placer le haut de l'échelle et changer la tuile du dessous pour que l'échelle soit accessible par le joueur
                             SpawnBPTile(Ladder, x + k, y);
                             PutTileOnGrid(x + k, y, (int32)ETiles::UNDERLADDER, *BuildingLayer);
 
@@ -147,6 +154,7 @@ void ATest_GP_Map::GenerateWorld()
 
                             int l = 1;
 
+                            // 6) Placer le reste de l'échelle jusqu'au prochain sol
                             while (!IsTileUserDataEqual(*BuildingLayer, x + k, y + l, TEXT("GROUND")))
                             {
                                 SpawnBPTile(Ladder, x + k, y + l);
