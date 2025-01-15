@@ -54,12 +54,16 @@ private:
 	bool IsTileUserDataEqual(UPaperTileLayer& layer, int x, int y, FString tileType);
 	bool IsTileNull(UPaperTileLayer& layer, int x, int y);
 	int CountTiles(UPaperTileLayer& layer, int x, int y, TFunction<bool(UPaperTileLayer&, int, int)> condition, TFunction<void(int&, int&)> iteration);
-	bool BuildOrNot(int const probability);
 	void PutTileOnGrid(int const x, int const y, int32 tile, UPaperTileLayer& layer);
-	void CreateBackLedge(int const x, int const y, UPaperTileLayer& layer);
 	FVector ConvertGridPositionToWorldPosition(const int x, const int y);
 	void SpawnBPTile(TSubclassOf<AInteractible>& BPTile, const int x, const int y);
 
+	bool BuildOrNot(int const probability);
+	int PlateformIsAccessibleOrNot(UPaperTileLayer& layer, int x, int y, int const currentPlateformLength);
+	void CreateLadderOrNot(UPaperTileLayer& layer, int x, int y, int const probability);
+
+	void ContinueLadder(UPaperTileLayer& layer, int x, int y);
+	void CreateBackLedge(int const x, int const y, UPaperTileLayer& layer);
 	void CreateBuilding(int const x, int const y, int& width, int& availableFloorSpace, UPaperTileLayer& layer);
 	void ContinueBuilding(int const x, int const y, UPaperTileLayer& layer);
 
@@ -93,7 +97,10 @@ public:
 	int PROBA_FRONT_LEDGE = 8;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
-	int PROBA_LADDER = 8; //
+	int PROBA_LADDER = 8;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
+	int VALUE_PLATEFORM_IS_NOT_AVAILABLE = 4;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")

@@ -58,8 +58,8 @@ void ATest_GP_Map::GenerateWorld()
     // ETAPE 4 : Création d'un nouveau calque pour poser les tuiles
     UPaperTileLayer* BuildingLayer = TileMap->AddNewLayer();
 
-    // ETAPE 5 : Placement des murs dans la grille
-    for (int32 y = GridHeight; y >= 0; y--) // - 1
+    // ETAPE 5 : LAYER BUILDINGS - Placement des murs dans la grille
+    for (int32 y = GridHeight; y >= 0; y--)
     {
         int BuildingWidth = 0;
         int availableFloorSpace = 0;
@@ -84,94 +84,33 @@ void ATest_GP_Map::GenerateWorld()
         }
     }
 
-    // ETAPE 6 : Placement des éléments interactibles dans la map
-    for (int32 y = GridHeight - 2; y >= 0; y--) // - 1
+    // ETAPE 6 : LAYER INTERACTIBLES - Placement des éléments interactibles dans la map
+    for (int32 y = GridHeight - MIN_HEIGHT_BUILDING; y >= 0; y--)
     {
         for (int32 x = 0; x < GridWidth; x++)
         {
-            // 1) Vérification si on est en début de plateforme
+            // Vérification si on est en début de plateforme
             if (IsTileUserDataEqual(*BuildingLayer, x, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - 1, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - 2, y, TEXT("GROUND"))) //si bord gauche plateforme et qu'une échelle ne vient pas d'être placée
             {
-                int isNotAvailable = 0;
-
-                // 2) calcul de l'accessibilité de la plateforme
-                // calcul disponibilité à gauche
-                for (int i = 1; i <= 3; i++)
-                {
-                    if (!IsTileUserDataEqual(*BuildingLayer, x - i, y + i, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - i, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - i, y - i, TEXT("GROUND")))
-                    {
-                        isNotAvailable++;
-                    }
-                }
-
-                int plateformLength = CountTiles(
+                // TODO : Voir si besoin de réorganiser la partie suivante en fonction du spawn des portes et des coffres
+                // 1) Calcul à quelle point la plateforme est accessible ou non depuis d'autres plateformes
+                int currentPlateformAccessibility = PlateformIsAccessibleOrNot(*BuildingLayer, x, y, CountTiles(
                     *BuildingLayer, x, y,
                     [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileUserDataEqual(layer, x, y, TEXT("GROUND")) && IsTileUserDataEqual(layer, x + 1, y, TEXT("GROUND")); },
-                    [](int& x, int& y) { x++; });
+                    [](int& x, int& y) { x++; }));
 
-                // calcul disponibilité à droite
-                for (int j = 1; j <= 3; j++)
+                // 2) Calcul la probabilité de spawn de l'échelle en fonction de l'accessibilité
+                int proba_calculate = PROBA_LADDER;
+                if (currentPlateformAccessibility == 6)
                 {
-                    if (!IsTileUserDataEqual(*BuildingLayer, x + plateformLength + j, y + j, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x + plateformLength + j, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x + plateformLength + j, y - j, TEXT("GROUND")))
-                    {
-                        isNotAvailable++;
-                    }
-                }
-
-
-                // 3) Calcul la probabilité de spawn de l'échelle en fonction de l'accessibilité
-                int proba_calculate;
-                if (isNotAvailable == 6)
-                {
-                    proba_calculate = PROBA_LADDER * isNotAvailable;
-                }
-                else
-                {
-                    proba_calculate = PROBA_LADDER;
+                    proba_calculate *= currentPlateformAccessibility;
                 }
                 
-                // Si l'échelle n'est pas accessible facilement
-                if (isNotAvailable >= 4)
+                // 3) Si l'échelle n'est pas accessible facilement, on regarde si l'on place une échelle ou non
+                if (currentPlateformAccessibility >= VALUE_PLATEFORM_IS_NOT_AVAILABLE)
                 {
-                    bool isLadder = false;
-                    int k = 0;
-
-                    // 4) parcourir la plateforme tant qu'il n'y a pas d'échelle
-                    while (!isLadder && IsTileUserDataEqual(*BuildingLayer, x + k, y, TEXT("GROUND")))
-                    {
-                        // S'il y a un mur en dessous du sol
-                        // et si les deux tuiles du dessous ne sont pas des sols
-                        // et si la probabilité de placer une échelle est bonne
-                        if (IsTileUserDataEqual(*BuildingLayer, x + k, y + 1, TEXT("BUILDINGWALL"))
-                            && (!IsTileUserDataEqual(*BuildingLayer, x + k, y - 1, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x + k, y - 2, TEXT("GROUND")))
-                            && BuildOrNot(proba_calculate))
-                        {
-                            // 5) Placer le haut de l'échelle et changer la tuile du dessous pour que l'échelle soit accessible par le joueur
-                            SpawnBPTile(Ladder, x + k, y);
-                            PutTileOnGrid(x + k, y, (int32)ETiles::UNDERLADDER, *BuildingLayer);
-
-                            isLadder = true;
-
-                            int l = 1;
-
-                            // 6) Placer le reste de l'échelle jusqu'au prochain sol
-                            while (!IsTileUserDataEqual(*BuildingLayer, x + k, y + l, TEXT("GROUND")))
-                            {
-                                SpawnBPTile(Ladder, x + k, y + l);
-                                l++;
-                            }
-                        }
-                        else
-                        {
-                            k++;
-                        }
-                    }
-
-                    k = 0;
-                    isLadder = false;
+                    CreateLadderOrNot(*BuildingLayer, x, y, proba_calculate);
                 }
-
-                isNotAvailable = 0;
             }
         }
     }
@@ -180,21 +119,34 @@ void ATest_GP_Map::GenerateWorld()
     MyTileMapComponent->RebuildCollision();
 }
 
-bool ATest_GP_Map::IsTileUserDataEqual(UPaperTileLayer& layer,  int x, int y, FString tileType)
+
+
+// TILE MANAGEMENT
+/// <summary>
+/// Return true or false depending on whether the given tile (in x ; y) has the same type than the given type
+/// </summary>
+/// <param name="layer"></param>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="tileType"></param>
+/// <returns></returns>
+bool ATest_GP_Map::IsTileUserDataEqual(UPaperTileLayer& layer, int x, int y, FString tileType)
 {
     FPaperTileInfo TileInfoCell = layer.GetCell(x, y);
     return TileInfoCell.TileSet && TileInfoCell.TileSet->GetTileUserData(TileInfoCell.PackedTileIndex).ToString() == tileType;
 }
- 
+
+/// <summary>
+/// Detect if given tile has asset associated
+/// </summary>
+/// <param name="layer"></param>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <returns></returns>
 bool ATest_GP_Map::IsTileNull(UPaperTileLayer& layer, int x, int y)
 {
     FPaperTileInfo TileInfoCell = layer.GetCell(x, y);
     return !TileInfoCell.TileSet;
-}
-
-bool ATest_GP_Map::BuildOrNot(int const probability)
-{
-    return Stream.RandRange(0, 99) < probability;
 }
 
 /// <summary>
@@ -219,7 +171,13 @@ int ATest_GP_Map::CountTiles(UPaperTileLayer& layer, int x, int y, TFunction<boo
     }
 }
 
-// Eh you là-bas ! Near the betonneuse ! Put the ciment on the poteau please !
+/// <summary>
+/// Eh you là-bas ! Near the betonneuse ! Put the ciment on the poteau please !
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="tile"></param>
+/// <param name="layer"></param>
 void ATest_GP_Map::PutTileOnGrid(int const x, int const y, int32 tile, UPaperTileLayer& layer)
 {
     FPaperTileInfo TileInfo;
@@ -229,9 +187,133 @@ void ATest_GP_Map::PutTileOnGrid(int const x, int const y, int32 tile, UPaperTil
     MyTileMapComponent->SetTile(x, y, layer.GetLayerIndex(), TileInfo);
 }
 
+/// <summary>
+/// Takes a world position and convert it in tile coordinate if it's possible (useful for BP Tiles)
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <returns></returns>
+FVector ATest_GP_Map::ConvertGridPositionToWorldPosition(const int x, const int y)
+{
+    return FVector(x * TileSize, 0.0f, y * -TileSize);
+}
+
+/// <summary>
+/// Spawn Blueprint tiles type (interactibles tiles)
+/// </summary>
+/// <param name="BPTile"></param>
+/// <param name="x"></param>
+/// <param name="y"></param>
+void ATest_GP_Map::SpawnBPTile(TSubclassOf<AInteractible>& BPTile, const int x, const int y)
+{
+    GetWorld()->SpawnActor<AActor>(BPTile, ConvertGridPositionToWorldPosition(x, y), FRotator::ZeroRotator);
+}
+
+
+
+// DECISION MANAGEMENT
+/// <summary>
+/// Return true or false depending on whether the given probability is upper than the random number between (0 ; 99)
+/// If return is true, script can construct something, else it cannot
+/// </summary>
+/// <param name="probability"></param>
+/// <returns></returns>
+bool ATest_GP_Map::BuildOrNot(int const probability)
+{
+    return Stream.RandRange(0, 99) < probability;
+}
+
+/// <summary>
+/// Check if a plateform is accessible from others or not. More returned int is big (between 0 and 6), more the plateform is isolated
+/// </summary>
+/// <param name="layer"></param>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="currentPlateformLength"></param>
+/// <returns></returns>
+int ATest_GP_Map::PlateformIsAccessibleOrNot(UPaperTileLayer& layer, int x, int y, int const currentPlateformLength)
+{
+    int currentPlateformAvailability = 0;
+
+    for (int i = 1; i <= 3; i++)
+    {
+        if (!IsTileUserDataEqual(layer, x - i, y + i, TEXT("GROUND")) && !IsTileUserDataEqual(layer, x - i, y, TEXT("GROUND")) && !IsTileUserDataEqual(layer, x - i, y - i, TEXT("GROUND")))
+        {
+            currentPlateformAvailability++;
+        }
+        if (!IsTileUserDataEqual(layer, x + currentPlateformLength + i, y + i, TEXT("GROUND")) && !IsTileUserDataEqual(layer, x + currentPlateformLength + i, y, TEXT("GROUND")) && !IsTileUserDataEqual(layer, x + currentPlateformLength + i, y - i, TEXT("GROUND")))
+        {
+            currentPlateformAvailability++;
+        }
+    }
+
+    return currentPlateformAvailability;
+}
+
+/// <summary>
+/// Decide, depending on draw, if it put a ladder on plateform or not
+/// </summary>
+/// <param name="layer"></param>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="probability"></param>
+void ATest_GP_Map::CreateLadderOrNot(UPaperTileLayer& layer, int x, int y, int const probability)
+{
+    bool isLadder = false;
+    int i = 0;
+
+    // Parcours la plateforme tant qu'il n'y a pas d'échelle
+    while (!isLadder && IsTileUserDataEqual(layer, x + i, y, TEXT("GROUND")))
+    {
+        // S'il y a un mur en dessous du sol
+        // et si les deux tuiles du dessous ne sont pas des sols
+        // et si la probabilité de placer une échelle est bonne
+        if (IsTileUserDataEqual(layer, x + i, y + 1, TEXT("BUILDINGWALL"))
+            && (!IsTileUserDataEqual(layer, x + i, y - 1, TEXT("GROUND")) && !IsTileUserDataEqual(layer, x + i, y - 2, TEXT("GROUND")))
+            && BuildOrNot(probability))
+        {
+            // Placer le haut de l'échelle et changer la tuile du dessous pour que l'échelle soit accessible par le joueur
+            ContinueLadder(layer, x + i, y);
+
+            isLadder = true;
+        }
+        else
+        {
+            i++;
+        }
+    }
+}
+
+
+
+// CREATE ELEMENT IN MAP
+
+/// <summary>
+/// Put Ladder on map
+/// </summary>
+void ATest_GP_Map::ContinueLadder(UPaperTileLayer& layer, int x, int y) //call x + i
+{
+    // First ladder's tile
+    SpawnBPTile(Ladder, x, y);
+    PutTileOnGrid(x, y, (int32)ETiles::UNDERLADDER, layer);
+
+    int h = 1;
+
+    while (!IsTileUserDataEqual(layer, x, y + h, TEXT("GROUND")))
+    {
+        SpawnBPTile(Ladder, x, y + h);
+        h++;
+    }
+}
+
+/// <summary>
+/// Create an extention for the plateform (to his left)
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="layer"></param>
 void ATest_GP_Map::CreateBackLedge(int const x, int const y, UPaperTileLayer& layer)
 {
-
     // BACK LEDGES : On prend en compte le nombre de tuile vide précédente pour avoir plus de chance d'avoir une corniche arrière si le nombre de tuile vide est faible
     int numberOfTile = CountTiles(
         layer, x - 1, y,
@@ -250,16 +332,14 @@ void ATest_GP_Map::CreateBackLedge(int const x, int const y, UPaperTileLayer& la
     }
 }
 
-FVector ATest_GP_Map::ConvertGridPositionToWorldPosition(const int x, const int y)
-{
-    return FVector(x * TileSize, 0.0f, y * -TileSize);
-}
-
-void ATest_GP_Map::SpawnBPTile(TSubclassOf<AInteractible>& BPTile, const int x, const int y)
-{
-    GetWorld()->SpawnActor<AActor>(BPTile, ConvertGridPositionToWorldPosition(x, y), FRotator::ZeroRotator);
-}
-
+/// <summary>
+/// Put the first tile on ground to create a building. This function allows ContinueBuilding() to construct the rest of the building
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="width"></param>
+/// <param name="availableFloorSpace"></param>
+/// <param name="layer"></param>
 void ATest_GP_Map::CreateBuilding(int const x, int const y, int& width, int& availableFloorSpace, UPaperTileLayer& layer)
 {
     if (width == 0)
@@ -302,15 +382,21 @@ void ATest_GP_Map::CreateBuilding(int const x, int const y, int& width, int& ava
     }
 }
 
+/// <summary>
+/// Put tile on grid according to context. This function is structurated according to all available tiles to create building
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="layer"></param>
 void ATest_GP_Map::ContinueBuilding(int const x, int const y, UPaperTileLayer& layer)
 {
-    // Construction en Hauteur (on est pas sur le sol)
+    // Construction en Hauteur (on est plus sur le sol)
     int heightBuilding = CountTiles(
         layer, x, y,
         [this](UPaperTileLayer& layer, int x, int y) -> bool { return !IsTileUserDataEqual(layer, x, y, TEXT("GROUND")); },
         [](int& x, int& y) { y++; });
 
-    //START
+    //STARTBUILDING
     if (y > 0 && IsTileUserDataEqual(layer, x, y + 1, TEXT("STARTBUILDING"))
         && (heightBuilding <= MIN_HEIGHT_BUILDING
             || (heightBuilding < MAX_HEIGHT_BUILDING && BuildOrNot(PROBA_EXTEND_BUILD_HEIGHT))))
@@ -323,7 +409,7 @@ void ATest_GP_Map::ContinueBuilding(int const x, int const y, UPaperTileLayer& l
     {
         PutTileOnGrid(x, y, (int32)ETiles::BUILDINGWALL, layer);
     }
-    //END
+    //ENDBUILDING
     else if (IsTileUserDataEqual(layer, x, y + 1, TEXT("ENDBUILDING")) && !IsTileUserDataEqual(layer, x - 1, y, TEXT("GROUND")))
     {
         PutTileOnGrid(x, y, (int32)ETiles::ENDBUILDING, layer);
@@ -331,14 +417,14 @@ void ATest_GP_Map::ContinueBuilding(int const x, int const y, UPaperTileLayer& l
     //GROUND
     else if (
         //On pose un sol si
-        // La tuile en dessous n'est pas vide ET qu'elle n'est pas un sol
-        // OU (corniche avant) que la tuile en dessous est nulle
+        // La tuile est à la dernière ligne de la grille et que la tuile du dessous n'est pas vide ou n'est pas un sol
+        // OU La tuile en dessous n'est pas vide ET qu'elle n'est pas un sol
+        // OU (corniche avant) que les 2 tuiles en dessous sont nulles
         //      ET que la tuile avant est un sol
         //      ET que la probabilité de poser un sol soit bonne
         ((y == 0 && !IsTileNull(layer, x, y + 1) && !IsTileUserDataEqual(layer, x, y + 1, TEXT("GROUND")))
-            || !IsTileNull(layer, x, y + 1) && (!IsTileUserDataEqual(layer, x, y + 1, TEXT("GROUND"))))
-        || (IsTileNull(layer, x, y + 1)
-            && IsTileNull(layer, x, y + 2)
+        || !IsTileNull(layer, x, y + 1) && (!IsTileUserDataEqual(layer, x, y + 1, TEXT("GROUND"))))
+        || (IsTileNull(layer, x, y + 1) && IsTileNull(layer, x, y + 2)
             && IsTileUserDataEqual(layer, x - 1, y, TEXT("GROUND"))
             && BuildOrNot(CountTiles(
                 layer, x - 1, y,
@@ -346,7 +432,6 @@ void ATest_GP_Map::ContinueBuilding(int const x, int const y, UPaperTileLayer& l
                 [](int& x, int& y) { x--; }) * PROBA_FRONT_LEDGE)))
         // FRONT LEDGE : On prend en compte le nombre de tuile sol précédente pour avoir une taille de corniche cohérente avec la taille du batiment
     {
-
         // Placer une mur en dessous de la ground
         PutTileOnGrid(x, y, (int32)ETiles::GROUND, layer);
 
