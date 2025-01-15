@@ -81,6 +81,7 @@ int AGameManager::GetGameTimeValue() const
 {
 	return GameTimeValue;
 }
+
 void AGameManager::SetGameTimeValue(int NewValue)
 {
 	GameTimeValue = NewValue;
