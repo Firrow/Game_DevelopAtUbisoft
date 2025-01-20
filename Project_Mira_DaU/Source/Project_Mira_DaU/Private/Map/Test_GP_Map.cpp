@@ -97,16 +97,15 @@ void ATest_GP_Map::GenerateWorld()
                 {
                     CalculateLadderSpawnProbability(x, y, *BuildingLayer);
                 }
-                // PLACEMENT DES COFFRES
-                if (true)
-                {
 
-                }
             }
         }
     }
 
-    // ETAPE 7 : MAJ des collisions des tuiles
+    // ETAPE 7 : AJOUT DU GAMEMANAGER
+    GetWorld()->SpawnActor<AActor>(GameManager, FVector(0, 0, 0), FRotator::ZeroRotator);
+
+    // ETAPE 8 : MAJ des collisions des tuiles
     MyTileMapComponent->RebuildCollision();
 }
 
