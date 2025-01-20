@@ -90,26 +90,17 @@ void ATest_GP_Map::GenerateWorld()
         for (int32 x = 0; x < GridWidth; x++)
         {
             // Vérification si on est en début de plateforme
-            if (IsTileUserDataEqual(*BuildingLayer, x, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - 1, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - 2, y, TEXT("GROUND"))) //si bord gauche plateforme et qu'une échelle ne vient pas d'être placée
+            if (IsTileUserDataEqual(*BuildingLayer, x, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - 1, y, TEXT("GROUND"))) //si bord gauche plateforme et qu'une échelle ne vient pas d'être placée
             {
-                // TODO : Voir si besoin de réorganiser la partie suivante en fonction du spawn des portes et des coffres
-                // 1) Calcul à quelle point la plateforme est accessible ou non depuis d'autres plateformes
-                int currentPlateformAccessibility = PlateformIsAccessibleOrNot(*BuildingLayer, x, y, CountTiles(
-                    *BuildingLayer, x, y,
-                    [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileUserDataEqual(layer, x, y, TEXT("GROUND")) && IsTileUserDataEqual(layer, x + 1, y, TEXT("GROUND")); },
-                    [](int& x, int& y) { x++; }));
-
-                // 2) Calcul la probabilité de spawn de l'échelle en fonction de l'accessibilité
-                int proba_calculate = PROBA_LADDER;
-                if (currentPlateformAccessibility == 6)
+                // PLACEMENT DES ÉCHELLES
+                if (!IsTileUserDataEqual(*BuildingLayer, x - 2, y, TEXT("GROUND")))
                 {
-                    proba_calculate *= currentPlateformAccessibility;
+                    CalculateLadderSpawnProbability(x, y, *BuildingLayer);
                 }
-                
-                // 3) Si l'échelle n'est pas accessible facilement, on regarde si l'on place une échelle ou non
-                if (currentPlateformAccessibility >= VALUE_PLATEFORM_IS_NOT_AVAILABLE)
+                // PLACEMENT DES COFFRES
+                if (true)
                 {
-                    CreateLadderOrNot(*BuildingLayer, x, y, proba_calculate);
+
                 }
             }
         }
@@ -251,13 +242,41 @@ int ATest_GP_Map::PlateformIsAccessibleOrNot(UPaperTileLayer& layer, int x, int 
 }
 
 /// <summary>
+/// Check plateform accessibility and calculate a probability for this plateform to have a ladder
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="layer"></param>
+void ATest_GP_Map::CalculateLadderSpawnProbability(int const x, int const y, UPaperTileLayer& layer)
+{
+    // 1) Calcul à quelle point la plateforme est accessible ou non depuis d'autres plateformes
+    int currentPlateformAccessibility = PlateformIsAccessibleOrNot(layer, x, y, CountTiles(
+        layer, x, y,
+        [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileUserDataEqual(layer, x, y, TEXT("GROUND")) && IsTileUserDataEqual(layer, x + 1, y, TEXT("GROUND")); },
+        [](int& x, int& y) { x++; }));
+
+    // 2) Calcul la probabilité de spawn de l'échelle en fonction de l'accessibilité
+    int proba_calculate = PROBA_LADDER;
+    if (currentPlateformAccessibility == 6)
+    {
+        proba_calculate *= currentPlateformAccessibility;
+    }
+
+    // 3) Si l'échelle n'est pas accessible facilement, on regarde si l'on place une échelle ou non
+    if (currentPlateformAccessibility >= VALUE_PLATEFORM_IS_NOT_AVAILABLE)
+    {
+        ChooseLadderSpawnPoint(layer, x, y, proba_calculate);
+    }
+}
+
+/// <summary>
 /// Decide, depending on draw, if it put a ladder on plateform or not
 /// </summary>
 /// <param name="layer"></param>
 /// <param name="x"></param>
 /// <param name="y"></param>
 /// <param name="probability"></param>
-void ATest_GP_Map::CreateLadderOrNot(UPaperTileLayer& layer, int x, int y, int const probability)
+void ATest_GP_Map::ChooseLadderSpawnPoint(UPaperTileLayer& layer, int x, int y, int const probability)
 {
     bool isLadder = false;
     int i = 0;
@@ -273,7 +292,7 @@ void ATest_GP_Map::CreateLadderOrNot(UPaperTileLayer& layer, int x, int y, int c
             && BuildOrNot(probability))
         {
             // Placer le haut de l'échelle et changer la tuile du dessous pour que l'échelle soit accessible par le joueur
-            ContinueLadder(layer, x + i, y);
+            CreateLadder(layer, x + i, y);
 
             isLadder = true;
         }
@@ -291,7 +310,7 @@ void ATest_GP_Map::CreateLadderOrNot(UPaperTileLayer& layer, int x, int y, int c
 /// <summary>
 /// Put Ladder on map
 /// </summary>
-void ATest_GP_Map::ContinueLadder(UPaperTileLayer& layer, int x, int y) //call x + i
+void ATest_GP_Map::CreateLadder(UPaperTileLayer& layer, int x, int y) //call x + i
 {
     // First ladder's tile
     SpawnBPTile(Ladder, x, y);
