@@ -60,12 +60,16 @@ private:
 
 	bool BuildOrNot(int const probability);
 	int PlateformIsAccessibleOrNot(UPaperTileLayer& layer, int x, int y, int const currentPlateformLength);
-	void CreateLadderOrNot(UPaperTileLayer& layer, int x, int y, int const probability);
+	void ChooseLadderSpawnPoint(UPaperTileLayer& layer, int x, int y, int const probability);
 
-	void ContinueLadder(UPaperTileLayer& layer, int x, int y);
+	void CreateLadder(UPaperTileLayer& layer, int x, int y);
 	void CreateBackLedge(int const x, int const y, UPaperTileLayer& layer);
 	void CreateBuilding(int const x, int const y, int& width, int& availableFloorSpace, UPaperTileLayer& layer);
 	void ContinueBuilding(int const x, int const y, UPaperTileLayer& layer);
+
+
+
+	void CalculateLadderSpawnProbability(int const x, int const y, UPaperTileLayer& layer);
 
 protected:
 	virtual void BeginPlay() override;
@@ -118,4 +122,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
 	TSubclassOf<AInteractible> Ladder;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
+	TSubclassOf<AInteractible> Chest;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
+	int CHEST_QUANTITY = 14;
 };
