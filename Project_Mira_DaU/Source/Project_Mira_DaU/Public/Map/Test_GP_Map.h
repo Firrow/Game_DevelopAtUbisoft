@@ -5,12 +5,15 @@
 #include "GameFramework/Actor.h"
 #include "PaperTileMapActor.h"
 #include "ObjectInGame/Interactible.h"
+#include "ObjectInGame/Ressource.h"
+#include "Game/GameManager.h"
 #include "Test_GP_Map.generated.h"
 
 class PaperTileMapComponent;
 class UPaperTileSet;
 class UPaperTileMap;
 class UPaperTileLayer;
+class AGameManager;
 
 
 UENUM(BlueprintType)
@@ -119,11 +122,17 @@ public:
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
+	TSubclassOf<AGameManager> GameManager;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
 	TSubclassOf<AInteractible> Ladder;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
 	TSubclassOf<AInteractible> Chest;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
-	int CHEST_QUANTITY = 14;
+	TMap<FString, TSubclassOf<ARessource>> RessourcesType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
+	TMap<FString, int> RessourcesQuantity;
 };
