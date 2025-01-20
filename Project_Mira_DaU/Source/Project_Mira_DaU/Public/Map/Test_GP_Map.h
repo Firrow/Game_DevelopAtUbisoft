@@ -24,6 +24,7 @@ enum class ETiles : uint8 {
 	TEMP = 48 UMETA(DisplayName = "TEMP")
 };
 
+
 USTRUCT(BlueprintType) 
 struct FSeed
 {
@@ -60,16 +61,13 @@ private:
 
 	bool BuildOrNot(int const probability);
 	int PlateformIsAccessibleOrNot(UPaperTileLayer& layer, int x, int y, int const currentPlateformLength);
+	void CalculateLadderSpawnProbability(int const x, int const y, UPaperTileLayer& layer);
 	void ChooseLadderSpawnPoint(UPaperTileLayer& layer, int x, int y, int const probability);
 
 	void CreateLadder(UPaperTileLayer& layer, int x, int y);
 	void CreateBackLedge(int const x, int const y, UPaperTileLayer& layer);
 	void CreateBuilding(int const x, int const y, int& width, int& availableFloorSpace, UPaperTileLayer& layer);
 	void ContinueBuilding(int const x, int const y, UPaperTileLayer& layer);
-
-
-
-	void CalculateLadderSpawnProbability(int const x, int const y, UPaperTileLayer& layer);
 
 protected:
 	virtual void BeginPlay() override;
