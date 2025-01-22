@@ -21,7 +21,7 @@ private:
 public:
 
 	UPROPERTY(EditAnywhere, Category = "Global Informations")
-	TArray<TSubclassOf<ARessource>> RessourceInside;
+	TArray<TSubclassOf<ARessource>> RessourceInside = {nullptr};
 
 	UPROPERTY(VisibleAnywhere, Category = "Global Informations") //temporaire ? vérifier après si le container a toujours son objet ?
 	bool isEmpty = false;

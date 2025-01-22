@@ -139,8 +139,12 @@ void ATest_GP_Map::GenerateWorld()
             else if (IsTileUserDataEqual(*BuildingLayer, x, y + 1, TEXT("GROUND")))
             {
                 // PLACEMENT DES COFFRES
+                // 
+                // TODO : CHANGER FORMULE SPAWN
+                // TODO : A CLEAN
+                // 
                 // Si aucun BP n'est présent sur la tuile
-                if (!BPPositionInGrid.Contains(FVector2D(x, y)))
+                if (TotalRessourcesQuantity > 0 && !BPPositionInGrid.Contains(FVector2D(x, y)))
                 {
                     // 1) Calculer la probabilité de spawn
                     int proba_calculate = ((GridWidth * GridHeight) / TotalRessourcesQuantity) / 200;
@@ -152,18 +156,24 @@ void ATest_GP_Map::GenerateWorld()
                         SpawnBPTile(Chest, x, y);
                         AInteractible* newChest = FindInteractibleAtGridPosition(x, y);
 
-                        if (Cast<AContainer>(newChest))
+                        if (AContainer* newContainer = Cast<AContainer>(newChest))
                         {
                             // 3) Tirer au hasard un objet parmi la liste RessourcesQuantity ayant une quantité > 0 
-                                // a) tirer un nombre au hasard entre 0 et RessourceType.Num() - 1
-                                // b) tant que RessourceQuantity[num] == 0
-                                        //num + 1
+                            int IDObject = Stream.RandRange(0, RessourcesType.Num() - 1);
+                            
+                            while (GameManager->RessourcesQuantity[IDObject] == 0)
+                            {
+                                IDObject = (IDObject + 1) % GameManager->RessourcesQuantity.Num();
+                            }
 
-                            // 4) Assigner un objet de la liste RessourcesType dans le coffre créé
-                            //newChest->GetComponentByClass<AContainer>()->RessourceInside.Add();
-
-
+                            if (newContainer->RessourceInside.Num() == 0 || newContainer->RessourceInside[0] == nullptr)
+                            {
+                                // 4) Assigner un objet de la liste RessourcesType dans le coffre créé
+                                newContainer->RessourceInside.Add(RessourcesType[IDObject]);
+                            }
                             // 5) Mettre à jour la quantité de cette objet dans la liste RessourcesQuantity
+                            GameManager->RessourcesQuantity[IDObject]--;
+                            TotalRessourcesQuantity--;
                         }
                     }
 
@@ -172,11 +182,7 @@ void ATest_GP_Map::GenerateWorld()
         }
     }
 
-    // ETAPE 7 : AJOUT DU GAMEMANAGER
-    // TODO : A SUPPRIMER ? 
-    //GetWorld()->SpawnActor<AActor>(GameManager, FVector(0, 0, 0), FRotator::ZeroRotator);
-
-    // ETAPE 8 : MAJ des collisions des tuiles
+    // ETAPE 7 : MAJ des collisions des tuiles
     MyTileMapComponent->RebuildCollision();
 }
 
