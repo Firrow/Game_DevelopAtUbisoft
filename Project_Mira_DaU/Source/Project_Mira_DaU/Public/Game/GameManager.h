@@ -38,7 +38,15 @@ protected:
 
 
 public:	
-	int NUMBER_OF_GEARS = 3;
+	virtual void Tick(float DeltaTime) override;
+	void GameOverEndGame();
+	void VictoryEndGame();
+
+
+	int NUMBER_OF_GEARS;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DEBUGING SECTION")
+	bool ActiveTimer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UUserWidget> GameOverWidgetClass;
@@ -46,9 +54,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UUserWidget> VictoryWidgetClass;
 
-	virtual void Tick(float DeltaTime) override;
-	void GameOverEndGame();
-	void VictoryEndGame();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
+	TMap<int, int> RessourcesQuantity;
 
 
 
