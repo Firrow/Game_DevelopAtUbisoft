@@ -5,6 +5,10 @@
 #include "PaperTileLayer.h"
 #include "Math/UnrealMathUtility.h"
 #include "Templates/Function.h"
+#include "Kismet/GameplayStatics.h"
+
+#include "ObjectInGame/Container.h"
+
 #include "Map/Test_GP_Map.h"
 
 
@@ -24,9 +28,41 @@ void ATest_GP_Map::BeginPlay()
 {
 	Super::BeginPlay();
 
-    UE_LOG(LogTemp, Warning, TEXT("SEED : % d"), SEED.value);
+    GetGameManager();
+    CalculateTotalRessourcesQuantity();
 	
 	GenerateWorld();
+}
+
+// MAP INITIALIZATION
+void ATest_GP_Map::GetGameManager()
+{
+    UWorld* World = GetWorld();
+    if (!World)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("World is not available!"));
+    }
+
+    TArray<AActor*> FoundActors;
+    UGameplayStatics::GetAllActorsWithTag(World, FName("GameManager"), FoundActors);
+    if (FoundActors.Num() > 0)
+    {
+        GameManager = Cast<AGameManager>(FoundActors[0]);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("No Actor founded!"));
+    }
+}
+
+void ATest_GP_Map::CalculateTotalRessourcesQuantity()
+{
+    TotalRessourcesQuantity = 0;
+
+    for (int i = 0; i < GameManager->RessourcesQuantity.Num(); i++)
+    {
+        TotalRessourcesQuantity += GameManager->RessourcesQuantity[i];
+    }
 }
 
 void ATest_GP_Map::GenerateWorld()
@@ -54,6 +90,7 @@ void ATest_GP_Map::GenerateWorld()
         Stream.Initialize(SEED.value);
     }
     GEngine->AddOnScreenDebugMessage(-1, 50000.f, FColor::Yellow, FString::Printf(TEXT("SEED : %d"), SEED.value));
+
 
     // ETAPE 4 : Création d'un nouveau calque pour poser les tuiles
     UPaperTileLayer* BuildingLayer = TileMap->AddNewLayer();
@@ -90,20 +127,54 @@ void ATest_GP_Map::GenerateWorld()
         for (int32 x = 0; x < GridWidth; x++)
         {
             // Vérification si on est en début de plateforme
-            if (IsTileUserDataEqual(*BuildingLayer, x, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - 1, y, TEXT("GROUND"))) //si bord gauche plateforme et qu'une échelle ne vient pas d'être placée
+            if (IsTileUserDataEqual(*BuildingLayer, x, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - 1, y, TEXT("GROUND")))
             {
                 // PLACEMENT DES ÉCHELLES
                 if (!IsTileUserDataEqual(*BuildingLayer, x - 2, y, TEXT("GROUND")))
                 {
                     CalculateLadderSpawnProbability(x, y, *BuildingLayer);
                 }
+                //PLACEMENT DES PORTES
+            }
+            else if (IsTileUserDataEqual(*BuildingLayer, x, y + 1, TEXT("GROUND")))
+            {
+                // PLACEMENT DES COFFRES
+                // Si aucun BP n'est présent sur la tuile
+                if (!BPPositionInGrid.Contains(FVector2D(x, y)))
+                {
+                    // 1) Calculer la probabilité de spawn
+                    int proba_calculate = ((GridWidth * GridHeight) / TotalRessourcesQuantity) / 200;
 
+                    // SI PROBA OK
+                    if (BuildOrNot(proba_calculate))
+                    {
+                        // 2) Spawn le coffre
+                        SpawnBPTile(Chest, x, y);
+                        AInteractible* newChest = FindInteractibleAtGridPosition(x, y);
+
+                        if (Cast<AContainer>(newChest))
+                        {
+                            // 3) Tirer au hasard un objet parmi la liste RessourcesQuantity ayant une quantité > 0 
+                                // a) tirer un nombre au hasard entre 0 et RessourceType.Num() - 1
+                                // b) tant que RessourceQuantity[num] == 0
+                                        //num + 1
+
+                            // 4) Assigner un objet de la liste RessourcesType dans le coffre créé
+                            //newChest->GetComponentByClass<AContainer>()->RessourceInside.Add();
+
+
+                            // 5) Mettre à jour la quantité de cette objet dans la liste RessourcesQuantity
+                        }
+                    }
+
+                }
             }
         }
     }
 
     // ETAPE 7 : AJOUT DU GAMEMANAGER
-    GetWorld()->SpawnActor<AActor>(GameManager, FVector(0, 0, 0), FRotator::ZeroRotator);
+    // TODO : A SUPPRIMER ? 
+    //GetWorld()->SpawnActor<AActor>(GameManager, FVector(0, 0, 0), FRotator::ZeroRotator);
 
     // ETAPE 8 : MAJ des collisions des tuiles
     MyTileMapComponent->RebuildCollision();
@@ -196,7 +267,56 @@ FVector ATest_GP_Map::ConvertGridPositionToWorldPosition(const int x, const int 
 /// <param name="y"></param>
 void ATest_GP_Map::SpawnBPTile(TSubclassOf<AInteractible>& BPTile, const int x, const int y)
 {
+    BPPositionInGrid.Add(FVector2D(x, y));
     GetWorld()->SpawnActor<AActor>(BPTile, ConvertGridPositionToWorldPosition(x, y), FRotator::ZeroRotator);
+}
+
+/// <summary>
+/// Get the BP instance on a given tile
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <returns></returns>
+AInteractible* ATest_GP_Map::FindInteractibleAtGridPosition(int x, int y)
+{
+    // Convertir les coordonnées de la grille en position du monde
+    FVector WorldPosition = ConvertGridPositionToWorldPosition(x, y);
+
+    // Définir un rayon pour rechercher autour de la position
+    float SearchRadius = TileSize * 0.5f; // Ajustez selon vos besoins
+    FCollisionShape CollisionShape = FCollisionShape::MakeSphere(SearchRadius);
+
+    // Configuration pour ne rechercher que les acteurs dynamiques (par exemple, les BP instanciés)
+    FCollisionObjectQueryParams ObjectQueryParams(ECollisionChannel::ECC_WorldDynamic);
+
+    // Tableau pour stocker les résultats
+    TArray<FOverlapResult> OverlapResults;
+
+    // Effectuer une recherche d'overlap
+    bool bHasHit = GetWorld()->OverlapMultiByObjectType(
+        OverlapResults,
+        WorldPosition,
+        FQuat::Identity,
+        ObjectQueryParams,
+        CollisionShape
+    );
+
+    if (bHasHit)
+    {
+        // Parcourir les résultats et vérifier le type
+        for (const FOverlapResult& Result : OverlapResults)
+        {
+            AActor* Actor = Result.GetActor();
+            if (Actor && Actor->IsA(AInteractible::StaticClass()))
+            {
+                // Retourner le premier acteur correspondant
+                return Cast<AInteractible>(Actor);
+            }
+        }
+    }
+
+    // Aucun acteur trouvé
+    return nullptr;
 }
 
 

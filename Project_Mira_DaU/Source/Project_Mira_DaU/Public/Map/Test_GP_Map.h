@@ -51,9 +51,14 @@ private:
 	int GridHeight;
 	float TileSize;
 	FRandomStream Stream; //Ma map étant une classe de generation, je prefere le mettre en attribut (Stream <=> RNG)
+	AGameManager* GameManager;
+	TSet<FVector2D> BPPositionInGrid;
+	int TotalRessourcesQuantity;
 
 	ATest_GP_Map();
-	void GenerateWorld();
+	void GetGameManager();
+	void CalculateTotalRessourcesQuantity();
+    void GenerateWorld();
 
 	bool IsTileUserDataEqual(UPaperTileLayer& layer, int x, int y, FString tileType);
 	bool IsTileNull(UPaperTileLayer& layer, int x, int y);
@@ -61,6 +66,7 @@ private:
 	void PutTileOnGrid(int const x, int const y, int32 tile, UPaperTileLayer& layer);
 	FVector ConvertGridPositionToWorldPosition(const int x, const int y);
 	void SpawnBPTile(TSubclassOf<AInteractible>& BPTile, const int x, const int y);
+	AInteractible* FindInteractibleAtGridPosition(int x, int y);
 
 	bool BuildOrNot(int const probability);
 	int PlateformIsAccessibleOrNot(UPaperTileLayer& layer, int x, int y, int const currentPlateformLength);
@@ -104,8 +110,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
 	int PROBA_LADDER = 8;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
-	int VALUE_PLATEFORM_IS_NOT_AVAILABLE = 4;
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
+	int PROBA_CHEST = 5;*/
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
@@ -120,9 +126,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
 	int MAX_HEIGHT_BUILDING = 14;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
+	int VALUE_PLATEFORM_IS_NOT_AVAILABLE = 4;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
-	TSubclassOf<AGameManager> GameManager;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
 	TSubclassOf<AInteractible> Ladder;
@@ -131,8 +137,5 @@ public:
 	TSubclassOf<AInteractible> Chest;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
-	TMap<FString, TSubclassOf<ARessource>> RessourcesType;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
-	TMap<FString, int> RessourcesQuantity;
+	TMap<int, TSubclassOf<ARessource>> RessourcesType;
 };

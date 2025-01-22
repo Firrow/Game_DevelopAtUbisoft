@@ -11,10 +11,16 @@ AGameManager::AGameManager()
 void AGameManager::BeginPlay()
 {
 	Super::BeginPlay();
-	TimerManager();
+
+	if (ActiveTimer)
+	{
+		TimerManager();
+	}
 
 	GameOverWidget = CreateWidget<UUserWidget>(GetWorld(), GameOverWidgetClass);
 	VictoryWidget = CreateWidget<UUserWidget>(GetWorld(), VictoryWidgetClass);
+
+	NUMBER_OF_GEARS = RessourcesQuantity[0];
 }
 
 void AGameManager::Tick(float DeltaTime)
