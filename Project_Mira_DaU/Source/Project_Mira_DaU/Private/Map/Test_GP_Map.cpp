@@ -136,48 +136,54 @@ void ATest_GP_Map::GenerateWorld()
                 }
                 //PLACEMENT DES PORTES
             }
-            else if (IsTileUserDataEqual(*BuildingLayer, x, y + 1, TEXT("GROUND")))
+        }
+    }
+
+    for (int i = 1; i <= TotalRessourcesQuantity; i++)
+    {
+        // 2) Tirer au hasard des coordonnées
+        std::unique_ptr<FIntPoint> coordonnees =
+            std::make_unique<FIntPoint>(Stream.RandRange(0, GridHeight - 1), Stream.RandRange(0, GridWidth - 1));
+
+
+        // 3) Ajuster les coordonnées
+        while (!IsTileUserDataEqual(*BuildingLayer, coordonnees->X, coordonnees->Y+1, TEXT("GROUND")))
+        {
+            coordonnees->Y += 1;
+        }
+        while (FindInteractibleAtGridPosition(coordonnees->X, coordonnees->Y))
+        {
+            if (IsTileUserDataEqual(*BuildingLayer, coordonnees->X + 1, coordonnees->Y + 1, TEXT("GROUND")))
             {
-                // PLACEMENT DES COFFRES
-                // 
-                // TODO : CHANGER FORMULE SPAWN
-                // TODO : A CLEAN
-                // 
-                // Si aucun BP n'est présent sur la tuile
-                if (TotalRessourcesQuantity > 0 && !BPPositionInGrid.Contains(FVector2D(x, y)))
-                {
-                    // 1) Calculer la probabilité de spawn
-                    int proba_calculate = ((GridWidth * GridHeight) / TotalRessourcesQuantity) / 200;
+                coordonnees->X += 1;
+            }
+            else
+            {
+                coordonnees->X -= 1;
+            }
+        }
 
-                    // SI PROBA OK
-                    if (BuildOrNot(proba_calculate))
-                    {
-                        // 2) Spawn le coffre
-                        SpawnBPTile(Chest, x, y);
-                        AInteractible* newChest = FindInteractibleAtGridPosition(x, y);
+        // 4) Spawn le coffre
+        SpawnBPTile(Chest, coordonnees->X, coordonnees->Y);
 
-                        if (AContainer* newContainer = Cast<AContainer>(newChest))
-                        {
-                            // 3) Tirer au hasard un objet parmi la liste RessourcesQuantity ayant une quantité > 0 
-                            int IDObject = Stream.RandRange(0, RessourcesType.Num() - 1);
-                            
-                            while (GameManager->RessourcesQuantity[IDObject] == 0)
-                            {
-                                IDObject = (IDObject + 1) % GameManager->RessourcesQuantity.Num();
-                            }
 
-                            if (newContainer->RessourceInside.Num() == 0 || newContainer->RessourceInside[0] == nullptr)
-                            {
-                                // 4) Assigner un objet de la liste RessourcesType dans le coffre créé
-                                newContainer->RessourceInside.Add(RessourcesType[IDObject]);
-                            }
-                            // 5) Mettre à jour la quantité de cette objet dans la liste RessourcesQuantity
-                            GameManager->RessourcesQuantity[IDObject]--;
-                            TotalRessourcesQuantity--;
-                        }
-                    }
+        if (AContainer* newContainer = Cast<AContainer>(FindInteractibleAtGridPosition(coordonnees->X, coordonnees->Y)))
+        {
+            // 5) Tirer au hasard un objet parmi la liste RessourcesQuantity ayant une quantité > 0 
+            int IDObject = 0;
 
-                }
+            while (GameManager->RessourcesQuantity[IDObject] == 0)
+            {
+                IDObject = (IDObject + 1) % GameManager->RessourcesQuantity.Num();
+            }
+
+            if (newContainer->RessourceInside.Num() == 0 || newContainer->RessourceInside[0] == nullptr)
+            {
+                // 6) Assigner un objet de la liste RessourcesType dans le coffre créé
+                newContainer->RessourceInside.Add(RessourcesType[IDObject]);
+
+                // 7) Mettre à jour la quantité de cette objet dans la liste RessourcesQuantity
+                GameManager->RessourcesQuantity[IDObject]--;
             }
         }
     }
@@ -262,7 +268,7 @@ void ATest_GP_Map::PutTileOnGrid(int const x, int const y, int32 tile, UPaperTil
 /// <returns></returns>
 FVector ATest_GP_Map::ConvertGridPositionToWorldPosition(const int x, const int y)
 {
-    return FVector(x * TileSize, 0.0f, y * -TileSize);
+    return FVector(x * TileSize, -0.1f, y * -TileSize);
 }
 
 /// <summary>
@@ -285,17 +291,15 @@ void ATest_GP_Map::SpawnBPTile(TSubclassOf<AInteractible>& BPTile, const int x, 
 /// <returns></returns>
 AInteractible* ATest_GP_Map::FindInteractibleAtGridPosition(int x, int y)
 {
-    // Convertir les coordonnées de la grille en position du monde
     FVector WorldPosition = ConvertGridPositionToWorldPosition(x, y);
 
     // Définir un rayon pour rechercher autour de la position
-    float SearchRadius = TileSize * 0.5f; // Ajustez selon vos besoins
+    float SearchRadius = TileSize * 0.5f;
     FCollisionShape CollisionShape = FCollisionShape::MakeSphere(SearchRadius);
 
     // Configuration pour ne rechercher que les acteurs dynamiques (par exemple, les BP instanciés)
     FCollisionObjectQueryParams ObjectQueryParams(ECollisionChannel::ECC_WorldDynamic);
 
-    // Tableau pour stocker les résultats
     TArray<FOverlapResult> OverlapResults;
 
     // Effectuer une recherche d'overlap
@@ -321,7 +325,6 @@ AInteractible* ATest_GP_Map::FindInteractibleAtGridPosition(int x, int y)
         }
     }
 
-    // Aucun acteur trouvé
     return nullptr;
 }
 
@@ -431,7 +434,6 @@ void ATest_GP_Map::ChooseLadderSpawnPoint(UPaperTileLayer& layer, int x, int y, 
 
 
 // CREATE ELEMENT IN MAP
-
 /// <summary>
 /// Put Ladder on map
 /// </summary>

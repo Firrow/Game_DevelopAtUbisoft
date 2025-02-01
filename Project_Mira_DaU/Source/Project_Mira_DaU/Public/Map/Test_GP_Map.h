@@ -110,8 +110,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
 	int PROBA_LADDER = 8;
 
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
-	int PROBA_CHEST = 5;*/
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
