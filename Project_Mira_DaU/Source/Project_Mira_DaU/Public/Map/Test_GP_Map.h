@@ -74,6 +74,7 @@ private:
 	void ChooseLadderSpawnPoint(UPaperTileLayer& layer, int x, int y, int const probability);
 
 	void CreateLadder(UPaperTileLayer& layer, int x, int y);
+	void CreateContainer(UPaperTileLayer& layer, FIntPoint& coordinates);
 	void CreateBackLedge(int const x, int const y, UPaperTileLayer& layer);
 	void CreateBuilding(int const x, int const y, int& width, int& availableFloorSpace, UPaperTileLayer& layer);
 	void ContinueBuilding(int const x, int const y, UPaperTileLayer& layer);
