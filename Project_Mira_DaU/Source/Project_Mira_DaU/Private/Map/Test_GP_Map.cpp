@@ -138,54 +138,43 @@ void ATest_GP_Map::GenerateWorld()
             }
         }
     }
-
+    //PLACEMENT DES COFFRES
     for (int i = 1; i <= TotalRessourcesQuantity; i++)
     {
-        // 2) Tirer au hasard des coordonnées
-        std::unique_ptr<FIntPoint> coordonnees =
+        // 1) Tirer au hasard des coordonnées
+        std::unique_ptr<FIntPoint> coordinates =
             std::make_unique<FIntPoint>(Stream.RandRange(0, GridHeight - 1), Stream.RandRange(0, GridWidth - 1));
 
+        // 2) Ajuster les coordonnées du container
+        bool isOnGround = false;
+        bool isOnBP = true;
 
-        // 3) Ajuster les coordonnées
-        while (!IsTileUserDataEqual(*BuildingLayer, coordonnees->X, coordonnees->Y+1, TEXT("GROUND")))
+        while (!isOnGround || isOnBP)
         {
-            coordonnees->Y += 1;
-        }
-        while (FindInteractibleAtGridPosition(coordonnees->X, coordonnees->Y))
-        {
-            if (IsTileUserDataEqual(*BuildingLayer, coordonnees->X + 1, coordonnees->Y + 1, TEXT("GROUND")))
+            // check if container is on ground and not between two grounds
+            if (!IsTileUserDataEqual(*BuildingLayer, coordinates->X, coordinates->Y + 1, TEXT("GROUND")) 
+                || IsTileUserDataEqual(*BuildingLayer, coordinates->X, coordinates->Y - 1, TEXT("GROUND")))
             {
-                coordonnees->X += 1;
+                coordinates->Y += 1;
             }
             else
             {
-                coordonnees->X -= 1;
+                isOnGround = true;
+            }
+
+            // check if container is on another BP
+            if (FindInteractibleAtGridPosition(coordinates->X, coordinates->Y))
+            {
+                IsTileUserDataEqual(*BuildingLayer, coordinates->X + 1, coordinates->Y + 1, TEXT("GROUND")) ? coordinates->X += 1 : coordinates->X -= 1;
+            }
+            else
+            {
+                isOnBP = false;
             }
         }
 
-        // 4) Spawn le coffre
-        SpawnBPTile(Chest, coordonnees->X, coordonnees->Y);
-
-
-        if (AContainer* newContainer = Cast<AContainer>(FindInteractibleAtGridPosition(coordonnees->X, coordonnees->Y)))
-        {
-            // 5) Tirer au hasard un objet parmi la liste RessourcesQuantity ayant une quantité > 0 
-            int IDObject = 0;
-
-            while (GameManager->RessourcesQuantity[IDObject] == 0)
-            {
-                IDObject = (IDObject + 1) % GameManager->RessourcesQuantity.Num();
-            }
-
-            if (newContainer->RessourceInside.Num() == 0 || newContainer->RessourceInside[0] == nullptr)
-            {
-                // 6) Assigner un objet de la liste RessourcesType dans le coffre créé
-                newContainer->RessourceInside.Add(RessourcesType[IDObject]);
-
-                // 7) Mettre à jour la quantité de cette objet dans la liste RessourcesQuantity
-                GameManager->RessourcesQuantity[IDObject]--;
-            }
-        }
+        // 3) Spawn le coffre
+        CreateContainer(*BuildingLayer, *coordinates);
     }
 
     // ETAPE 7 : MAJ des collisions des tuiles
@@ -449,6 +438,37 @@ void ATest_GP_Map::CreateLadder(UPaperTileLayer& layer, int x, int y) //call x +
     {
         SpawnBPTile(Ladder, x, y + h);
         h++;
+    }
+}
+
+/// <summary>
+/// Put chest on map
+/// </summary>
+/// <param name="layer"></param>
+/// <param name="x"></param>
+/// <param name="y"></param>
+void ATest_GP_Map::CreateContainer(UPaperTileLayer& layer, FIntPoint& coordinates)
+{
+    SpawnBPTile(Chest, coordinates.X, coordinates.Y);
+
+    if (AContainer* newContainer = Cast<AContainer>(FindInteractibleAtGridPosition(coordinates.X, coordinates.Y)))
+    {
+        // 5) Tirer au hasard un objet parmi la liste RessourcesQuantity ayant une quantité > 0 
+        int IDObject = 0;
+
+        while (GameManager->RessourcesQuantity[IDObject] == 0)
+        {
+            IDObject = (IDObject + 1) % GameManager->RessourcesQuantity.Num();
+        }
+
+        if (newContainer->RessourceInside.Num() == 0 || newContainer->RessourceInside[0] == nullptr)
+        {
+            // 6) Assigner un objet de la liste RessourcesType dans le coffre créé
+            newContainer->RessourceInside.Add(RessourcesType[IDObject]);
+
+            // 7) Mettre à jour la quantité de cette objet dans la liste RessourcesQuantity
+            GameManager->RessourcesQuantity[IDObject]--;
+        }
     }
 }
 
