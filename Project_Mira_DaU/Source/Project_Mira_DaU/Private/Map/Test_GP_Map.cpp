@@ -122,19 +122,61 @@ void ATest_GP_Map::GenerateWorld()
     }
 
     // ETAPE 6 : LAYER INTERACTIBLES - Placement des éléments interactibles dans la map
+    // PLACEMENT DES ÉCHELLES
     for (int32 y = GridHeight - MIN_HEIGHT_BUILDING; y >= 0; y--)
     {
         for (int32 x = 0; x < GridWidth; x++)
         {
-            // Vérification si on est en début de plateforme
-            if (IsTileUserDataEqual(*BuildingLayer, x, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - 1, y, TEXT("GROUND")))
+            if (IsTileUserDataEqual(*BuildingLayer, x, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - 1, y, TEXT("GROUND")) && !IsTileUserDataEqual(*BuildingLayer, x - 2, y, TEXT("GROUND")))
             {
-                // PLACEMENT DES ÉCHELLES
-                if (!IsTileUserDataEqual(*BuildingLayer, x - 2, y, TEXT("GROUND")))
+                CalculateLadderSpawnProbability(x, y, *BuildingLayer);
+            }
+        }
+    }
+    //PLACEMENT DES PORTES
+    for (int32 y = GridHeight - 1; y >= 0; y--)
+    {
+        for (int32 x = 0; x < GridWidth; x++)
+        {
+            if (IsTileUserDataEqual(*BuildingLayer, x, y, TEXT("STARTBUILDING")) && IsTileUserDataEqual(*BuildingLayer, x, y + 1, TEXT("GROUND")))
+            {
+                bool doorIsPlaced = false;
+
+                // calculate number of tiles between starbuilding + 1 and endbuilding - 2 (door takes 2 tiles)
+                int availableSpace = CountTiles(
+                    *BuildingLayer, x + 1, y,
+                    [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileUserDataEqual(layer, x, y, TEXT("BUILDINGWALL")); },
+                    [](int& x, int& y) { x++; }) - 1;
+
+                int doorPosition = 0;
+
+                // TODO : fix bug door could be on ladder in x+2
+                while (doorPosition == 0 || FindInteractibleAtGridPosition(x + doorPosition, y) || FindInteractibleAtGridPosition(x + doorPosition + 1, y))
                 {
-                    CalculateLadderSpawnProbability(x, y, *BuildingLayer);
+                    doorPosition = Stream.RandRange(1, availableSpace);
+
+                    UE_LOG(LogTemp, Display, TEXT("availableSpace : %i"), availableSpace);
+                    UE_LOG(LogTemp, Display, TEXT("doorPosition : %i"), doorPosition);
                 }
-                //PLACEMENT DES PORTES
+
+                UE_LOG(LogTemp, Display, TEXT("-----------------------"));
+
+                int i = 1;
+
+                while (!doorIsPlaced)
+                {
+                    if (i == doorPosition)
+                    {
+                        SpawnBPTile(Door, x + doorPosition, y - 1);
+
+                        UE_LOG(LogTemp, Display, TEXT("x door position : %i"), x + i);
+                        doorIsPlaced = true;
+                    }
+                    else
+                    {
+                        i++;
+                    }
+                }
             }
         }
     }
@@ -173,7 +215,7 @@ void ATest_GP_Map::GenerateWorld()
             }
         }
 
-        // 3) Spawn le coffre
+        // 3) Placement du coffre
         CreateContainer(*BuildingLayer, *coordinates);
     }
 
