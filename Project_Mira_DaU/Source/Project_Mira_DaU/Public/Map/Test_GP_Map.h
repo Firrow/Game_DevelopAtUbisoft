@@ -136,5 +136,8 @@ public:
 	TSubclassOf<AInteractible> Chest;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
+	TSubclassOf<AInteractible> Door;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
 	TMap<int, TSubclassOf<ARessource>> RessourcesType;
 };
