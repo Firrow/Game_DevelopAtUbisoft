@@ -169,7 +169,16 @@ void ATest_GP_Map::GenerateWorld()
                     //UE_LOG(LogTemp, Display, TEXT("index : %i"), indexInSequence);
                     //UE_LOG(LogTemp, Display, TEXT("x choisit : %i"), xTileWithSequenceAvailable[indexInSequence]);
 
-                    SpawnBPTile(Door, xTileWithSequenceAvailable[indexInSequence], y - 1, 3);
+                    UE_LOG(LogTemp, Display, TEXT("PORTE POSITION x : %i - y : %i"), xTileWithSequenceAvailable[indexInSequence], y);
+
+                    BPPositionInGrid.Add(FVector2D(xTileWithSequenceAvailable[indexInSequence] - 1, y));
+                    UE_LOG(LogTemp, Display, TEXT("PORTE ON x : %i - y : %i"), xTileWithSequenceAvailable[indexInSequence] - 1, y);
+
+                    SpawnBPTile(Door, xTileWithSequenceAvailable[indexInSequence], y - 1, 1);
+                    UE_LOG(LogTemp, Display, TEXT("PORTE ON x : %i - y : %i"), xTileWithSequenceAvailable[indexInSequence], y);
+
+                    BPPositionInGrid.Add(FVector2D(xTileWithSequenceAvailable[indexInSequence] + 1, y));
+                    UE_LOG(LogTemp, Display, TEXT("PORTE ON x : %i - y : %i"), xTileWithSequenceAvailable[indexInSequence] + 1, y);
 
                     doorIsPlaced = true;
                 }
@@ -311,12 +320,16 @@ FVector ATest_GP_Map::ConvertGridPositionToWorldPosition(const int x, const int 
 void ATest_GP_Map::SpawnBPTile(TSubclassOf<AInteractible>& BPTile, const int x, const int y, int BPSize)
 {
     GetWorld()->SpawnActor<AActor>(BPTile, ConvertGridPositionToWorldPosition(x, y), FRotator::ZeroRotator);
+    BPPositionInGrid.Add(FVector2D(x, y));
+    //UE_LOG(LogTemp, Display, TEXT("BP ON x : %i - y : %i"), x, y);
 
-    for (int32 i = 0; i < BPSize; i++)
+    /*for (int32 i = 0; i < BPSize; i++)
     {
         BPPositionInGrid.Add(FVector2D(x + i, y));
         UE_LOG(LogTemp, Display, TEXT("BP ON x : %i - y : %i"), x, y);
-    }
+    }*/
+
+    //UE_LOG(LogTemp, Display, TEXT("------------------------------------"));
 }
 
 /// <summary>
@@ -497,6 +510,7 @@ void ATest_GP_Map::CreateLadder(UPaperTileLayer& layer, int x, int y)
 void ATest_GP_Map::CreateContainer(UPaperTileLayer& layer, FIntPoint& coordinates)
 {
     SpawnBPTile(Chest, coordinates.X, coordinates.Y, 1);
+    UE_LOG(LogTemp, Display, TEXT("COFFRE ON x : %i - y : %i"), coordinates.X, coordinates.Y);
 
     if (AContainer* newContainer = Cast<AContainer>(FindInteractibleAtGridPosition(coordinates.X, coordinates.Y)))
     {
