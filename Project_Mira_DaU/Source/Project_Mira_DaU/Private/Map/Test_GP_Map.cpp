@@ -138,45 +138,45 @@ void ATest_GP_Map::GenerateWorld()
     {
         for (int32 x = 0; x < GridWidth; x++)
         {
-            if (IsTileUserDataEqual(*BuildingLayer, x, y, TEXT("STARTBUILDING")) && IsTileUserDataEqual(*BuildingLayer, x, y + 1, TEXT("GROUND")))
-            {
-                bool doorIsPlaced = false;
+            bool doorIsPlaced = false;
 
+            if (!doorIsPlaced && IsTileUserDataEqual(*BuildingLayer, x, y, TEXT("STARTBUILDING")) && IsTileUserDataEqual(*BuildingLayer, x, y + 1, TEXT("GROUND")))
+            {
+
+                //UE_LOG(LogTemp, Warning, TEXT("CURRENT TILE x : %i - y : %i"), x, y);
                 // calculate number of tiles between starbuilding + 1 and endbuilding - 2 (door takes 2 tiles)
                 int availableSpace = CountTiles(
                     *BuildingLayer, x + 1, y,
                     [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileUserDataEqual(layer, x, y, TEXT("BUILDINGWALL")); },
-                    [](int& x, int& y) { x++; }) - 1;
+                    [](int& x, int& y) { x++; }) - 2;
 
-                int doorPosition = 0;
+                TArray<int> xTileWithSequenceAvailable = {};
 
-                // TODO : fix bug door could be on ladder in x+2
-                while (doorPosition == 0 || FindInteractibleAtGridPosition(x + doorPosition, y) || FindInteractibleAtGridPosition(x + doorPosition + 1, y))
+                for (int i = 0; i < availableSpace; i++)
                 {
-                    doorPosition = Stream.RandRange(1, availableSpace);
-
-                    UE_LOG(LogTemp, Display, TEXT("availableSpace : %i"), availableSpace);
-                    UE_LOG(LogTemp, Display, TEXT("doorPosition : %i"), doorPosition);
-                }
-
-                UE_LOG(LogTemp, Display, TEXT("-----------------------"));
-
-                int i = 1;
-
-                while (!doorIsPlaced)
-                {
-                    if (i == doorPosition)
+                    if (!FindInteractibleAtGridPosition(x + i, y) && !IsTileUserDataEqual(*BuildingLayer, x + i, y, TEXT("ENDBUILDING")) &&
+                        !FindInteractibleAtGridPosition(x + i + 1, y) && !IsTileUserDataEqual(*BuildingLayer, x + i + 1, y, TEXT("ENDBUILDING")) &&
+                        !FindInteractibleAtGridPosition(x + i + 2, y) && !IsTileUserDataEqual(*BuildingLayer, x + i + 2, y, TEXT("ENDBUILDING")))
                     {
-                        SpawnBPTile(Door, x + doorPosition, y - 1);
-
-                        UE_LOG(LogTemp, Display, TEXT("x door position : %i"), x + i);
-                        doorIsPlaced = true;
-                    }
-                    else
-                    {
-                        i++;
+                        //UE_LOG(LogTemp, Display, TEXT("TUILE DISPONIBLE x : %i - y : %i"), x + i, y);
+                        xTileWithSequenceAvailable.Add(x + i);
                     }
                 }
+
+                if (xTileWithSequenceAvailable.Num() > 0)
+                {
+                    int indexInSequence = Stream.RandRange(0, xTileWithSequenceAvailable.Num() - 1);
+                    //UE_LOG(LogTemp, Display, TEXT("index : %i"), indexInSequence);
+                    //UE_LOG(LogTemp, Display, TEXT("x choisit : %i"), xTileWithSequenceAvailable[indexInSequence]);
+
+                    SpawnBPTile(Door, xTileWithSequenceAvailable[indexInSequence], y - 1, 3);
+
+                    doorIsPlaced = true;
+                }
+
+                xTileWithSequenceAvailable = {};
+
+                //UE_LOG(LogTemp, Display, TEXT("----------------------------------------"));
             }
         }
     }
@@ -308,10 +308,15 @@ FVector ATest_GP_Map::ConvertGridPositionToWorldPosition(const int x, const int 
 /// <param name="BPTile"></param>
 /// <param name="x"></param>
 /// <param name="y"></param>
-void ATest_GP_Map::SpawnBPTile(TSubclassOf<AInteractible>& BPTile, const int x, const int y)
+void ATest_GP_Map::SpawnBPTile(TSubclassOf<AInteractible>& BPTile, const int x, const int y, int BPSize)
 {
-    BPPositionInGrid.Add(FVector2D(x, y));
     GetWorld()->SpawnActor<AActor>(BPTile, ConvertGridPositionToWorldPosition(x, y), FRotator::ZeroRotator);
+
+    for (int32 i = 0; i < BPSize; i++)
+    {
+        BPPositionInGrid.Add(FVector2D(x + i, y));
+        UE_LOG(LogTemp, Display, TEXT("BP ON x : %i - y : %i"), x, y);
+    }
 }
 
 /// <summary>
@@ -468,17 +473,17 @@ void ATest_GP_Map::ChooseLadderSpawnPoint(UPaperTileLayer& layer, int x, int y, 
 /// <summary>
 /// Put Ladder on map
 /// </summary>
-void ATest_GP_Map::CreateLadder(UPaperTileLayer& layer, int x, int y) //call x + i
+void ATest_GP_Map::CreateLadder(UPaperTileLayer& layer, int x, int y)
 {
     // First ladder's tile
-    SpawnBPTile(Ladder, x, y);
+    SpawnBPTile(Ladder, x, y, 1);
     PutTileOnGrid(x, y, (int32)ETiles::UNDERLADDER, layer);
 
     int h = 1;
 
     while (!IsTileUserDataEqual(layer, x, y + h, TEXT("GROUND")))
     {
-        SpawnBPTile(Ladder, x, y + h);
+        SpawnBPTile(Ladder, x, y + h, 1);
         h++;
     }
 }
@@ -491,7 +496,7 @@ void ATest_GP_Map::CreateLadder(UPaperTileLayer& layer, int x, int y) //call x +
 /// <param name="y"></param>
 void ATest_GP_Map::CreateContainer(UPaperTileLayer& layer, FIntPoint& coordinates)
 {
-    SpawnBPTile(Chest, coordinates.X, coordinates.Y);
+    SpawnBPTile(Chest, coordinates.X, coordinates.Y, 1);
 
     if (AContainer* newContainer = Cast<AContainer>(FindInteractibleAtGridPosition(coordinates.X, coordinates.Y)))
     {
