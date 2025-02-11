@@ -142,8 +142,6 @@ void ATest_GP_Map::GenerateWorld()
 
             if (!doorIsPlaced && IsTileUserDataEqual(*BuildingLayer, x, y, TEXT("STARTBUILDING")) && IsTileUserDataEqual(*BuildingLayer, x, y + 1, TEXT("GROUND")))
             {
-
-                //UE_LOG(LogTemp, Warning, TEXT("CURRENT TILE x : %i - y : %i"), x, y);
                 // calculate number of tiles between starbuilding + 1 and endbuilding - 2 (door takes 2 tiles)
                 int availableSpace = CountTiles(
                     *BuildingLayer, x + 1, y,
@@ -152,7 +150,7 @@ void ATest_GP_Map::GenerateWorld()
 
                 TArray<int> xTileWithSequenceAvailable = {};
 
-                for (int i = 0; i < availableSpace; i++)
+                for (int i = 1; i < availableSpace; i++)
                 {
                     if (!FindInteractibleAtGridPosition(x + i, y) && !IsTileUserDataEqual(*BuildingLayer, x + i, y, TEXT("ENDBUILDING")) &&
                         !FindInteractibleAtGridPosition(x + i + 1, y) && !IsTileUserDataEqual(*BuildingLayer, x + i + 1, y, TEXT("ENDBUILDING")) &&
@@ -193,7 +191,7 @@ void ATest_GP_Map::GenerateWorld()
     for (int i = 1; i <= TotalRessourcesQuantity; i++)
     {
         // 1) Tirer au hasard des coordonnées
-        std::unique_ptr<FIntPoint> coordinates =
+        std::unique_ptr<FIntPoint> coordinates = 
             std::make_unique<FIntPoint>(Stream.RandRange(0, GridHeight - 1), Stream.RandRange(0, GridWidth - 1));
 
         // 2) Ajuster les coordonnées du container
@@ -510,7 +508,6 @@ void ATest_GP_Map::CreateLadder(UPaperTileLayer& layer, int x, int y)
 void ATest_GP_Map::CreateContainer(UPaperTileLayer& layer, FIntPoint& coordinates)
 {
     SpawnBPTile(Chest, coordinates.X, coordinates.Y, 1);
-    UE_LOG(LogTemp, Display, TEXT("COFFRE ON x : %i - y : %i"), coordinates.X, coordinates.Y);
 
     if (AContainer* newContainer = Cast<AContainer>(FindInteractibleAtGridPosition(coordinates.X, coordinates.Y)))
     {
