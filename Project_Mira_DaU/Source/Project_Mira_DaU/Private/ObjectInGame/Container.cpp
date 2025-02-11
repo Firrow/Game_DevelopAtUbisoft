@@ -27,6 +27,8 @@ void AContainer::Effect()
         {
             //TODO : Lancer l'animation du coffre en BP
 
+            GEngine->AddOnScreenDebugMessage(-1, 50000.f, FColor::Yellow, FString::Printf(TEXT("COFFRE OUVERT !")));
+
             FRotator Rotation(0.0f, 0.0f, 0.0f);
             GetWorld()->SpawnActor<ARessource>(RessourceInside.Last(), RessourcePointSpawn->GetComponentLocation(), Rotation);
             RessourceInside.Pop();

@@ -200,7 +200,7 @@ void ATest_GP_Map::GenerateWorld()
             }
 
             // check if container is on another BP
-            if (BPPositionInGrid.Contains(FVector2D(coordinates->X, coordinates->Y)))
+            if (FindInteractibleAtGridPosition(coordinates->X, coordinates->Y)) //BPPositionInGrid.Contains(FVector2D(coordinates->X, coordinates->Y))
             {
                 IsTileUserDataEqual(*BuildingLayer, coordinates->X + 1, coordinates->Y + 1, TEXT("GROUND")) ? coordinates->X += 1 : coordinates->X -= 1;
             }
@@ -313,6 +313,7 @@ void ATest_GP_Map::SpawnBPTile(TSubclassOf<AInteractible>& BPTile, int BPSize, c
     for (int32 i = 0; i < BPSize; i++)
     {
         BPPositionInGrid.Add(FVector2D(x + xOffset + i, y + yOffset));
+        UE_LOG(LogTemp, Warning, TEXT("x : %i - y : %i"), x + xOffset + i, y + yOffset);
     }
 }
 
