@@ -156,7 +156,6 @@ void ATest_GP_Map::GenerateWorld()
                         !FindInteractibleAtGridPosition(x + i + 1, y) && !IsTileUserDataEqual(*BuildingLayer, x + i + 1, y, TEXT("ENDBUILDING")) &&
                         !FindInteractibleAtGridPosition(x + i + 2, y) && !IsTileUserDataEqual(*BuildingLayer, x + i + 2, y, TEXT("ENDBUILDING")))
                     {
-                        //UE_LOG(LogTemp, Display, TEXT("TUILE DISPONIBLE x : %i - y : %i"), x + i, y);
                         xTileWithSequenceAvailable.Add(x + i);
                     }
                 }
@@ -164,26 +163,22 @@ void ATest_GP_Map::GenerateWorld()
                 if (xTileWithSequenceAvailable.Num() > 0)
                 {
                     int indexInSequence = Stream.RandRange(0, xTileWithSequenceAvailable.Num() - 1);
-                    //UE_LOG(LogTemp, Display, TEXT("index : %i"), indexInSequence);
-                    //UE_LOG(LogTemp, Display, TEXT("x choisit : %i"), xTileWithSequenceAvailable[indexInSequence]);
 
                     UE_LOG(LogTemp, Display, TEXT("PORTE POSITION x : %i - y : %i"), xTileWithSequenceAvailable[indexInSequence], y);
 
-                    BPPositionInGrid.Add(FVector2D(xTileWithSequenceAvailable[indexInSequence] - 1, y));
-                    UE_LOG(LogTemp, Display, TEXT("PORTE ON x : %i - y : %i"), xTileWithSequenceAvailable[indexInSequence] - 1, y);
-
-                    SpawnBPTile(Door, xTileWithSequenceAvailable[indexInSequence], y - 1, 1);
+                    BPPositionInGrid.Add(FVector2D(xTileWithSequenceAvailable[indexInSequence], y));
                     UE_LOG(LogTemp, Display, TEXT("PORTE ON x : %i - y : %i"), xTileWithSequenceAvailable[indexInSequence], y);
 
-                    BPPositionInGrid.Add(FVector2D(xTileWithSequenceAvailable[indexInSequence] + 1, y));
+                    SpawnBPTile(Door, xTileWithSequenceAvailable[indexInSequence], y - 1, 1);
                     UE_LOG(LogTemp, Display, TEXT("PORTE ON x : %i - y : %i"), xTileWithSequenceAvailable[indexInSequence] + 1, y);
+
+                    BPPositionInGrid.Add(FVector2D(xTileWithSequenceAvailable[indexInSequence] + 2, y));
+                    UE_LOG(LogTemp, Display, TEXT("PORTE ON x : %i - y : %i"), xTileWithSequenceAvailable[indexInSequence] + 2, y);
 
                     doorIsPlaced = true;
                 }
 
                 xTileWithSequenceAvailable = {};
-
-                //UE_LOG(LogTemp, Display, TEXT("----------------------------------------"));
             }
         }
     }
@@ -191,7 +186,7 @@ void ATest_GP_Map::GenerateWorld()
     for (int i = 1; i <= TotalRessourcesQuantity; i++)
     {
         // 1) Tirer au hasard des coordonnées
-        std::unique_ptr<FIntPoint> coordinates = 
+        std::unique_ptr<FIntPoint> coordinates =
             std::make_unique<FIntPoint>(Stream.RandRange(0, GridHeight - 1), Stream.RandRange(0, GridWidth - 1));
 
         // 2) Ajuster les coordonnées du container
@@ -201,7 +196,7 @@ void ATest_GP_Map::GenerateWorld()
         while (!isOnGround || isOnBP)
         {
             // check if container is on ground and not between two grounds
-            if (!IsTileUserDataEqual(*BuildingLayer, coordinates->X, coordinates->Y + 1, TEXT("GROUND")) 
+            if (!IsTileUserDataEqual(*BuildingLayer, coordinates->X, coordinates->Y + 1, TEXT("GROUND"))
                 || IsTileUserDataEqual(*BuildingLayer, coordinates->X, coordinates->Y - 1, TEXT("GROUND")))
             {
                 coordinates->Y += 1;
@@ -212,7 +207,7 @@ void ATest_GP_Map::GenerateWorld()
             }
 
             // check if container is on another BP
-            if (FindInteractibleAtGridPosition(coordinates->X, coordinates->Y))
+            if (BPPositionInGrid.Contains(FVector2D(coordinates->X, coordinates->Y))) //FindInteractibleAtGridPosition(coordinates->X, coordinates->Y)
             {
                 IsTileUserDataEqual(*BuildingLayer, coordinates->X + 1, coordinates->Y + 1, TEXT("GROUND")) ? coordinates->X += 1 : coordinates->X -= 1;
             }
