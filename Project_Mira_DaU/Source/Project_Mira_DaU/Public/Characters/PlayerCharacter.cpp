@@ -172,11 +172,15 @@ void APlayerCharacter::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     bool bFromSweep,
     const FHitResult& SweepResult)
 {
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("POUET")));
+
     if (Cast<AInteractible>(OtherActor))
     {
         //APPELER LA FONCTION de l'UI
 
         ActorIsOverlaped = OtherActor;
+
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("ACTEUR TOUCHE : %s"), *ActorIsOverlaped->GetFName().ToString()));
 
         if (OtherActor->ActorHasTag("Ladder"))
         {

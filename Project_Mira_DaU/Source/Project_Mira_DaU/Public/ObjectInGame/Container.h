@@ -30,7 +30,7 @@ public:
 	USphereComponent* RessourcePointSpawn;
 
 	UPROPERTY(EditAnywhere, Category = "CapsuleRessource")
-	USphereComponent* CapsuleColliderRessource;
+	USphereComponent* CapsuleContainer;
 
 	AContainer();
 };

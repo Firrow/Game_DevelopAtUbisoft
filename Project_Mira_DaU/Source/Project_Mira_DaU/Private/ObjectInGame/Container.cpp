@@ -5,16 +5,20 @@
 
 AContainer::AContainer()
 {
+    CapsuleContainer = CreateDefaultSubobject<USphereComponent>(TEXT("CapsuleContainer"));
+    CapsuleContainer->InitSphereRadius(25.f);
+    CapsuleContainer->SetupAttachment(RootComponent);
+
     RessourcePointSpawn = CreateDefaultSubobject<USphereComponent>(TEXT("RessourcePointSpawn"));
     RessourcePointSpawn->InitSphereRadius(1.f);
-    RessourcePointSpawn->SetupAttachment(CapsuleColliderRessource);
+    RessourcePointSpawn->AddLocalOffset(FVector(0, 0, 80));
+    RessourcePointSpawn->SetupAttachment(CapsuleContainer);
 }
 
 void AContainer::Effect()
 {
     if (!isEmpty)
     {
-        
         if (RessourceInside.IsEmpty())
         {
             isEmpty = true;
