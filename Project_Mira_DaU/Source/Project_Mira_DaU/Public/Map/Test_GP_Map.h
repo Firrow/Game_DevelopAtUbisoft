@@ -139,5 +139,8 @@ public:
 	TSubclassOf<AInteractible> Door;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
+	TSubclassOf<AActor> EndingTrigger;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
 	TMap<int, TSubclassOf<ARessource>> RessourcesType;
 };

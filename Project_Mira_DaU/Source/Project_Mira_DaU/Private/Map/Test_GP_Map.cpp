@@ -214,7 +214,9 @@ void ATest_GP_Map::GenerateWorld()
         CreateContainer(*BuildingLayer, *coordinates);
     }
 
-    // ETAPE 7 : MAJ des collisions des tuiles
+    // ETAPE 7 : PLACEMENT DES ÉLÉMENTS DE DÉBUT ET FIN DE PARTIE 
+
+    // ETAPE 8 : MAJ des collisions des tuiles
     MyTileMapComponent->RebuildCollision();
 }
 
