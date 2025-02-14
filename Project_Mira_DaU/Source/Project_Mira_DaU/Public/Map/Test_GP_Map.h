@@ -67,7 +67,7 @@ private:
 	FVector ConvertGridPositionToWorldPosition(const int x, const int y);
 	template<typename T> 
 	void SpawnBPTile(TSubclassOf<T>& BPTile, int BPSize, const int x, const int y, const int xOffset = 0, const int yOffset = 0);
-	AInteractible* FindInteractibleAtGridPosition(int x, int y);
+	AActor* FindInteractibleAtGridPosition(int x, int y);
 
 	bool BuildOrNot(int const probability);
 	int PlateformIsAccessibleOrNot(UPaperTileLayer& layer, int x, int y, int const currentPlateformLength);
