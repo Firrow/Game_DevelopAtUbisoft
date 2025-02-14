@@ -139,123 +139,17 @@ void ATest_GP_Map::GenerateWorld()
     {
         for (int32 x = 0; x < GridWidth; x++)
         {
-            bool doorIsPlaced = false;
-
-            if (!doorIsPlaced && IsTileUserDataEqual(*BuildingLayer, x, y, TEXT("STARTBUILDING")) && IsTileUserDataEqual(*BuildingLayer, x, y + 1, TEXT("GROUND")))
-            {
-                // calculate number of tiles between starbuilding + 1 and endbuilding - 2 (door takes 2 tiles)
-                int availableSpace = CountTiles(
-                    *BuildingLayer, x + 1, y,
-                    [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileUserDataEqual(layer, x, y, TEXT("BUILDINGWALL")); },
-                    [](int& x, int& y) { x++; }) - 2;
-
-                TArray<int> xTileWithSequenceAvailable = {};
-
-                // Get all X when x, x+1 and x+2 have no BP on it and put X value in xTileWithSequenceAvailable
-                for (int i = 1; i < availableSpace; i++)
-                {
-                    if (!FindInteractibleAtGridPosition(x + i, y) && !IsTileUserDataEqual(*BuildingLayer, x + i, y, TEXT("ENDBUILDING")) &&
-                        !FindInteractibleAtGridPosition(x + i + 1, y) && !IsTileUserDataEqual(*BuildingLayer, x + i + 1, y, TEXT("ENDBUILDING")) &&
-                        !FindInteractibleAtGridPosition(x + i + 2, y) && !IsTileUserDataEqual(*BuildingLayer, x + i + 2, y, TEXT("ENDBUILDING")))
-                    {
-                        xTileWithSequenceAvailable.Add(x + i);
-                    }
-                }
-
-                if (xTileWithSequenceAvailable.Num() > 0)
-                {
-                    // Get random index to choose X value in xTileWithSequenceAvailable
-                    int indexInSequence = Stream.RandRange(0, xTileWithSequenceAvailable.Num() - 1);
-
-                    SpawnBPTile(Door, 3, xTileWithSequenceAvailable[indexInSequence], y - 1, 0, 1);
-
-                    doorIsPlaced = true;
-                }
-
-                xTileWithSequenceAvailable = {};
-            }
+            CreateDoor(*BuildingLayer, x, y);
         }
     }
     //PLACEMENT DES COFFRES
     for (int i = 1; i <= TotalRessourcesQuantity; i++)
     {
-        // 1) Tirer au hasard des coordonnées
-        std::unique_ptr<FIntPoint> coordinates =
-            std::make_unique<FIntPoint>(Stream.RandRange(0, GridHeight - 1), Stream.RandRange(0, GridWidth - 1));
-
-        // 2) Ajuster les coordonnées du container
-        bool isOnGround = false;
-        bool isOnBP = true;
-
-        while (!isOnGround || isOnBP)
-        {
-            // check if container is on ground and not between two grounds
-            if (!IsTileUserDataEqual(*BuildingLayer, coordinates->X, coordinates->Y + 1, TEXT("GROUND"))
-                || IsTileUserDataEqual(*BuildingLayer, coordinates->X, coordinates->Y - 1, TEXT("GROUND")))
-            {
-                coordinates->Y += 1;
-            }
-            else
-            {
-                isOnGround = true;
-            }
-
-            // check if container is on another BP
-            if (FindInteractibleAtGridPosition(coordinates->X, coordinates->Y)) //BPPositionInGrid.Contains(FVector2D(coordinates->X, coordinates->Y))
-            {
-                IsTileUserDataEqual(*BuildingLayer, coordinates->X + 1, coordinates->Y + 1, TEXT("GROUND")) ? coordinates->X += 1 : coordinates->X -= 1;
-            }
-            else
-            {
-                isOnBP = false;
-            }
-        }
-
-        // 3) Placement du coffre
-        CreateContainer(*BuildingLayer, *coordinates);
+        ChooseContainerSpawnPoint(*BuildingLayer);
     }
 
     // ETAPE 7 : PLACEMENT DES ÉLÉMENTS DE DÉBUT ET FIN DE PARTIE 
-    std::unique_ptr<FIntPoint> EndingCoordinates = std::make_unique<FIntPoint>(Stream.RandRange(0, 1) == 0 ? 0 : GridWidth - 1, Stream.RandRange(0, GridHeight - 1));
-    
-    UE_LOG(LogTemp, Warning, TEXT("TRIGGER X : %i - TRIGGER Y : %i"), EndingCoordinates->X, EndingCoordinates->Y);
-
-    bool coordinatesIsGood = false;
-    int firstYValue = EndingCoordinates->Y - 1;
-
-    while (!coordinatesIsGood)
-    {
-        // Check if it's possible to pu Ending trigger on coordinates
-        if (EndingCoordinates->Y != firstYValue && 
-            !IsTileUserDataEqual(*BuildingLayer, EndingCoordinates->X, EndingCoordinates->Y + 1, TEXT("GROUND")) ||
-            FindInteractibleAtGridPosition(EndingCoordinates->X, EndingCoordinates->Y) || 
-            FindInteractibleAtGridPosition(EndingCoordinates->X + 1, EndingCoordinates->Y) || FindInteractibleAtGridPosition(EndingCoordinates->X + 2, EndingCoordinates->Y) ||
-            FindInteractibleAtGridPosition(EndingCoordinates->X - 1, EndingCoordinates->Y) || FindInteractibleAtGridPosition(EndingCoordinates->X - 2, EndingCoordinates->Y))
-        {
-            EndingCoordinates->Y = (EndingCoordinates->Y + 1) % GridHeight;
-        }
-        // If all y values was check with this x, change x value
-        else if (EndingCoordinates->Y == firstYValue)
-        {
-            EndingCoordinates->X = EndingCoordinates->X == 0 ? GridWidth - 1 : 0;
-        }
-        // Coordinates are good !
-        else
-        {
-            coordinatesIsGood = true;
-
-            // Put trigger ending on ground
-            EndingCoordinates->Y++;
-        }
-    }
-
-    SpawnBPTile(EndingTrigger, 3, EndingCoordinates->X, EndingCoordinates->Y);
-    ATriggerEnding* triggerEndingBP = Cast<ATriggerEnding>(FindInteractibleAtGridPosition(EndingCoordinates->X, EndingCoordinates->Y));
-
-    if (EndingCoordinates->X == 0 && triggerEndingBP)
-    {
-        triggerEndingBP->isOnMapLeftSide = true;
-    }
+    CreateTriggerEnding(*BuildingLayer);
 
     // ETAPE 8 : MAJ des collisions des tuiles
     MyTileMapComponent->RebuildCollision();
@@ -509,11 +403,56 @@ void ATest_GP_Map::ChooseLadderSpawnPoint(UPaperTileLayer& layer, int x, int y, 
     }
 }
 
+/// <summary>
+/// 
+/// </summary>
+/// <param name="layer"></param>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="probability"></param>
+void ATest_GP_Map::ChooseContainerSpawnPoint(UPaperTileLayer& layer)
+{
+    // 1) Tirer au hasard des coordonnées
+    std::unique_ptr<FIntPoint> coordinates =
+        std::make_unique<FIntPoint>(Stream.RandRange(0, GridHeight - 1), Stream.RandRange(0, GridWidth - 1));
+
+    // 2) Ajuster les coordonnées du container
+    bool isOnGround = false;
+    bool isOnBP = true;
+
+    while (!isOnGround || isOnBP)
+    {
+        // check if container is on ground and not between two grounds
+        if (!IsTileUserDataEqual(layer, coordinates->X, coordinates->Y + 1, TEXT("GROUND"))
+            || IsTileUserDataEqual(layer, coordinates->X, coordinates->Y - 1, TEXT("GROUND")))
+        {
+            coordinates->Y += 1;
+        }
+        else
+        {
+            isOnGround = true;
+        }
+
+        // check if container is on another BP
+        if (FindInteractibleAtGridPosition(coordinates->X, coordinates->Y)) //BPPositionInGrid.Contains(FVector2D(coordinates->X, coordinates->Y))
+        {
+            IsTileUserDataEqual(layer, coordinates->X + 1, coordinates->Y + 1, TEXT("GROUND")) ? coordinates->X += 1 : coordinates->X -= 1;
+        }
+        else
+        {
+            isOnBP = false;
+        }
+    }
+
+    // 3) Placement du coffre
+    CreateContainer(layer, *coordinates);
+}
+
 
 
 // CREATE ELEMENT IN MAP
 /// <summary>
-/// Put Ladder on map
+/// Put ladder on map
 /// </summary>
 void ATest_GP_Map::CreateLadder(UPaperTileLayer& layer, int x, int y)
 {
@@ -527,6 +466,51 @@ void ATest_GP_Map::CreateLadder(UPaperTileLayer& layer, int x, int y)
     {
         SpawnBPTile(Ladder, 1, x, y + h);
         h++;
+    }
+}
+
+/// <summary>
+/// Put door on map
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <param name="layer"></param>
+void ATest_GP_Map::CreateDoor(UPaperTileLayer& layer, int const x, int const y)
+{
+    bool doorIsPlaced = false;
+
+    if (!doorIsPlaced && IsTileUserDataEqual(layer, x, y, TEXT("STARTBUILDING")) && IsTileUserDataEqual(layer, x, y + 1, TEXT("GROUND")))
+    {
+        // calculate number of tiles between starbuilding + 1 and endbuilding - 2 (door takes 2 tiles)
+        int availableSpace = CountTiles(
+            layer, x + 1, y,
+            [this](UPaperTileLayer& layer, int x, int y) -> bool { return IsTileUserDataEqual(layer, x, y, TEXT("BUILDINGWALL")); },
+            [](int& x, int& y) { x++; }) - 2;
+
+        TArray<int> xTileWithSequenceAvailable = {};
+
+        // Get all X when x, x+1 and x+2 have no BP on it and put X value in xTileWithSequenceAvailable
+        for (int i = 1; i < availableSpace; i++)
+        {
+            if (!FindInteractibleAtGridPosition(x + i, y) && !IsTileUserDataEqual(layer, x + i, y, TEXT("ENDBUILDING")) &&
+                !FindInteractibleAtGridPosition(x + i + 1, y) && !IsTileUserDataEqual(layer, x + i + 1, y, TEXT("ENDBUILDING")) &&
+                !FindInteractibleAtGridPosition(x + i + 2, y) && !IsTileUserDataEqual(layer, x + i + 2, y, TEXT("ENDBUILDING")))
+            {
+                xTileWithSequenceAvailable.Add(x + i);
+            }
+        }
+
+        if (xTileWithSequenceAvailable.Num() > 0)
+        {
+            // Get random index to choose X value in xTileWithSequenceAvailable
+            int indexInSequence = Stream.RandRange(0, xTileWithSequenceAvailable.Num() - 1);
+
+            SpawnBPTile(Door, 3, xTileWithSequenceAvailable[indexInSequence], y - 1, 0, 1);
+
+            doorIsPlaced = true;
+        }
+
+        xTileWithSequenceAvailable = {};
     }
 }
 
@@ -558,6 +542,54 @@ void ATest_GP_Map::CreateContainer(UPaperTileLayer& layer, FIntPoint& coordinate
             // 7) Mettre à jour la quantité de cette objet dans la liste RessourcesQuantity
             GameManager->RessourcesQuantity[IDObject]--;
         }
+    }
+}
+
+/// <summary>
+/// Put trigger ending on map
+/// </summary>
+/// <param name="layer"></param>
+/// <param name="x"></param>
+/// <param name="y"></param>
+void ATest_GP_Map::CreateTriggerEnding(UPaperTileLayer& layer)
+{
+    std::unique_ptr<FIntPoint> EndingCoordinates = std::make_unique<FIntPoint>(Stream.RandRange(0, 1) == 0 ? 0 : GridWidth - 1, Stream.RandRange(0, GridHeight - 1));
+
+    bool coordinatesIsGood = false;
+    int firstYValue = EndingCoordinates->Y - 1;
+
+    while (!coordinatesIsGood)
+    {
+        // Check if it's possible to pu Ending trigger on coordinates
+        if (EndingCoordinates->Y != firstYValue &&
+            !IsTileUserDataEqual(layer, EndingCoordinates->X, EndingCoordinates->Y + 1, TEXT("GROUND")) ||
+            FindInteractibleAtGridPosition(EndingCoordinates->X, EndingCoordinates->Y) ||
+            FindInteractibleAtGridPosition(EndingCoordinates->X + 1, EndingCoordinates->Y) || FindInteractibleAtGridPosition(EndingCoordinates->X + 2, EndingCoordinates->Y) ||
+            FindInteractibleAtGridPosition(EndingCoordinates->X - 1, EndingCoordinates->Y) || FindInteractibleAtGridPosition(EndingCoordinates->X - 2, EndingCoordinates->Y))
+        {
+            EndingCoordinates->Y = (EndingCoordinates->Y + 1) % GridHeight;
+        }
+        // If all y values was check with this x, change x value
+        else if (EndingCoordinates->Y == firstYValue)
+        {
+            EndingCoordinates->X = EndingCoordinates->X == 0 ? GridWidth - 1 : 0;
+        }
+        // Coordinates are good !
+        else
+        {
+            coordinatesIsGood = true;
+
+            // Put trigger ending on ground
+            EndingCoordinates->Y++;
+        }
+    }
+
+    SpawnBPTile(EndingTrigger, 3, EndingCoordinates->X, EndingCoordinates->Y);
+    ATriggerEnding* triggerEndingBP = Cast<ATriggerEnding>(FindInteractibleAtGridPosition(EndingCoordinates->X, EndingCoordinates->Y));
+
+    if (EndingCoordinates->X == 0 && triggerEndingBP)
+    {
+        triggerEndingBP->isOnMapLeftSide = true;
     }
 }
 

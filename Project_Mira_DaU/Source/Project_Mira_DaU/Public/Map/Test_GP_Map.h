@@ -73,9 +73,12 @@ private:
 	int PlateformIsAccessibleOrNot(UPaperTileLayer& layer, int x, int y, int const currentPlateformLength);
 	void CalculateLadderSpawnProbability(int const x, int const y, UPaperTileLayer& layer);
 	void ChooseLadderSpawnPoint(UPaperTileLayer& layer, int x, int y, int const probability);
+	void ChooseContainerSpawnPoint(UPaperTileLayer& layer);
 
 	void CreateLadder(UPaperTileLayer& layer, int x, int y);
+	void CreateDoor(UPaperTileLayer& layer, int const x, int const y);
 	void CreateContainer(UPaperTileLayer& layer, FIntPoint& coordinates);
+	void CreateTriggerEnding(UPaperTileLayer& layer);
 	void CreateBackLedge(int const x, int const y, UPaperTileLayer& layer);
 	void CreateBuilding(int const x, int const y, int& width, int& availableFloorSpace, UPaperTileLayer& layer);
 	void ContinueBuilding(int const x, int const y, UPaperTileLayer& layer);
