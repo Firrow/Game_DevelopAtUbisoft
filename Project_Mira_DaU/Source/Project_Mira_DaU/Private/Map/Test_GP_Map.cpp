@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 
 #include "ObjectInGame/Container.h"
+#include "Game/TriggerEnding.h"
 
 #include "Map/Test_GP_Map.h"
 
@@ -220,23 +221,41 @@ void ATest_GP_Map::GenerateWorld()
     UE_LOG(LogTemp, Warning, TEXT("TRIGGER X : %i - TRIGGER Y : %i"), EndingCoordinates->X, EndingCoordinates->Y);
 
     bool coordinatesIsGood = false;
+    int firstYValue = EndingCoordinates->Y - 1;
 
     while (!coordinatesIsGood)
     {
-        if (!IsTileUserDataEqual(*BuildingLayer, EndingCoordinates->X, EndingCoordinates->Y + 1, TEXT("GROUND")) ||
+        // Check if it's possible to pu Ending trigger on coordinates
+        if (EndingCoordinates->Y != firstYValue && 
+            !IsTileUserDataEqual(*BuildingLayer, EndingCoordinates->X, EndingCoordinates->Y + 1, TEXT("GROUND")) ||
             FindInteractibleAtGridPosition(EndingCoordinates->X, EndingCoordinates->Y) || 
             FindInteractibleAtGridPosition(EndingCoordinates->X + 1, EndingCoordinates->Y) || FindInteractibleAtGridPosition(EndingCoordinates->X + 2, EndingCoordinates->Y) ||
             FindInteractibleAtGridPosition(EndingCoordinates->X - 1, EndingCoordinates->Y) || FindInteractibleAtGridPosition(EndingCoordinates->X - 2, EndingCoordinates->Y))
         {
             EndingCoordinates->Y = (EndingCoordinates->Y + 1) % GridHeight;
         }
+        // If all y values was check with this x, change x value
+        else if (EndingCoordinates->Y == firstYValue)
+        {
+            EndingCoordinates->X = EndingCoordinates->X == 0 ? GridWidth - 1 : 0;
+        }
+        // Coordinates are good !
         else
         {
             coordinatesIsGood = true;
+
+            // Put trigger ending on ground
+            EndingCoordinates->Y++;
         }
     }
 
-    SpawnBPTile(EndingTrigger, 3, EndingCoordinates->X, EndingCoordinates->Y + 1);
+    SpawnBPTile(EndingTrigger, 3, EndingCoordinates->X, EndingCoordinates->Y);
+    ATriggerEnding* triggerEndingBP = Cast<ATriggerEnding>(FindInteractibleAtGridPosition(EndingCoordinates->X, EndingCoordinates->Y));
+
+    if (EndingCoordinates->X == 0 && triggerEndingBP)
+    {
+        triggerEndingBP->isOnMapLeftSide = true;
+    }
 
     // ETAPE 8 : MAJ des collisions des tuiles
     MyTileMapComponent->RebuildCollision();
@@ -347,7 +366,7 @@ void ATest_GP_Map::SpawnBPTile(TSubclassOf<T>& BPTile, int BPSize, const int x, 
 /// <param name="x"></param>
 /// <param name="y"></param>
 /// <returns></returns>
-AInteractible* ATest_GP_Map::FindInteractibleAtGridPosition(int x, int y)
+AActor* ATest_GP_Map::FindInteractibleAtGridPosition(int x, int y)
 {
     FVector WorldPosition = ConvertGridPositionToWorldPosition(x, y);
 
@@ -375,11 +394,12 @@ AInteractible* ATest_GP_Map::FindInteractibleAtGridPosition(int x, int y)
         for (const FOverlapResult& Result : OverlapResults)
         {
             AActor* Actor = Result.GetActor();
-            if (Actor && Actor->IsA(AInteractible::StaticClass()))
+            return Actor;
+            /*if (Actor && Actor->IsA(AInteractible::StaticClass()))
             {
                 // Retourner le premier acteur correspondant
                 return Cast<AInteractible>(Actor);
-            }
+            }*/
         }
     }
 

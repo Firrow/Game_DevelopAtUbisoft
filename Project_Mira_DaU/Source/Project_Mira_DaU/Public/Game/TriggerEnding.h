@@ -23,4 +23,7 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "BoxComponent")
 	class UBoxComponent* TriggerWithEnding;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Sprite")
+	bool isOnMapLeftSide = false;
 };
