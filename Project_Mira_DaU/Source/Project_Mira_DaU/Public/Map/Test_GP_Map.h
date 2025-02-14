@@ -65,7 +65,8 @@ private:
 	int CountTiles(UPaperTileLayer& layer, int x, int y, TFunction<bool(UPaperTileLayer&, int, int)> condition, TFunction<void(int&, int&)> iteration);
 	void PutTileOnGrid(int const x, int const y, int32 tile, UPaperTileLayer& layer);
 	FVector ConvertGridPositionToWorldPosition(const int x, const int y);
-	void SpawnBPTile(TSubclassOf<AInteractible>& BPTile, int BPSize, const int x, const int y, const int xOffset = 0, const int yOffset = 0);
+	template<typename T> 
+	void SpawnBPTile(TSubclassOf<T>& BPTile, int BPSize, const int x, const int y, const int xOffset = 0, const int yOffset = 0);
 	AInteractible* FindInteractibleAtGridPosition(int x, int y);
 
 	bool BuildOrNot(int const probability);

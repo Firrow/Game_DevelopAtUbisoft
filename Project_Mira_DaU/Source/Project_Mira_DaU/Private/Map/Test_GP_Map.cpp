@@ -215,6 +215,28 @@ void ATest_GP_Map::GenerateWorld()
     }
 
     // ETAPE 7 : PLACEMENT DES ÉLÉMENTS DE DÉBUT ET FIN DE PARTIE 
+    std::unique_ptr<FIntPoint> EndingCoordinates = std::make_unique<FIntPoint>(Stream.RandRange(0, 1) == 0 ? 0 : GridWidth - 1, Stream.RandRange(0, GridHeight - 1));
+    
+    UE_LOG(LogTemp, Warning, TEXT("TRIGGER X : %i - TRIGGER Y : %i"), EndingCoordinates->X, EndingCoordinates->Y);
+
+    bool coordinatesIsGood = false;
+
+    while (!coordinatesIsGood)
+    {
+        if (!IsTileUserDataEqual(*BuildingLayer, EndingCoordinates->X, EndingCoordinates->Y + 1, TEXT("GROUND")) ||
+            FindInteractibleAtGridPosition(EndingCoordinates->X, EndingCoordinates->Y) || 
+            FindInteractibleAtGridPosition(EndingCoordinates->X + 1, EndingCoordinates->Y) || FindInteractibleAtGridPosition(EndingCoordinates->X + 2, EndingCoordinates->Y) ||
+            FindInteractibleAtGridPosition(EndingCoordinates->X - 1, EndingCoordinates->Y) || FindInteractibleAtGridPosition(EndingCoordinates->X - 2, EndingCoordinates->Y))
+        {
+            EndingCoordinates->Y = (EndingCoordinates->Y + 1) % GridHeight;
+        }
+        else
+        {
+            coordinatesIsGood = true;
+        }
+    }
+
+    SpawnBPTile(EndingTrigger, 3, EndingCoordinates->X, EndingCoordinates->Y + 1);
 
     // ETAPE 8 : MAJ des collisions des tuiles
     MyTileMapComponent->RebuildCollision();
@@ -308,14 +330,14 @@ FVector ATest_GP_Map::ConvertGridPositionToWorldPosition(const int x, const int 
 /// <param name="y"> BP coordinate Y </param>
 /// <param name="xOffset"> Value difference between BP coordinate X and value to put in BPPositionInGrid </param>
 /// <param name="yOffset"> Value difference between BP coordinate Y and value to put in BPPositionInGrid </param>
-void ATest_GP_Map::SpawnBPTile(TSubclassOf<AInteractible>& BPTile, int BPSize, const int x, const int y, const int xOffset, const int yOffset)
+template<typename T>
+void ATest_GP_Map::SpawnBPTile(TSubclassOf<T>& BPTile, int BPSize, const int x, const int y, const int xOffset, const int yOffset)
 {
-    GetWorld()->SpawnActor<AActor>(BPTile, ConvertGridPositionToWorldPosition(x, y), FRotator::ZeroRotator);
+    GetWorld()->SpawnActor<T>(BPTile, ConvertGridPositionToWorldPosition(x, y), FRotator::ZeroRotator);
 
     for (int32 i = 0; i < BPSize; i++)
     {
         BPPositionInGrid.Add(FVector2D(x + xOffset + i, y + yOffset));
-        UE_LOG(LogTemp, Warning, TEXT("x : %i - y : %i"), x + xOffset + i, y + yOffset);
     }
 }
 
