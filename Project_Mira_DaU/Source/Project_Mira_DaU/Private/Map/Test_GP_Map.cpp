@@ -436,7 +436,7 @@ void ATest_GP_Map::ChooseContainerSpawnPoint(UPaperTileLayer& layer)
         // check if container is on another BP
         if (FindInteractibleAtGridPosition(coordinates->X, coordinates->Y)) //BPPositionInGrid.Contains(FVector2D(coordinates->X, coordinates->Y))
         {
-            IsTileUserDataEqual(layer, coordinates->X + 1, coordinates->Y + 1, TEXT("GROUND")) ? coordinates->X += 1 : coordinates->X -= 1;
+            IsTileUserDataEqual(layer, coordinates->X + 1, coordinates->Y + 1, TEXT("GROUND")) ? coordinates->X += 1 : coordinates->Y = (coordinates->Y + 1) % GridHeight;
         }
         else
         {
