@@ -111,6 +111,7 @@ void APlayerCharacter::Interact(const FInputActionValue& InputValue)
 {
     if (ActorIsOverlaped != nullptr && ActorIsOverlaped->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass()))
     {
+        GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, TEXT("On peut interagir"));
         IInteractibleInterface* InteractibleActor = Cast<IInteractibleInterface>(ActorIsOverlaped);
         if (InteractibleActor)
         {
@@ -176,8 +177,6 @@ void APlayerCharacter::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     {
         //APPELER LA FONCTION de l'UI
 
-        ActorIsOverlaped = OtherActor;
-
         if (OtherActor->ActorHasTag("Ladder"))
         {
             if (!OverlappingLadders.Contains(OtherActor))
@@ -185,6 +184,10 @@ void APlayerCharacter::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
 
             if (!bIsOnLadder)
                 bIsOnLadder = true;
+        }
+        else
+        {
+            ActorIsOverlaped = OtherActor;
         }
     }
     else 
@@ -212,7 +215,6 @@ void APlayerCharacter::EndOverlap(UPrimitiveComponent* OverlappedComponent,
     if (Cast<AInteractible>(OtherActor))
     {
         //Stopper LA FONCTION de l'UI
-        ActorIsOverlaped = nullptr;
 
         if (OtherActor->ActorHasTag("Ladder"))
         {
@@ -223,6 +225,10 @@ void APlayerCharacter::EndOverlap(UPrimitiveComponent* OverlappedComponent,
                 bIsOnLadder = false;
                 GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
             }
+        }
+        else
+        {
+            ActorIsOverlaped = nullptr;
         }
     }
 }
