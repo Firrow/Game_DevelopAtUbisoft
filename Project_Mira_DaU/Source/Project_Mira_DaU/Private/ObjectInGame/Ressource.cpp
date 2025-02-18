@@ -8,7 +8,7 @@ ARessource::ARessource()
 	PrimaryActorTick.bCanEverTick = true;
 
 	ObjectCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Object's Capsule"));
-	ObjectCapsule->InitCapsuleSize(1.f, 1.f);
+	ObjectCapsule->InitCapsuleSize(5.f, 5.f);
 }
 
 void ARessource::RessourceEffect()

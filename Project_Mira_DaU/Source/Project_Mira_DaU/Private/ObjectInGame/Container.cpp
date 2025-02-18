@@ -25,7 +25,8 @@ void AContainer::Effect()
         }
         else
         {
-            //TODO : Lancer l'animation du coffre en BP
+            // Start opening animation
+            isClosed = false;
 
             FRotator Rotation(0.0f, 0.0f, 0.0f);
             GetWorld()->SpawnActor<ARessource>(RessourceInside.Last(), RessourcePointSpawn->GetComponentLocation(), Rotation);

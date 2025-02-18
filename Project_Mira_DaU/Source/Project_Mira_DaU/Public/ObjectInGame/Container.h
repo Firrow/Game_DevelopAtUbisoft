@@ -32,6 +32,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "CapsuleRessource")
 	USphereComponent* CapsuleContainer;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Animation")
+	bool isClosed = true;
+
 	AContainer();
 };
 
