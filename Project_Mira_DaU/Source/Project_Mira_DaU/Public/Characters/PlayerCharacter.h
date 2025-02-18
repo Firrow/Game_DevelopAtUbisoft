@@ -31,6 +31,7 @@ private:
 	bool bIsOnLadder = false;
 	float MaxStepHeightPlayer = 5.0f;
 	TArray<AActor*> OverlappingLadders;
+	TArray<AActor*> OverlappingObjects;
 	class AGameManager* GameManager = nullptr;
 
 	APlayerCharacter();
