@@ -416,14 +416,14 @@ void ATest_GP_Map::ChooseContainerSpawnPoint(UPaperTileLayer& layer)
 {
     // 1) Tirer au hasard des coordonnées
     std::unique_ptr<FIntPoint> coordinates =
-        std::make_unique<FIntPoint>(Stream.RandRange(0, GridHeight - 1), Stream.RandRange(0, GridWidth - 1));
+        std::make_unique<FIntPoint>(Stream.RandRange(0, GridWidth - 1), Stream.RandRange(0, GridHeight - 1));
 
     // 2) Ajuster les coordonnées du container
     bool isOnGround = false;
     bool isOnBP = true;
-    int attempts = 1;
+    int attempts = 0;
 
-    while ((!isOnGround || isOnBP) && attempts <= 50)
+    while (!isOnGround || isOnBP)
     {
         // check if container is on ground and not between two grounds
         if (!IsTileUserDataEqual(layer, coordinates->X, coordinates->Y + 1, TEXT("GROUND"))
@@ -431,7 +431,6 @@ void ATest_GP_Map::ChooseContainerSpawnPoint(UPaperTileLayer& layer)
         {
             coordinates->Y += 1;
             isOnGround = false;
-            attempts++;
         }
         else
         {
@@ -443,16 +442,22 @@ void ATest_GP_Map::ChooseContainerSpawnPoint(UPaperTileLayer& layer)
         {
             IsTileUserDataEqual(layer, coordinates->X + 1, coordinates->Y + 1, TEXT("GROUND")) ? coordinates->X += 1 : coordinates->Y = (coordinates->Y + 1) % GridHeight;
             isOnBP = true;
-            attempts++;
         }
         else
         {
             isOnBP = false;
         }
-    }
-    if (attempts > 50)
-    {
-        ChooseContainerSpawnPoint(layer);
+
+        attempts++;
+
+        if (attempts >= 200)
+        {
+            coordinates->X = Stream.RandRange(0, GridWidth - 1);
+            coordinates->Y = Stream.RandRange(0, GridHeight - 1);
+            isOnGround = false;
+            isOnBP = true;
+            attempts = 0;
+        }
     }
 
     // 3) Placement du coffre
