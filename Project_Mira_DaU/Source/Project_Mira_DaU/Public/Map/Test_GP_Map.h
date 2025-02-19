@@ -14,6 +14,7 @@ class UPaperTileSet;
 class UPaperTileMap;
 class UPaperTileLayer;
 class AGameManager;
+class APlayerCharacter;
 
 
 UENUM(BlueprintType)
@@ -64,7 +65,7 @@ private:
 	bool IsTileNull(UPaperTileLayer& layer, int x, int y);
 	int CountTiles(UPaperTileLayer& layer, int x, int y, TFunction<bool(UPaperTileLayer&, int, int)> condition, TFunction<void(int&, int&)> iteration);
 	void PutTileOnGrid(int const x, int const y, int32 tile, UPaperTileLayer& layer);
-	FVector ConvertGridPositionToWorldPosition(const int x, const int y);
+	FVector ConvertGridPositionToWorldPosition(const int x, const int y, bool isPlayer);
 	template<typename T> 
 	void SpawnBPTile(TSubclassOf<T>& BPTile, int BPSize, const int x, const int y, const int xOffset = 0, const int yOffset = 0);
 	AActor* FindInteractibleAtGridPosition(int x, int y);
@@ -79,6 +80,8 @@ private:
 	void CreateDoor(UPaperTileLayer& layer, int const x, int const y);
 	void CreateContainer(UPaperTileLayer& layer, FIntPoint& coordinates);
 	void CreateTriggerEnding(UPaperTileLayer& layer);
+	void DeleteFirstPlayerInstance();
+	void SpawnPlayerInScene(UPaperTileLayer& layer);
 	void CreateBackLedge(int const x, int const y, UPaperTileLayer& layer);
 	void CreateBuilding(int const x, int const y, int& width, int& availableFloorSpace, UPaperTileLayer& layer);
 	void ContinueBuilding(int const x, int const y, UPaperTileLayer& layer);
@@ -144,6 +147,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
 	TSubclassOf<AActor> EndingTrigger;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
+	TSubclassOf<APlayerCharacter> PlayerCharacter;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
 	TMap<int, TSubclassOf<ARessource>> RessourcesType;
