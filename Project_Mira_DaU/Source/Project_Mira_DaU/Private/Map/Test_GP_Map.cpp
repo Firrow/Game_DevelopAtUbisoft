@@ -1,4 +1,5 @@
 
+#include "Map/Test_GP_Map.h"
 #include "PaperTileMapComponent.h"
 #include "PaperTileMap.h"
 #include "PaperTileSet.h"
@@ -9,8 +10,7 @@
 
 #include "ObjectInGame/Container.h"
 #include "Game/TriggerEnding.h"
-
-#include "Map/Test_GP_Map.h"
+#include "Characters/PlayerCharacter.h"
 
 
 // ETAPE 1 : Initialiser la TileMapComponent et les valeurs qui seront utilisées
@@ -28,6 +28,8 @@ ATest_GP_Map::ATest_GP_Map()
 void ATest_GP_Map::BeginPlay()
 {
 	Super::BeginPlay();
+
+    DeleteFirstPlayerInstance();
 
     GetGameManager();
     CalculateTotalRessourcesQuantity();
@@ -153,6 +155,9 @@ void ATest_GP_Map::GenerateWorld()
 
     // ETAPE 8 : MAJ des collisions des tuiles
     MyTileMapComponent->RebuildCollision();
+
+    // ÉTAPE 9 : Ajouter le joueur à la map
+    SpawnPlayerInScene(*BuildingLayer);
 }
 
 
@@ -229,9 +234,9 @@ void ATest_GP_Map::PutTileOnGrid(int const x, int const y, int32 tile, UPaperTil
 /// <param name="x"></param>
 /// <param name="y"></param>
 /// <returns></returns>
-FVector ATest_GP_Map::ConvertGridPositionToWorldPosition(const int x, const int y)
+FVector ATest_GP_Map::ConvertGridPositionToWorldPosition(const int x, const int y, bool isPlayer = false)
 {
-    return FVector(x * TileSize, -0.1f, y * -TileSize);
+    return isPlayer ? FVector(x * TileSize, 0.f, y * -TileSize) : FVector(x * TileSize, -0.1f, y * -TileSize);
 }
 
 /// <summary>
@@ -289,11 +294,6 @@ AActor* ATest_GP_Map::FindInteractibleAtGridPosition(int x, int y)
         {
             AActor* Actor = Result.GetActor();
             return Actor;
-            /*if (Actor && Actor->IsA(AInteractible::StaticClass()))
-            {
-                // Retourner le premier acteur correspondant
-                return Cast<AInteractible>(Actor);
-            }*/
         }
     }
 
@@ -592,6 +592,59 @@ void ATest_GP_Map::CreateTriggerEnding(UPaperTileLayer& layer)
         triggerEndingBP->isOnMapLeftSide = true;
     }
 }
+
+/// <summary>
+/// Destroy first instance of player create by Game mode
+/// </summary>
+void ATest_GP_Map::DeleteFirstPlayerInstance()
+{
+    APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+    if (!PlayerController) return;
+
+    APawn* PlayerPawn = PlayerController->GetPawn();
+    if (PlayerPawn)
+    {
+        PlayerPawn->Destroy();
+    }
+}
+
+/// <summary>
+/// 
+/// </summary>
+/// <param name="layer"></param>
+void ATest_GP_Map::SpawnPlayerInScene(UPaperTileLayer& layer)
+{
+    APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+
+    std::unique_ptr<FIntPoint> StartingCoordinates = std::make_unique<FIntPoint>(Stream.RandRange(2, GridHeight - 2), Stream.RandRange(2, GridWidth - 2));
+    bool coordinatesIsGood = false;
+
+    while (!coordinatesIsGood)
+    {
+        if (!IsTileUserDataEqual(layer, StartingCoordinates->X, StartingCoordinates->Y + 1, TEXT("GROUND")))
+        {
+            StartingCoordinates->Y = (StartingCoordinates->Y + 1) % GridHeight;
+        }
+        else
+        {
+            coordinatesIsGood = true;
+        }
+    }
+
+    FActorSpawnParameters SpawnParams;
+    APlayerCharacter* NewPlayer = GetWorld()->SpawnActor<APlayerCharacter>(PlayerCharacter, ConvertGridPositionToWorldPosition(StartingCoordinates->X, StartingCoordinates->Y, true), FRotator::ZeroRotator, SpawnParams);
+
+    if (NewPlayer)
+    {
+        PlayerController->Possess(NewPlayer);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Échec du respawn du joueur"));
+    }
+}
+
+
 
 /// <summary>
 /// Create an extention for the plateform (to his left)

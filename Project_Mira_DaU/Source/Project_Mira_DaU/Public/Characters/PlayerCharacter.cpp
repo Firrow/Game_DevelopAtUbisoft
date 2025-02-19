@@ -111,7 +111,6 @@ void APlayerCharacter::Interact(const FInputActionValue& InputValue)
 {
     if (ActorIsOverlaped != nullptr && ActorIsOverlaped->GetClass()->ImplementsInterface(UInteractibleInterface::StaticClass()))
     {
-        GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, TEXT("On peut interagir"));
         IInteractibleInterface* InteractibleActor = Cast<IInteractibleInterface>(ActorIsOverlaped);
         if (InteractibleActor)
         {
