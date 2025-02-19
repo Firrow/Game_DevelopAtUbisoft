@@ -136,6 +136,7 @@ void ATest_GP_Map::GenerateWorld()
             }
         }
     }
+
     //PLACEMENT DES PORTES
     for (int32 y = GridHeight - 1; y >= 0; y--)
     {
@@ -144,6 +145,7 @@ void ATest_GP_Map::GenerateWorld()
             CreateDoor(*BuildingLayer, x, y);
         }
     }
+
     //PLACEMENT DES COFFRES
     for (int i = 1; i <= TotalRessourcesQuantity; i++)
     {
@@ -255,7 +257,7 @@ void ATest_GP_Map::SpawnBPTile(TSubclassOf<T>& BPTile, int BPSize, const int x, 
 
     for (int32 i = 0; i < BPSize; i++)
     {
-        BPPositionInGrid.Add(FVector2D(x + xOffset + i, y + yOffset));
+        BPPositionInGrid.Add(FIntPoint(x + xOffset + i, y + yOffset));
     }
 }
 
@@ -419,14 +421,17 @@ void ATest_GP_Map::ChooseContainerSpawnPoint(UPaperTileLayer& layer)
     // 2) Ajuster les coordonnées du container
     bool isOnGround = false;
     bool isOnBP = true;
+    int attempts = 1;
 
-    while (!isOnGround || isOnBP)
+    while ((!isOnGround || isOnBP) && attempts <= 50)
     {
         // check if container is on ground and not between two grounds
         if (!IsTileUserDataEqual(layer, coordinates->X, coordinates->Y + 1, TEXT("GROUND"))
             || IsTileUserDataEqual(layer, coordinates->X, coordinates->Y - 1, TEXT("GROUND")))
         {
             coordinates->Y += 1;
+            isOnGround = false;
+            attempts++;
         }
         else
         {
@@ -434,14 +439,20 @@ void ATest_GP_Map::ChooseContainerSpawnPoint(UPaperTileLayer& layer)
         }
 
         // check if container is on another BP
-        if (FindInteractibleAtGridPosition(coordinates->X, coordinates->Y)) //BPPositionInGrid.Contains(FVector2D(coordinates->X, coordinates->Y))
+        if (BPPositionInGrid.Contains(FIntPoint(coordinates->X, coordinates->Y)))
         {
             IsTileUserDataEqual(layer, coordinates->X + 1, coordinates->Y + 1, TEXT("GROUND")) ? coordinates->X += 1 : coordinates->Y = (coordinates->Y + 1) % GridHeight;
+            isOnBP = true;
+            attempts++;
         }
         else
         {
             isOnBP = false;
         }
+    }
+    if (attempts > 50)
+    {
+        ChooseContainerSpawnPoint(layer);
     }
 
     // 3) Placement du coffre

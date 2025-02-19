@@ -53,7 +53,7 @@ private:
 	float TileSize;
 	FRandomStream Stream; //Ma map étant une classe de generation, je prefere le mettre en attribut (Stream <=> RNG)
 	AGameManager* GameManager;
-	TSet<FVector2D> BPPositionInGrid;
+	TSet<FIntPoint> BPPositionInGrid;
 	int TotalRessourcesQuantity;
 
 	ATest_GP_Map();
