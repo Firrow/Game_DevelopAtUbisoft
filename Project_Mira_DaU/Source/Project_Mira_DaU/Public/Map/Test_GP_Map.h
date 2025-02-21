@@ -60,6 +60,7 @@ private:
 	void GetGameManager();
 	void CalculateTotalRessourcesQuantity();
     void GenerateWorld();
+	void GenerateBackground();
 
 	bool IsTileUserDataEqual(UPaperTileLayer& layer, int x, int y, FString tileType);
 	bool IsTileNull(UPaperTileLayer& layer, int x, int y);
@@ -150,6 +151,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
 	TSubclassOf<APlayerCharacter> PlayerCharacter;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
+	TSubclassOf<AActor> Background;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
 	TMap<int, TSubclassOf<ARessource>> RessourcesType;
