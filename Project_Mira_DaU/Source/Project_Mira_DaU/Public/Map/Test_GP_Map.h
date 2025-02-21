@@ -156,5 +156,11 @@ public:
 	TSubclassOf<AActor> Background;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
+	int32 BackgroundXPosition = 50;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
+	int32 BackgroundYPosition = 50;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
 	TMap<int, TSubclassOf<ARessource>> RessourcesType;
 };
