@@ -7,6 +7,7 @@
 
 
 class APlayerCharacter;
+class AGameManager;
 
 UCLASS()
 class PROJECT_MIRA_DAU_API AGear_ressource : public ARessource
@@ -15,6 +16,7 @@ class PROJECT_MIRA_DAU_API AGear_ressource : public ARessource
 	
 private:
 	APlayerCharacter* PlayerCharacter = nullptr;
+	AGameManager* GameManager = nullptr;
 
 	virtual void RessourceEffect() override;
 

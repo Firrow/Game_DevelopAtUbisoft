@@ -1,5 +1,6 @@
 
 #include "Characters/PlayerCharacter.h"
+#include "Kismet/GameplayStatics.h"
 #include "ObjectInGame/Ressources/Gear_ressource.h"
 
 void AGear_ressource::BeginPlay()
@@ -11,7 +12,10 @@ void AGear_ressource::BeginPlay()
 
 void AGear_ressource::RessourceEffect()
 {
-    PlayerCharacter->GearsNumber++;
+    if (GameManager != nullptr)
+    {
+        GameManager->SetPlayerGearsQuantity(GameManager->GetPlayerGearsQuantity() + 1);
+    }
 }
 
 
@@ -26,6 +30,9 @@ void AGear_ressource::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
     if (PlayerCharacter != nullptr)
     {
+        AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass());
+        GameManager = Cast<AGameManager>(FoundActor);
+
         Super::BeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
     }
 }
