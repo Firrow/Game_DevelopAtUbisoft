@@ -35,9 +35,9 @@ void ATest_GP_Map::BeginPlay()
     CalculateTotalRessourcesQuantity();
 	
 	GenerateWorld();
+    GenerateBackground();
 }
 
-// MAP INITIALIZATION
 void ATest_GP_Map::GetGameManager()
 {
     UWorld* World = GetWorld();
@@ -68,6 +68,7 @@ void ATest_GP_Map::CalculateTotalRessourcesQuantity()
     }
 }
 
+// MAP INITIALIZATION
 void ATest_GP_Map::GenerateWorld()
 {
     // ETAPE 3 : Création et assignation d'une TileMap avec pour propriétaire la TileMapComponent
@@ -160,6 +161,14 @@ void ATest_GP_Map::GenerateWorld()
 
     // ÉTAPE 9 : Ajouter le joueur à la map
     SpawnPlayerInScene(*BuildingLayer);
+}
+
+void ATest_GP_Map::GenerateBackground()
+{   
+    int xBackground = GridWidth / 2;
+    int yBackground = GridHeight / 2;
+    FActorSpawnParameters SpawnParams;
+    GetWorld()->SpawnActor<AActor>(Background, ConvertGridPositionToWorldPosition(xBackground, yBackground, false), FRotator::ZeroRotator, SpawnParams);
 }
 
 
@@ -630,8 +639,6 @@ void ATest_GP_Map::DeleteFirstPlayerInstance()
 /// <param name="layer"></param>
 void ATest_GP_Map::SpawnPlayerInScene(UPaperTileLayer& layer)
 {
-    APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-
     std::unique_ptr<FIntPoint> StartingCoordinates = std::make_unique<FIntPoint>(Stream.RandRange(2, GridHeight - 2), Stream.RandRange(2, GridWidth - 2));
     bool coordinatesIsGood = false;
 
@@ -652,12 +659,15 @@ void ATest_GP_Map::SpawnPlayerInScene(UPaperTileLayer& layer)
 
     if (NewPlayer)
     {
+        APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
         PlayerController->Possess(NewPlayer);
     }
     else
     {
         UE_LOG(LogTemp, Warning, TEXT("Échec du respawn du joueur"));
     }
+
+    //TODO : Delete BP_Player2
 }
 
 
