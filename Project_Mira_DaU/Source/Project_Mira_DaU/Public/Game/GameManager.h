@@ -13,8 +13,9 @@ class PROJECT_MIRA_DAU_API AGameManager : public AActor
 	
 private:	
 
-	int RealTimeValue; //créer getter et setter
-	int GameTimeValue; //créer getter et setter
+	int RealTimeValue;
+	int GameTimeValue;
+	int PlayerGearsQuantity;
 
 	int SECONDS_IN_A_DAY = 86400;
 	int TOTAL_PLAYING_TIME = 10; //TODO : Set to 3600 or 1800 when tests are finished
@@ -42,7 +43,6 @@ public:
 	void GameOverEndGame();
 	void VictoryEndGame();
 
-
 	int NUMBER_OF_GEARS;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DEBUGING SECTION")
@@ -64,4 +64,7 @@ public:
 
 	int GetGameTimeValue() const;
 	void SetGameTimeValue(int NewValue);
+
+	int GetPlayerGearsQuantity() const;
+	void SetPlayerGearsQuantity(int NewValue);
 };

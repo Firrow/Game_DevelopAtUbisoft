@@ -92,3 +92,12 @@ void AGameManager::SetGameTimeValue(int NewValue)
 {
 	GameTimeValue = NewValue;
 }
+
+int AGameManager::GetPlayerGearsQuantity() const
+{
+	return PlayerGearsQuantity;
+}
+void AGameManager::SetPlayerGearsQuantity(int NewValue)
+{
+	PlayerGearsQuantity = NewValue;
+}

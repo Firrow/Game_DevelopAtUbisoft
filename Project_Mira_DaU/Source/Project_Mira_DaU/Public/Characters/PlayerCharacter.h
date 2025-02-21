@@ -44,8 +44,6 @@ private:
 	void UpdateIsFacingLeft();
 
 public:
-
-	int GearsNumber = 0;
 	int LifePlayer = MAX_HEALTH;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
