@@ -58,6 +58,9 @@ void ATest_GP_Map::GetGameManager()
     }
 }
 
+/// <summary>
+/// Calculate total number quantity to spawn in map
+/// </summary>
 void ATest_GP_Map::CalculateTotalRessourcesQuantity()
 {
     TotalRessourcesQuantity = 0;
@@ -165,8 +168,6 @@ void ATest_GP_Map::GenerateWorld()
 
 void ATest_GP_Map::GenerateBackground()
 {   
-    //int xBackground = GridWidth / 2;
-    //int yBackground = GridHeight / 2;
     FActorSpawnParameters SpawnParams;
     GetWorld()->SpawnActor<AActor>(Background, ConvertGridPositionToWorldPosition(BackgroundXPosition, BackgroundYPosition, false), FRotator::ZeroRotator, SpawnParams);
 }
