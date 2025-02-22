@@ -107,7 +107,7 @@ int AGameManager::GetGameTimeValue() const
 void AGameManager::SetGameTimeValue(int NewValue)
 {
 	GameTimeValue = NewValue;
-	// Update UI temps
+	OnGameHourChanged.Broadcast(GameTimeValue);
 }
 
 int AGameManager::GetPlayerGearsQuantity() const
@@ -117,6 +117,5 @@ int AGameManager::GetPlayerGearsQuantity() const
 void AGameManager::SetPlayerGearsQuantity(int NewValue)
 {
 	PlayerGearsQuantity = NewValue;
-	// Update UI gears
 	OnGearsQuantityChanged.Broadcast(PlayerGearsQuantity);
 }

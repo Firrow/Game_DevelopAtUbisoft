@@ -8,6 +8,7 @@
 
 // Delegate dynamique pour notifier les changements de PlayerGearsQuantity
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGearsQuantityChanged, int, PlayerGearsQuantity);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameHourChanged, int, GameTimeValue);
 
 
 UCLASS()
@@ -21,7 +22,7 @@ private:
 	int PlayerGearsQuantity = 0;
 
 	int SECONDS_IN_A_DAY = 86400;
-	int TOTAL_PLAYING_TIME = 10; //TODO : Set to 3600 or 1800 when tests are finished
+	int TOTAL_PLAYING_TIME = 30; //TODO : Set to 3600 or 1800 when tests are finished
 
 	FTimerHandle timer;
 	int translateSecondsIRLTimeToGameTime = SECONDS_IN_A_DAY / TOTAL_PLAYING_TIME;
@@ -71,6 +72,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnGearsQuantityChanged OnGearsQuantityChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnGameHourChanged OnGameHourChanged;
 
 
 	int GetRealTimeValue() const;
