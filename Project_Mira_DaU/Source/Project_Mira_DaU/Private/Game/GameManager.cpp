@@ -1,5 +1,6 @@
 
 #include "Game/GameManager.h"
+#include "Blueprint/UserWidget.h"
 #include "Components/WidgetComponent.h"
 
 
@@ -62,22 +63,31 @@ int AGameManager::GetTimeInGame(const int &RealTime)
 void AGameManager::DisplayUI_PlayerInformations()
 {
 	PlayerInformationsWidget->AddToViewport();
+	UIIsDisplay = true;
 }
 
 void AGameManager::GameOverEndGame()
 {
 	//TODO : display screen (avec les causes de la mort)
-	// Si timer est encore en cours -> arrêter le timer
-	GetWorldTimerManager().ClearTimer(timer);
+	FinishedGame();
 	GameOverWidget->AddToViewport();
 }
 
 void AGameManager::VictoryEndGame()
 {
-	GetWorldTimerManager().ClearTimer(timer);
+	FinishedGame();
 	VictoryWidget->AddToViewport();
 }
 
+void AGameManager::FinishedGame()
+{
+	GetWorldTimerManager().ClearTimer(timer);
+
+	if (UIIsDisplay)
+	{
+		PlayerInformationsWidget->RemoveFromParent();
+	}
+}
 
 
 int AGameManager::GetRealTimeValue() const
@@ -97,6 +107,7 @@ int AGameManager::GetGameTimeValue() const
 void AGameManager::SetGameTimeValue(int NewValue)
 {
 	GameTimeValue = NewValue;
+	// Update UI temps
 }
 
 int AGameManager::GetPlayerGearsQuantity() const
@@ -106,4 +117,6 @@ int AGameManager::GetPlayerGearsQuantity() const
 void AGameManager::SetPlayerGearsQuantity(int NewValue)
 {
 	PlayerGearsQuantity = NewValue;
+	// Update UI gears
+	OnGearsQuantityChanged.Broadcast(PlayerGearsQuantity);
 }
