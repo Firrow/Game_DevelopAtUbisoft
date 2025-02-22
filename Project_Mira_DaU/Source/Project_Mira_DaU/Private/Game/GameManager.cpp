@@ -17,6 +17,7 @@ void AGameManager::BeginPlay()
 		TimerManager();
 	}
 
+	PlayerInformationsWidget = CreateWidget<UUserWidget>(GetWorld(), PlayerInformationsWidgetClass);
 	GameOverWidget = CreateWidget<UUserWidget>(GetWorld(), GameOverWidgetClass);
 	VictoryWidget = CreateWidget<UUserWidget>(GetWorld(), VictoryWidgetClass);
 
@@ -57,6 +58,11 @@ int AGameManager::GetTimeInGame(const int &RealTime)
 }
 
 
+
+void AGameManager::DisplayUI_PlayerInformations()
+{
+	PlayerInformationsWidget->AddToViewport();
+}
 
 void AGameManager::GameOverEndGame()
 {
