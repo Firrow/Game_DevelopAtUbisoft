@@ -39,15 +39,11 @@ void AGameManager::TimerManager()
 
 		SetRealTimeValue(GetRealTimeValue() + 1);
 		SetGameTimeValue(GetTimeInGame(GetRealTimeValue()));
-		UE_LOG(LogTemp, Warning, TEXT("REAL TIME (second) : %i"), RealTimeValue);
-		UE_LOG(LogTemp, Warning, TEXT("Time in game (second) : %i"), GameTimeValue);
-		UE_LOG(LogTemp, Warning, TEXT("----------------------------------------------------------------------------"));
 
 		if (GetRealTimeValue() >= TOTAL_PLAYING_TIME)
 		{
 			GetWorldTimerManager().ClearTimer(timer);
 			GameOverEndGame();
-			UE_LOG(LogTemp, Warning, TEXT("STOP GAME !!!!! : %i"), GameTimeValue);
 		}
 
 	}), 1, true);
@@ -63,7 +59,14 @@ FString AGameManager::ConvertGameTimeValue()
 	int hours = GameTimeValue / 3600;
 	int minutes = ((GameTimeValue % 3600) / 60);
 
-	return FString::Printf(TEXT("%i h %i "), hours, minutes);
+	if (minutes == 0)
+	{
+		return FString::Printf(TEXT("%i h 00"), hours);
+	}
+	else
+	{
+		return FString::Printf(TEXT("%i h %i"), hours, minutes);
+	}
 }
 
 
@@ -86,6 +89,9 @@ void AGameManager::VictoryEndGame()
 	VictoryWidget->AddToViewport();
 }
 
+/// <summary>
+/// Stop timer and undisplay UI if it was on screen
+/// </summary>
 void AGameManager::FinishedGame()
 {
 	GetWorldTimerManager().ClearTimer(timer);
