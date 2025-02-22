@@ -15,8 +15,8 @@ void UGameInformationsUI::NativeConstruct()
     {
         // Lier la fonction UpdateGearQuantity au delegate du GameManager
         GameManager->OnGearsQuantityChanged.AddDynamic(this, &UGameInformationsUI::UpdateGearQuantity);
+        GameManager->OnGameHourChanged.AddDynamic(this, &UGameInformationsUI::UpdateGameHour);
 
-        // Mettre à jour l'affichage immédiatement
         UpdateGearQuantity(GameManager->GetPlayerGearsQuantity());
     }
 }
@@ -26,5 +26,13 @@ void UGameInformationsUI::UpdateGearQuantity(int32 NewQuantity)
     if (GearQuantity)
     {
         GearQuantity->SetText(FText::AsNumber(NewQuantity));
+    }
+}
+
+void UGameInformationsUI::UpdateGameHour(int32 NewQuantity)
+{
+    if (GameHour)
+    {
+        GameHour->SetText(FText::AsNumber(NewQuantity));
     }
 }

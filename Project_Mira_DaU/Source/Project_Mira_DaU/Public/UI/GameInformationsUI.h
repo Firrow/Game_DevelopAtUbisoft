@@ -14,9 +14,11 @@ class PROJECT_MIRA_DAU_API UGameInformationsUI : public UUserWidget
 	GENERATED_BODY()
 
     protected:
-        // Associe cette variable à l'élément texte dans le Blueprint
         UPROPERTY(meta = (BindWidget))
         UTextBlock* GearQuantity;
+
+        UPROPERTY(meta = (BindWidget))
+        UTextBlock* GameHour;
 
     private:
         AGameManager* GameManager;
@@ -26,4 +28,7 @@ class PROJECT_MIRA_DAU_API UGameInformationsUI : public UUserWidget
 
         UFUNCTION()
         void UpdateGearQuantity(int32 NewQuantity);
+
+        UFUNCTION()
+        void UpdateGameHour(int32 NewQuantity);
 };
