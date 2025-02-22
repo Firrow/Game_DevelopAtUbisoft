@@ -1,5 +1,6 @@
 
 #include <Characters/PlayerCharacter.h>
+#include "Kismet/GameplayStatics.h"
 #include "ObjectInGame/Ressources/Computer_ressource.h"
 
 void AComputer_ressource::BeginPlay()
@@ -11,9 +12,11 @@ void AComputer_ressource::BeginPlay()
 
 void AComputer_ressource::RessourceEffect()
 {
-    //Coder l'effet de la ressource
-
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Je joue l'effet : COMPUTER"));
+    // Add UI with informations on screen
+    if (GameManager != nullptr) 
+    {
+        GameManager->DisplayUI_PlayerInformations();
+    }
 }
 
 
@@ -28,6 +31,9 @@ void AComputer_ressource::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
     if (PlayerCharacter)
     {
+        AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass());
+        GameManager = Cast<AGameManager>(FoundActor);
+
         Super::BeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
     }
 }

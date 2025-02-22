@@ -5,15 +5,15 @@
 #include "ObjectInGame/Ressource.h"
 #include "Computer_ressource.generated.h"
 
-/**
- * 
- */
+class AGameManager;
+
 UCLASS()
 class PROJECT_MIRA_DAU_API AComputer_ressource : public ARessource
 {
 	GENERATED_BODY()
 	
 private:
+	AGameManager* GameManager = nullptr;
 
 	virtual void RessourceEffect() override;
 
