@@ -58,6 +58,13 @@ int AGameManager::GetTimeInGame(const int &RealTime)
 	return RealTime * translateSecondsIRLTimeToGameTime;
 }
 
+FString AGameManager::ConvertGameTimeValue()
+{
+	int hours = GameTimeValue / 3600;
+	int minutes = ((GameTimeValue % 3600) / 60);
+
+	return FString::Printf(TEXT("%i h %i "), hours, minutes);
+}
 
 
 void AGameManager::DisplayUI_PlayerInformations()
@@ -103,11 +110,11 @@ int AGameManager::GetGameTimeValue() const
 {
 	return GameTimeValue;
 }
-
 void AGameManager::SetGameTimeValue(int NewValue)
 {
 	GameTimeValue = NewValue;
-	OnGameHourChanged.Broadcast(GameTimeValue);
+	ConvertedGameTimeValue = ConvertGameTimeValue();
+	OnGameHourChanged.Broadcast(ConvertedGameTimeValue);
 }
 
 int AGameManager::GetPlayerGearsQuantity() const

@@ -29,10 +29,10 @@ void UGameInformationsUI::UpdateGearQuantity(int32 NewQuantity)
     }
 }
 
-void UGameInformationsUI::UpdateGameHour(int32 NewQuantity)
+void UGameInformationsUI::UpdateGameHour(FString NewHour)
 {
     if (GameHour)
     {
-        GameHour->SetText(FText::AsNumber(NewQuantity));
+        GameHour->SetText(FText::FromString(NewHour));
     }
 }

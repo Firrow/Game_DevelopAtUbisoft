@@ -30,5 +30,5 @@ class PROJECT_MIRA_DAU_API UGameInformationsUI : public UUserWidget
         void UpdateGearQuantity(int32 NewQuantity);
 
         UFUNCTION()
-        void UpdateGameHour(int32 NewQuantity);
+        void UpdateGameHour(FString NewHour);
 };

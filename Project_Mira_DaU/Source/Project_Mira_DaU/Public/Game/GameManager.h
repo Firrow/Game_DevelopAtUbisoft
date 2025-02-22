@@ -8,7 +8,7 @@
 
 // Delegate dynamique pour notifier les changements de PlayerGearsQuantity
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGearsQuantityChanged, int, PlayerGearsQuantity);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameHourChanged, int, GameTimeValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameHourChanged, FString, ConvertedGameTimeValue);
 
 
 UCLASS()
@@ -19,6 +19,7 @@ class PROJECT_MIRA_DAU_API AGameManager : public AActor
 private:	
 	int RealTimeValue;
 	int GameTimeValue;
+	FString ConvertedGameTimeValue = "";
 	int PlayerGearsQuantity = 0;
 
 	int SECONDS_IN_A_DAY = 86400;
@@ -40,6 +41,7 @@ private:
 	AGameManager();
 	void TimerManager();
 	int GetTimeInGame(const int& RealTime);
+	FString ConvertGameTimeValue();
 	void FinishedGame();
 	
 
