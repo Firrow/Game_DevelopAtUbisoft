@@ -6,7 +6,6 @@
 #include "Blueprint/UserWidget.h"
 #include "GameManager.generated.h"
 
-// Delegate dynamique pour notifier les changements de PlayerGearsQuantity
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGearsQuantityChanged, int, PlayerGearsQuantity);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameHourChanged, FString, ConvertedGameTimeValue);
 
@@ -67,7 +66,7 @@ public:
 	TSubclassOf<UUserWidget> VictoryWidgetClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-	TSubclassOf<UUserWidget> PlayerInformationsWidgetClass; // Current time + Gears get by Player
+	TSubclassOf<UUserWidget> PlayerInformationsWidgetClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
 	TMap<int, int> RessourcesQuantity;
