@@ -6,13 +6,16 @@
 #include "Components/BoxComponent.h"
 #include "TriggerEnding.generated.h"
 
+class AGameManager;
 
 UCLASS()
 class PROJECT_MIRA_DAU_API ATriggerEnding : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
+private:
+	AGameManager* GameManager = nullptr;
+
 	ATriggerEnding();
 
 protected:
@@ -20,6 +23,7 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
+	void CheckEnding();
 
 	UPROPERTY(EditAnywhere, Category = "BoxComponent")
 	class UBoxComponent* TriggerWithEnding;
