@@ -21,6 +21,7 @@ void AGameManager::BeginPlay()
 	PlayerInformationsWidget = CreateWidget<UUserWidget>(GetWorld(), PlayerInformationsWidgetClass);
 	GameOverWidget = CreateWidget<UUserWidget>(GetWorld(), GameOverWidgetClass);
 	VictoryWidget = CreateWidget<UUserWidget>(GetWorld(), VictoryWidgetClass);
+	MapWidget = CreateWidget<UUserWidget>(GetWorld(), MapWidgetClass);
 
 	NUMBER_OF_GEARS = RessourcesQuantity[0];
 }
@@ -76,6 +77,12 @@ void AGameManager::DisplayUI_PlayerInformations()
 	UIIsDisplay = true;
 }
 
+void AGameManager::DisplayUI_Map()
+{
+	MapWidget->AddToViewport();
+	MapIsDisplay = true;
+}
+
 void AGameManager::GameOverEndGame()
 {
 	//TODO : display screen (avec les causes de la mort)
@@ -99,6 +106,10 @@ void AGameManager::FinishedGame()
 	if (UIIsDisplay)
 	{
 		PlayerInformationsWidget->RemoveFromParent();
+	}
+	if (MapIsDisplay)
+	{
+		MapWidget->RemoveFromParent();
 	}
 }
 

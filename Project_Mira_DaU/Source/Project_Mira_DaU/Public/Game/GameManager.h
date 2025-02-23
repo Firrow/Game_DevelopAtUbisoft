@@ -27,9 +27,13 @@ private:
 	FTimerHandle timer;
 	int translateSecondsIRLTimeToGameTime = SECONDS_IN_A_DAY / TOTAL_PLAYING_TIME;
 	bool UIIsDisplay = false;
+	bool MapIsDisplay = false;
 
 	UPROPERTY()
 	UUserWidget* PlayerInformationsWidget;
+
+	UPROPERTY()
+	UUserWidget* MapWidget;
 
 	UPROPERTY()
 	UUserWidget* GameOverWidget;
@@ -51,6 +55,7 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	void DisplayUI_PlayerInformations();
+	void DisplayUI_Map();
 	void GameOverEndGame();
 	void VictoryEndGame();
 
@@ -67,6 +72,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UUserWidget> PlayerInformationsWidgetClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UUserWidget> MapWidgetClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
 	TMap<int, int> RessourcesQuantity;

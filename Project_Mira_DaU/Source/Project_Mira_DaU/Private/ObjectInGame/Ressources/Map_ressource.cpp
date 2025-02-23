@@ -1,5 +1,6 @@
 
 #include <Characters/PlayerCharacter.h>
+#include "Kismet/GameplayStatics.h"
 #include "ObjectInGame/Ressources/Map_ressource.h"
 
 void AMap_ressource::BeginPlay()
@@ -11,9 +12,11 @@ void AMap_ressource::BeginPlay()
 
 void AMap_ressource::RessourceEffect()
 {
-    //Coder l'effet de la ressource
-
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Je joue l'effet : MAP"));
+    // Add UI Map on screen
+    if (GameManager != nullptr)
+    {
+        GameManager->DisplayUI_Map();
+    }
 }
 
 
@@ -28,6 +31,9 @@ void AMap_ressource::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
     if (PlayerCharacter)
     {
+        AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass());
+        GameManager = Cast<AGameManager>(FoundActor);
+
         Super::BeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
     }
 }
