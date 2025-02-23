@@ -1,4 +1,6 @@
 
+#include <Characters/PlayerCharacter.h>
+#include "Kismet/GameplayStatics.h"
 #include "Game/TriggerEnding.h"
 
 ATriggerEnding::ATriggerEnding()
@@ -19,6 +21,22 @@ void ATriggerEnding::BeginPlay()
 void ATriggerEnding::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
+void ATriggerEnding::CheckEnding()
+{
+	AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass());
+	GameManager = Cast<AGameManager>(FoundActor);
+
+	if (GameManager != nullptr)
+	{
+		if (GameManager->GetPlayerGearsQuantity() == GameManager->RessourcesQuantity[0])
+		{
+			GameManager->VictoryEndGame();
+		}
+		else
+		{
+			GameManager->GameOverEndGame();
+		}
+	}
+}

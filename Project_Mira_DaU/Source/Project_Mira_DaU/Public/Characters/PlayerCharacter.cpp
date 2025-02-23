@@ -193,15 +193,8 @@ void APlayerCharacter::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     {
         if (Cast<ATriggerEnding>(OtherActor))
         {
-            //UE_LOG(LogTemp, Display, TEXT("This is the end... My only friend, the end"));
-            if (GameManager->GetPlayerGearsQuantity() == GameManager->NUMBER_OF_GEARS)
-            {
-                GameManager->VictoryEndGame();
-            }
-            else
-            {
-                GameManager->GameOverEndGame();
-            }
+            ATriggerEnding* triggerEnding = Cast<ATriggerEnding>(OtherActor);
+            triggerEnding->CheckEnding();
         }
     }
 }
