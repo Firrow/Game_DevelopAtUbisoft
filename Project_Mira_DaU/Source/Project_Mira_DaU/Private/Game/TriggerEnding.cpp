@@ -30,7 +30,7 @@ void ATriggerEnding::CheckEnding()
 
 	if (GameManager != nullptr)
 	{
-		if (GameManager->GetPlayerGearsQuantity() == GameManager->RessourcesQuantity[0])
+		if (GameManager->GetPlayerGearsQuantity() == GameManager->NUMBER_OF_GEARS)
 		{
 			GameManager->VictoryEndGame();
 		}
