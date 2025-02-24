@@ -83,6 +83,7 @@ private:
 	void CreateTriggerEnding(UPaperTileLayer& layer);
 	void DeleteFirstPlayerInstance();
 	void SpawnPlayerInScene(UPaperTileLayer& layer);
+	void CreateMapBorder();
 	void CreateBackLedge(int const x, int const y, UPaperTileLayer& layer);
 	void CreateBuilding(int const x, int const y, int& width, int& availableFloorSpace, UPaperTileLayer& layer);
 	void ContinueBuilding(int const x, int const y, UPaperTileLayer& layer);
@@ -160,6 +161,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
 	int32 BackgroundYPosition = 50;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
+	TSubclassOf<AActor> MapBorder;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Element in Map")
 	TMap<int, TSubclassOf<ARessource>> RessourcesType;
