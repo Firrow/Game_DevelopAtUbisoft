@@ -162,6 +162,9 @@ void ATest_GP_Map::GenerateWorld()
     // ETAPE 8 : MAJ des collisions des tuiles
     MyTileMapComponent->RebuildCollision();
 
+    // Border collisions
+    CreateMapBorder();
+
     // ÉTAPE 9 : Ajouter le joueur à la map
     SpawnPlayerInScene(*BuildingLayer);
 }
@@ -679,11 +682,14 @@ void ATest_GP_Map::SpawnPlayerInScene(UPaperTileLayer& layer)
     {
         UE_LOG(LogTemp, Warning, TEXT("Échec du respawn du joueur"));
     }
-
-    //TODO : Delete BP_Player2
 }
 
-
+void ATest_GP_Map::CreateMapBorder()
+{
+    FActorSpawnParameters SpawnParams;
+    GetWorld()->SpawnActor<AActor>(MapBorder, ConvertGridPositionToWorldPosition(-1, 0, false), FRotator::ZeroRotator, SpawnParams);
+    GetWorld()->SpawnActor<AActor>(MapBorder, ConvertGridPositionToWorldPosition(GridWidth, 0, false), FRotator::ZeroRotator, SpawnParams);
+}
 
 /// <summary>
 /// Create an extention for the plateform (to his left)
