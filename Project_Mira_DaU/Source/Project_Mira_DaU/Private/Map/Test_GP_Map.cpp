@@ -684,6 +684,9 @@ void ATest_GP_Map::SpawnPlayerInScene(UPaperTileLayer& layer)
     }
 }
 
+/// <summary>
+/// Adding invisible walls on map's borders 
+/// </summary>
 void ATest_GP_Map::CreateMapBorder()
 {
     FActorSpawnParameters SpawnParams;
