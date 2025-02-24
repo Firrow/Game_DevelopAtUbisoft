@@ -583,6 +583,8 @@ void ATest_GP_Map::CreateTriggerEnding(UPaperTileLayer& layer)
 
     bool coordinatesIsGood = false;
     int firstYValue = EndingCoordinates->Y - 1;
+    int attempts = 0;
+    int i = 0;
 
     while (!coordinatesIsGood)
     {
@@ -607,6 +609,16 @@ void ATest_GP_Map::CreateTriggerEnding(UPaperTileLayer& layer)
 
             // Put trigger ending on ground
             EndingCoordinates->Y++;
+        }
+
+        attempts++;
+
+        if (attempts >= 200)
+        {
+            i++;
+            EndingCoordinates->X = Stream.RandRange(0, 1) == 0 ? 0 + i : GridWidth - 1 - i;
+            EndingCoordinates->Y = Stream.RandRange(0, GridHeight - 1);
+            attempts = 0;
         }
     }
 
