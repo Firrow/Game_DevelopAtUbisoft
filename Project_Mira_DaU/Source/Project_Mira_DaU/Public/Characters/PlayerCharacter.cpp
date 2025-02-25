@@ -65,6 +65,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
         Input->BindAction(InteractAction, ETriggerEvent::Started, this, &APlayerCharacter::Interact);
 
         Input->BindAction(MoveFBAction, ETriggerEvent::Completed, this, &APlayerCharacter::EndMoveFB);
+
+        Input->BindAction(PauseAction, ETriggerEvent::Completed, this, &APlayerCharacter::PauseGame);
     }
 }
 
@@ -116,6 +118,15 @@ void APlayerCharacter::Interact(const FInputActionValue& InputValue)
         {
             InteractibleActor->Effect();
         }
+    }
+}
+
+//PLAYER PAUSE GAME
+void APlayerCharacter::PauseGame(const FInputActionValue& InputValue)
+{
+    if (GameManager != nullptr)
+    {
+        GameManager->PauseGame(); 
     }
 }
 

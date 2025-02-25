@@ -22,6 +22,7 @@ void AGameManager::BeginPlay()
 	GameOverWidget = CreateWidget<UUserWidget>(GetWorld(), GameOverWidgetClass);
 	VictoryWidget = CreateWidget<UUserWidget>(GetWorld(), VictoryWidgetClass);
 	MapWidget = CreateWidget<UUserWidget>(GetWorld(), MapWidgetClass);
+	PauseWidget = CreateWidget<UUserWidget>(GetWorld(), PauseWidgetClass);
 
 	NUMBER_OF_GEARS = RessourcesQuantity[0];
 }
@@ -93,6 +94,11 @@ void AGameManager::VictoryEndGame()
 {
 	FinishedGame();
 	VictoryWidget->AddToViewport();
+}
+
+void AGameManager::PauseGame()
+{
+	PauseWidget->AddToViewport();
 }
 
 /// <summary>

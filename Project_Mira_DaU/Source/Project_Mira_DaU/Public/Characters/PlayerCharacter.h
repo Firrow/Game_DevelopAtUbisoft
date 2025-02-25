@@ -40,6 +40,7 @@ private:
 	void EndMoveFB(const FInputActionValue& InputValue);
 	void Jump(const FInputActionValue& InputValue);
 	void Interact(const FInputActionValue& InputValue);
+	void PauseGame(const FInputActionValue& InputValue);
 	void UpdateCurrentState();
 	void UpdateIsFacingLeft();
 
@@ -67,6 +68,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Enhance Input")
 	UInputAction* InteractAction;
+
+	UPROPERTY(EditAnywhere, Category = "Enhance Input")
+	UInputAction* PauseAction;
 
 
 	UPROPERTY(BlueprintReadOnly, Category = "Animation")
