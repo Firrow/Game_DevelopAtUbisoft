@@ -118,7 +118,7 @@ public:
 	int PROBA_FRONT_LEDGE = 8;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation Map Settings")
-	int PROBA_LADDER = 8;
+	int PROBA_LADDER = 10;
 
 
 

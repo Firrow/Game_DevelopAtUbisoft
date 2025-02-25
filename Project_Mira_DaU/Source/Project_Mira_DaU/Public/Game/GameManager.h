@@ -41,6 +41,9 @@ private:
 	UPROPERTY()
 	UUserWidget* VictoryWidget;
 
+	UPROPERTY()
+	UUserWidget* PauseWidget;
+
 	AGameManager();
 	void TimerManager();
 	int GetTimeInGame(const int& RealTime);
@@ -51,13 +54,13 @@ private:
 protected:
 	virtual void BeginPlay() override;
 
-
 public:	
 	virtual void Tick(float DeltaTime) override;
 	void DisplayUI_PlayerInformations();
 	void DisplayUI_Map();
 	void GameOverEndGame();
 	void VictoryEndGame();
+	void PauseGame();
 
 	int NUMBER_OF_GEARS;
 
@@ -69,6 +72,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UUserWidget> VictoryWidgetClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UUserWidget> PauseWidgetClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UUserWidget> PlayerInformationsWidgetClass;
