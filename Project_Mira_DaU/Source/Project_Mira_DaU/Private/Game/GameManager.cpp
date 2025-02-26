@@ -148,3 +148,13 @@ void AGameManager::SetPlayerGearsQuantity(int NewValue)
 	PlayerGearsQuantity = NewValue;
 	OnGearsQuantityChanged.Broadcast(PlayerGearsQuantity);
 }
+
+int AGameManager::GetSeedCurrentMap() const
+{
+	return SeedCurrentMap;
+}
+void AGameManager::SetSeedCurrentMap(int NewValue)
+{
+	SeedCurrentMap = NewValue;
+	OnSeedValueDetermined.Broadcast(SeedCurrentMap);
+}

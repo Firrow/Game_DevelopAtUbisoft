@@ -8,6 +8,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGearsQuantityChanged, int, PlayerGearsQuantity);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameHourChanged, FString, ConvertedGameTimeValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSeedValueDetermined, int, SeedCurrentMap);
 
 
 UCLASS()
@@ -16,16 +17,16 @@ class PROJECT_MIRA_DAU_API AGameManager : public AActor
 	GENERATED_BODY()
 	
 private:	
-	int RealTimeValue;
-	int GameTimeValue;
-	FString ConvertedGameTimeValue = "";
-	int PlayerGearsQuantity = 0;
-
 	int SECONDS_IN_A_DAY = 86400;
 	int TOTAL_PLAYING_TIME = 600; //TODO : Set to 3600 or 1800 or 900 or 600 when tests are finished
 
+	int RealTimeValue;
+	int GameTimeValue;
 	FTimerHandle timer;
 	int translateSecondsIRLTimeToGameTime = SECONDS_IN_A_DAY / TOTAL_PLAYING_TIME;
+	FString ConvertedGameTimeValue = "";
+	int PlayerGearsQuantity = 0;
+	int SeedCurrentMap = 0;
 	bool UIIsDisplay = false;
 	bool MapIsDisplay = false;
 
@@ -91,6 +92,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnGameHourChanged OnGameHourChanged;
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnSeedValueDetermined OnSeedValueDetermined;
+
 
 	int GetRealTimeValue() const;
 	void SetRealTimeValue(int NewValue);
@@ -100,4 +104,7 @@ public:
 
 	int GetPlayerGearsQuantity() const;
 	void SetPlayerGearsQuantity(int NewValue);
+
+	int GetSeedCurrentMap() const;
+	void SetSeedCurrentMap(int NewValue);
 };

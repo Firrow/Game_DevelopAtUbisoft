@@ -96,7 +96,8 @@ void ATest_GP_Map::GenerateWorld()
     {
         Stream.Initialize(SEED.value);
     }
-    GEngine->AddOnScreenDebugMessage(-1, 50000.f, FColor::Yellow, FString::Printf(TEXT("SEED : %d"), SEED.value));
+    GameManager->SetSeedCurrentMap(SEED.value);
+    //GEngine->AddOnScreenDebugMessage(-1, 50000.f, FColor::Yellow, FString::Printf(TEXT("SEED : %d"), SEED.value));
 
 
     // ETAPE 4 : Création d'un nouveau calque pour poser les tuiles
