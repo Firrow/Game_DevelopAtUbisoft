@@ -50,6 +50,14 @@ private:
 	int GetTimeInGame(const int& RealTime);
 	FString ConvertGameTimeValue();
 	void FinishedGame();
+
+
+
+
+	float SoundVolumeMultiplier = 1.0f;
+	float SoundPitchMultiplier = 1.0f;
+
+
 	
 
 protected:
@@ -107,4 +115,13 @@ public:
 
 	int GetSeedCurrentMap() const;
 	void SetSeedCurrentMap(int NewValue);
+
+
+
+
+	int GetSoundVolumeMultiplier() const;
+	void SetSoundVolumeMultiplier(int NewValue);
+
+	int GetSoundPitchMultiplier() const;
+	void SetSoundPitchMultiplier(int NewValue);
 };

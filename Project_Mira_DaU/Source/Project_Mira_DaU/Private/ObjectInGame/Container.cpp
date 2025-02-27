@@ -1,5 +1,8 @@
 
 #include "Components/SphereComponent.h"
+#include "Game/GameManager.h"
+#include "Sound/SoundBase.h" 
+#include "Kismet/GameplayStatics.h"
 #include "ObjectInGame/Container.h"
 
 
@@ -25,8 +28,11 @@ void AContainer::Effect()
         }
         else
         {
-            // Start opening animation
             isClosed = false;
+
+            AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass());
+            GameManager = Cast<AGameManager>(FoundActor);
+            UGameplayStatics::PlaySound2D(this, OpenedSound, GameManager->GetSoundVolumeMultiplier(), GameManager->GetSoundPitchMultiplier(), 0);
 
             FRotator Rotation(0.0f, 0.0f, 0.0f);
             GetWorld()->SpawnActor<ARessource>(RessourceInside.Last(), RessourcePointSpawn->GetComponentLocation(), Rotation);

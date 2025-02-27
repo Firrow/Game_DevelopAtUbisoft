@@ -16,6 +16,7 @@ private:
 	AGameManager* GameManager = nullptr;
 
 	virtual void RessourceEffect() override;
+	virtual void PlayRessourceSound() override;
 
 public:
 	virtual void BeginPlay() override;
@@ -26,4 +27,7 @@ public:
 		int32 OtherBodyIndex,
 		bool bFromSweep,
 		const FHitResult& SweepResult) override;
+
+	UPROPERTY(EditAnywhere, Category = "Animation")
+	USoundBase* RessourceSound;
 };

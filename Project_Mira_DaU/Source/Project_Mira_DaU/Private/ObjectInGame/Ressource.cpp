@@ -1,7 +1,8 @@
 
 #include "ObjectInGame/Ressource.h"
+#include "Sound/SoundBase.h" 
 
-// Sets default values
+
 ARessource::ARessource()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -11,10 +12,8 @@ ARessource::ARessource()
 	ObjectCapsule->InitCapsuleSize(5.f, 5.f);
 }
 
-void ARessource::RessourceEffect()
-{
-
-}
+void ARessource::RessourceEffect() {}
+void ARessource::PlayRessourceSound() {}
 
 void ARessource::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     AActor* OtherActor,
@@ -24,6 +23,7 @@ void ARessource::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     const FHitResult& SweepResult)
 {
 	RessourceEffect();
+    PlayRessourceSound();
 
 	this->Destroy();
 }

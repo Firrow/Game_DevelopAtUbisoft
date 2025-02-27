@@ -1,11 +1,16 @@
 
 #include <Characters/PlayerCharacter.h>
 #include "Kismet/GameplayStatics.h"
+#include "Game/GameManager.h"
 #include "ObjectInGame/Ressources/Map_ressource.h"
+
 
 void AMap_ressource::BeginPlay()
 {
     Super::BeginPlay();
+
+    AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass());
+    GameManager = Cast<AGameManager>(FoundActor);
 
     ObjectCapsule->OnComponentBeginOverlap.AddDynamic(this, &AMap_ressource::BeginOverlap);
 }
@@ -17,6 +22,11 @@ void AMap_ressource::RessourceEffect()
     {
         GameManager->DisplayUI_Map();
     }
+}
+
+void AMap_ressource::PlayRessourceSound()
+{
+    UGameplayStatics::PlaySound2D(this, RessourceSound, GameManager->GetSoundVolumeMultiplier(), GameManager->GetSoundPitchMultiplier(), 0);
 }
 
 

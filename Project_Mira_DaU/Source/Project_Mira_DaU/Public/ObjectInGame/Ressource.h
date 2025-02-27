@@ -9,6 +9,7 @@
 
 
 class UCapsuleComponent;
+class USoundBase;
 
 UCLASS()
 class PROJECT_MIRA_DAU_API ARessource : public AActor
@@ -21,6 +22,7 @@ protected:
 	UCapsuleComponent* ObjectCapsule;
 
 	virtual void RessourceEffect();
+	virtual void PlayRessourceSound();
 
 public:	
 

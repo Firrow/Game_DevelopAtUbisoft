@@ -8,6 +8,9 @@
 #include "Container.generated.h"
 
 class USphereComponent;
+class AGameManager;
+class USoundBase;
+
 
 UCLASS()
 class PROJECT_MIRA_DAU_API AContainer : public AInteractible, public IInteractibleInterface
@@ -15,6 +18,7 @@ class PROJECT_MIRA_DAU_API AContainer : public AInteractible, public IInteractib
 	GENERATED_BODY()
 
 private:
+	AGameManager* GameManager = nullptr;
 
 	virtual void Effect() override;
 
@@ -34,6 +38,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Animation")
 	bool isClosed = true;
+
+	UPROPERTY(EditAnywhere, Category = "Animation")
+	USoundBase* OpenedSound;
 
 	AContainer();
 };

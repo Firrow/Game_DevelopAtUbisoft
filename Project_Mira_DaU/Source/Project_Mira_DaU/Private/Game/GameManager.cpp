@@ -158,3 +158,25 @@ void AGameManager::SetSeedCurrentMap(int NewValue)
 	SeedCurrentMap = NewValue;
 	OnSeedValueDetermined.Broadcast(SeedCurrentMap);
 }
+
+
+
+
+// SOUND
+int AGameManager::GetSoundVolumeMultiplier() const
+{
+	return SoundVolumeMultiplier;
+}
+void AGameManager::SetSoundVolumeMultiplier(int NewValue)
+{
+	SoundVolumeMultiplier = NewValue;
+}
+
+int AGameManager::GetSoundPitchMultiplier() const
+{
+	return SoundPitchMultiplier;
+}
+void AGameManager::SetSoundPitchMultiplier(int NewValue)
+{
+	SoundPitchMultiplier = NewValue;
+}

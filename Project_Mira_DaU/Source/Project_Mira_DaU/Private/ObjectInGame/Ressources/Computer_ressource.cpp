@@ -1,11 +1,16 @@
 
 #include <Characters/PlayerCharacter.h>
+#include "Game/GameManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "ObjectInGame/Ressources/Computer_ressource.h"
+
 
 void AComputer_ressource::BeginPlay()
 {
     Super::BeginPlay();
+
+    AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AGameManager::StaticClass());
+    GameManager = Cast<AGameManager>(FoundActor);
 
     ObjectCapsule->OnComponentBeginOverlap.AddDynamic(this, &AComputer_ressource::BeginOverlap);
 }
@@ -19,6 +24,10 @@ void AComputer_ressource::RessourceEffect()
     }
 }
 
+void AComputer_ressource::PlayRessourceSound()
+{
+    UGameplayStatics::PlaySound2D(this, RessourceSound, GameManager->GetSoundVolumeMultiplier(), GameManager->GetSoundPitchMultiplier(), 0);
+}
 
 void AComputer_ressource::BeginOverlap(UPrimitiveComponent* OverlappedComponent,
     AActor* OtherActor,
