@@ -79,10 +79,6 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Animation")
 	bool isFacingLeft = false;
 
-
-	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
-	int32 gears;
-
 	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
 	bool isArmed;
 

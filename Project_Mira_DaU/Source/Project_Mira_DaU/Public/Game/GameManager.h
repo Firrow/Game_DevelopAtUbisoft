@@ -25,6 +25,7 @@ private:
 	FTimerHandle timer;
 	int translateSecondsIRLTimeToGameTime = SECONDS_IN_A_DAY / TOTAL_PLAYING_TIME;
 	FString ConvertedGameTimeValue = "";
+	int NUMBER_OF_GEARS = 0;
 	int PlayerGearsQuantity = 0;
 	int SeedCurrentMap = 0;
 	bool UIIsDisplay = false;
@@ -71,8 +72,6 @@ public:
 	void VictoryEndGame();
 	void PauseGame();
 
-	int NUMBER_OF_GEARS;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DEBUGING SECTION")
 	bool ActiveTimer;
 
@@ -109,6 +108,9 @@ public:
 
 	int GetGameTimeValue() const;
 	void SetGameTimeValue(int NewValue);
+
+	int GetTotalGearQuantity() const;
+	void SetTotalGearQuantity(int NewValue);
 
 	int GetPlayerGearsQuantity() const;
 	void SetPlayerGearsQuantity(int NewValue);

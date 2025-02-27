@@ -23,8 +23,6 @@ void AGameManager::BeginPlay()
 	VictoryWidget = CreateWidget<UUserWidget>(GetWorld(), VictoryWidgetClass);
 	MapWidget = CreateWidget<UUserWidget>(GetWorld(), MapWidgetClass);
 	PauseWidget = CreateWidget<UUserWidget>(GetWorld(), PauseWidgetClass);
-
-	NUMBER_OF_GEARS = RessourcesQuantity[0];
 }
 
 void AGameManager::Tick(float DeltaTime)
@@ -71,6 +69,7 @@ FString AGameManager::ConvertGameTimeValue()
 }
 
 
+// UIs
 void AGameManager::DisplayUI_PlayerInformations()
 {
 	PlayerInformationsWidget->AddToViewport();
@@ -137,6 +136,15 @@ void AGameManager::SetGameTimeValue(int NewValue)
 	GameTimeValue = NewValue;
 	ConvertedGameTimeValue = ConvertGameTimeValue();
 	OnGameHourChanged.Broadcast(ConvertedGameTimeValue);
+}
+
+int AGameManager::GetTotalGearQuantity() const
+{
+	return NUMBER_OF_GEARS;
+}
+void AGameManager::SetTotalGearQuantity(int NewValue)
+{
+	NUMBER_OF_GEARS = NewValue;
 }
 
 int AGameManager::GetPlayerGearsQuantity() const

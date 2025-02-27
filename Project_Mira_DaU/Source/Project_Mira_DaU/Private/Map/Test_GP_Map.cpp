@@ -51,6 +51,7 @@ void ATest_GP_Map::GetGameManager()
     if (FoundActors.Num() > 0)
     {
         GameManager = Cast<AGameManager>(FoundActors[0]);
+        GameManager->SetTotalGearQuantity(GameManager->RessourcesQuantity[0]);
     }
     else
     {
