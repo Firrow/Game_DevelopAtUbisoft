@@ -29,9 +29,10 @@ void ATest_GP_Map::BeginPlay()
 {
 	Super::BeginPlay();
 
+    GetGameManager();
+
     DeleteFirstPlayerInstance();
 
-    GetGameManager();
     CalculateTotalRessourcesQuantity();
 	
 	GenerateWorld();

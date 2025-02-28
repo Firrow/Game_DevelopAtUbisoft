@@ -105,7 +105,7 @@ void AGameManager::PauseGame()
 /// </summary>
 void AGameManager::FinishedGame()
 {
-	GetWorldTimerManager().ClearTimer(timer);
+	ResetGame();
 
 	if (UIIsDisplay)
 	{
@@ -115,6 +115,13 @@ void AGameManager::FinishedGame()
 	{
 		MapWidget->RemoveFromParent();
 	}
+}
+
+void AGameManager::ResetGame()
+{
+	GetWorldTimerManager().ClearTimer(timer);
+	timer.Invalidate();
+	SetRealTimeValue(0);
 }
 
 

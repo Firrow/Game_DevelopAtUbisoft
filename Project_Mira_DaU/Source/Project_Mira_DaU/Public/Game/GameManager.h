@@ -20,8 +20,8 @@ private:
 	int SECONDS_IN_A_DAY = 86400;
 	int TOTAL_PLAYING_TIME = 600; //TODO : Set to 3600 or 1800 or 900 or 600 when tests are finished
 
-	int RealTimeValue;
-	int GameTimeValue;
+	int RealTimeValue = 0;
+	int GameTimeValue = 0;
 	FTimerHandle timer;
 	int translateSecondsIRLTimeToGameTime = SECONDS_IN_A_DAY / TOTAL_PLAYING_TIME;
 	FString ConvertedGameTimeValue = "";
@@ -51,6 +51,9 @@ private:
 	int GetTimeInGame(const int& RealTime);
 	FString ConvertGameTimeValue();
 	void FinishedGame();
+
+	UFUNCTION(BlueprintCallable)
+	void ResetGame();
 
 
 
