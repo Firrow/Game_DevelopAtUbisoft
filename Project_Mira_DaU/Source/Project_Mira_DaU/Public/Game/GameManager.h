@@ -30,6 +30,8 @@ private:
 	int SeedCurrentMap = 0;
 	bool UIIsDisplay = false;
 	bool MapIsDisplay = false;
+	float SoundVolumeMultiplier = 1.0f;
+	float SoundPitchMultiplier = 1.0f;
 
 	UPROPERTY()
 	UUserWidget* PlayerInformationsWidget;
@@ -51,16 +53,6 @@ private:
 	int GetTimeInGame(const int& RealTime);
 	FString ConvertGameTimeValue();
 	void FinishedGame();
-
-	UFUNCTION(BlueprintCallable)
-	void ResetGame();
-
-
-
-
-	float SoundVolumeMultiplier = 1.0f;
-	float SoundPitchMultiplier = 1.0f;
-
 
 	
 
@@ -105,6 +97,8 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnSeedValueDetermined OnSeedValueDetermined;
 
+	UFUNCTION(BlueprintCallable, Category = "Game")
+	void ResetGame();
 
 	int GetRealTimeValue() const;
 	void SetRealTimeValue(int NewValue);
