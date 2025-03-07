@@ -18,7 +18,7 @@ class PROJECT_MIRA_DAU_API AGameManager : public AActor
 	
 private:	
 	int SECONDS_IN_A_DAY = 86400;
-	int TOTAL_PLAYING_TIME = 600; //TODO : Set to 3600 or 1800 or 900 or 600 when tests are finished
+	int TOTAL_PLAYING_TIME = 300; //TODO : Set to 3600 or 1800 or 900 or 600 or 300 when tests are finished
 
 	int RealTimeValue = 0;
 	int GameTimeValue = 0;

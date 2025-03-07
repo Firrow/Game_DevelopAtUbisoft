@@ -13,7 +13,7 @@ class PROJECT_MIRA_DAU_API AWatch_ressource : public ARessource
 	GENERATED_BODY()
 	
 private:
-	int TIME_IN_WATCH = 5;
+	int TIME_IN_WATCH = 20;
 	AGameManager* GameManager = nullptr;
 
 	virtual void RessourceEffect() override;
