@@ -3,7 +3,7 @@ Project made during my Develop At Ubisoft training.
 
 Theme : "Limited ressources"<br />
 Technologie : Unreal Engine 5.3.2 - Blueprint - C++<br />
-Date (fr) : 12/11/2024 - March 2025<br />
+Date (fr) : 12/11/2024 - 07/03/2025<br />
 Studio : Ubisoft Annecy<br />
 
 
