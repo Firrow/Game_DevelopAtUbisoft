@@ -48,7 +48,7 @@ public:
 	int LifePlayer = MAX_HEALTH;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
-	float Speed = 0.25f; //0.3
+	float Speed = 0.25f;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float JumpHeight = 300.0f;
