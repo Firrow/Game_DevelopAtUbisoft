@@ -6,6 +6,7 @@ Technologie : Unreal Engine 5.3.2 - Blueprint - C++<br />
 Date (fr) : 12/11/2024 - 07/03/2025<br />
 Studio : Ubisoft Annecy<br />
 
+Final release here or on my itch.io : https://firrowmb.itch.io/miras-escape
 
 -------------
 This is my Visual Studio 2022 configuration for Unreal Engine 5.3 :
